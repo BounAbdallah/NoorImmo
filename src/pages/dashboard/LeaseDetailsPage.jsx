@@ -115,13 +115,18 @@ export default function LeaseDetailsPage() {
                 || monthPayments.find(p => p.statut === 'partiel')
                 || monthPayments[0];
 
+            const monthStart = startOfMonth(currentDate);
+            const monthEnd = endOfMonth(currentDate);
+
             months.push({
                 date: new Date(currentDate),
                 status: status,
                 montant_du: leaseData.loyer_mensuel,
                 montant_paye: amountPaid,
                 paymentRefs: monthPayments, // Store all payments
-                mainPayment: mainPayment // Store primary payment for actions
+                mainPayment: mainPayment, // Store primary payment for actions
+                periodStart: format(monthStart, 'yyyy-MM-dd'),
+                periodEnd: format(monthEnd, 'yyyy-MM-dd')
             });
 
             currentDate = addMonths(currentDate, 1);
@@ -246,11 +251,29 @@ export default function LeaseDetailsPage() {
 
             {/* Contract Terms */}
             <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center text-lg">
                         <FileText className="mr-2 h-5 w-5 text-gray-400" />
                         Termes du Contrat
                     </CardTitle>
+                    <div className="flex space-x-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => leaseService.viewContract(lease.id)}
+                            className="flex items-center"
+                        >
+                            <FileText className="w-4 h-4 mr-1" /> Visualiser
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => leaseService.downloadContract(lease.id)}
+                            className="flex items-center"
+                        >
+                            <Download className="w-4 h-4 mr-1" /> Télécharger
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -318,7 +341,89 @@ export default function LeaseDetailsPage() {
                                             {getStatusBadge(item.status)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                            {item.status === 'paye' || item.status === 'partiel' ? (
+                                            {item.status === 'retard' && (
+                                                <>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-orange-600 hover:text-orange-800 hover:bg-orange-50"
+                                                        onClick={() => {
+                                                            // Calculate all unpaid months and total
+                                                            const unpaidMonths = schedule.filter(s => s.status === 'retard');
+                                                            const totalDue = unpaidMonths.reduce((sum, m) => sum + parseFloat(m.montant_du || 0), 0);
+                                                            const monthsList = unpaidMonths.map(m => format(m.date, 'MMMM yyyy', { locale: fr }));
+
+                                                            console.log('Demeure params:', {
+                                                                montant: totalDue,
+                                                                mois: monthsList,
+                                                                unpaidMonths
+                                                            });
+
+                                                            leaseService.viewDemandLetter(lease.id, {
+                                                                montant: totalDue,
+                                                                mois: JSON.stringify(monthsList)
+                                                            });
+                                                        }}
+                                                        title="Mise en demeure"
+                                                    >
+                                                        <AlertTriangle className="h-4 w-4 mr-1" /> Demeure
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-gray-500 hover:text-gray-700"
+                                                        onClick={() => {
+                                                            console.log('Debt button clicked - item:', item);
+                                                            leaseService.viewDebtForBail(lease.id, {
+                                                                montant: item.montant_du,
+                                                                periode_debut: item.periodStart,
+                                                                periode_fin: item.periodEnd
+                                                            });
+                                                        }}
+                                                        title="Visualiser reconnaissance de dette"
+                                                    >
+                                                        <FileText className="h-4 w-4 mr-1" /> Dette
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-gray-500 hover:text-gray-700"
+                                                        onClick={() => leaseService.downloadDebtForBail(lease.id, {
+                                                            montant: item.montant_du,
+                                                            periode_debut: item.periodStart,
+                                                            periode_fin: item.periodEnd
+                                                        })}
+                                                        title="Télécharger reconnaissance de dette"
+                                                    >
+                                                        <Download className="h-4 w-4" />
+                                                    </Button>
+                                                </>
+                                            )}
+
+                                            {(item.status === 'partiel') && item.mainPayment && (
+                                                <>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-gray-500 hover:text-gray-700"
+                                                        onClick={() => paymentService.viewDebtDocument(item.mainPayment.id)}
+                                                        title="Visualiser reconnaissance de dette"
+                                                    >
+                                                        <FileText className="h-4 w-4 mr-1" /> Dette
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-gray-500 hover:text-gray-700"
+                                                        onClick={() => paymentService.downloadDebtDocument(item.mainPayment.id)}
+                                                        title="Télécharger reconnaissance de dette"
+                                                    >
+                                                        <Download className="h-4 w-4" />
+                                                    </Button>
+                                                </>
+                                            )}
+
+                                            {item.status === 'paye' && item.mainPayment && (
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
@@ -328,7 +433,7 @@ export default function LeaseDetailsPage() {
                                                 >
                                                     <Download className="h-4 w-4 mr-1" /> Quittance
                                                 </Button>
-                                            ) : null}
+                                            )}
 
                                             {item.status !== 'paye' && (
                                                 <Button

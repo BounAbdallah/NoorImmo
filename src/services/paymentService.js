@@ -34,8 +34,31 @@ export const paymentService = {
         return response.data;
     },
 
+
     getUnpaidRents: async () => {
-        const response = await api.get('/paiements-loyer/unpaid/all');
+        const response = await api.get('/paiements-loyer/unpaid');
         return response.data;
+    },
+
+    downloadDebtDocument: async (id) => {
+        const response = await api.get(`/paiements-loyer/${id}/dette/download`, {
+            responseType: 'blob'
+        });
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `reconnaissance_dette_${id}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    },
+
+    viewDebtDocument: async (id) => {
+        const response = await api.get(`/paiements-loyer/${id}/dette/view`, {
+            responseType: 'blob'
+        });
+        const file = new Blob([response.data], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(file);
+        window.open(fileURL, '_blank');
     }
 };

@@ -24,6 +24,7 @@ export default function LeaseForm() {
         locataire_id: '',
         date_debut: '',
         date_fin: '',
+        type_duree: 'indeterminee',
         loyer_mensuel: '',
         caution: ''
     });
@@ -141,6 +142,22 @@ export default function LeaseForm() {
                                     ))}
                                 </select>
                                 <p className="mt-1 text-xs text-gray-500">Le locataire n'est pas dans la liste ? Ajoutez-le d'abord dans l'annuaire.</p>
+                            </div>
+
+                            {/* Contract Type */}
+                            <div className="md:col-span-2">
+                                <Label htmlFor="type_duree">Type de Durée</Label>
+                                <select
+                                    id="type_duree"
+                                    name="type_duree"
+                                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
+                                    value={formData.type_duree}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="indeterminee">Indéterminée</option>
+                                    <option value="determinee">Déterminée</option>
+                                </select>
                             </div>
 
                             {/* Dates */}

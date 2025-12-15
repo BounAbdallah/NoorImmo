@@ -1,261 +1,324 @@
-import React, { useEffect, useState } from 'react';
-import { agencyService } from '../../services/agencyService';
+import React, { useState, useEffect } from 'react';
+import { agenceService } from '../../services/agenceService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { Label } from '../../components/ui/Label';
-import { Settings, Percent, DollarSign } from 'lucide-react';
-import Swal from 'sweetalert2';
+import { Building2, Upload, X, Save } from 'lucide-react';
 
 export default function AgencySettingsPage() {
     const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [settings, setSettings] = useState({
-        taux_commission_agence: 10,
-        taux_commission_plateforme: 5,
+    const [saving, setSaving] = useState(false);
+    const [agence, setAgence] = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    const [formData, setFormData] = useState({
         raison_sociale: '',
         ninea: '',
-        adresse: ''
+        rccm: '',
+        adresse: '',
+        telephone: '',
+        email: ''
     });
 
     useEffect(() => {
-        loadSettings();
+        loadAgence();
     }, []);
 
-    const loadSettings = async () => {
+    const loadAgence = async () => {
         try {
-            const response = await agencyService.getSettings();
+            const response = await agenceService.getProfile();
             if (response.success) {
-                setSettings(response.data);
+                const data = response.data;
+                setAgence(data);
+                setFormData({
+                    raison_sociale: data.raison_sociale || '',
+                    ninea: data.ninea || '',
+                    rccm: data.rccm || '',
+                    adresse: data.adresse || '',
+                    telephone: data.user?.telephone || '',
+                    email: data.user?.email || ''
+                });
+                if (data.logo_url) {
+                    setLogoPreview(data.logo_url);
+                }
             }
         } catch (error) {
-            console.error('Error loading settings:', error);
-            Swal.fire('Erreur', 'Impossible de charger les paramètres', 'error');
+            console.error('Error loading agency:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setSettings(prev => ({ ...prev, [name]: value }));
+    const handleInputChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
     };
 
-    const handleSubmit = async (e) => {
+    const handleSaveSettings = async (e) => {
         e.preventDefault();
-
-        const tauxAgence = parseFloat(settings.taux_commission_agence);
-        const tauxPlateforme = parseFloat(settings.taux_commission_plateforme);
-
-        if (tauxAgence + tauxPlateforme > 100) {
-            Swal.fire('Erreur', 'La somme des commissions ne peut pas dépasser 100%', 'error');
-            return;
-        }
-
-        setSubmitting(true);
+        setSaving(true);
         try {
-            const response = await agencyService.updateSettings({
-                taux_commission_agence: tauxAgence,
-                taux_commission_plateforme: tauxPlateforme,
-                raison_sociale: settings.raison_sociale,
-                ninea: settings.ninea,
-                rccm: settings.rccm,
-                adresse: settings.adresse
-            });
-
+            const response = await agenceService.updateSettings(formData);
             if (response.success) {
-                Swal.fire('Succès', 'Paramètres mis à jour avec succès', 'success');
+                alert('Paramètres mis à jour avec succès !');
+                await loadAgence();
             }
         } catch (error) {
             console.error('Error updating settings:', error);
-            Swal.fire('Erreur', error.response?.data?.message || 'Erreur lors de la mise à jour', 'error');
+            alert('Erreur lors de la mise à jour des paramètres');
         } finally {
-            setSubmitting(false);
+            setSaving(false);
         }
     };
 
-    const tauxBailleur = 100 - parseFloat(settings.taux_commission_agence || 0) - parseFloat(settings.taux_commission_plateforme || 0);
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file
+            if (!file.type.match('image.*')) {
+                alert('Veuillez sélectionner une image');
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Le fichier ne doit pas dépasser 2 MB');
+                return;
+            }
+
+            setSelectedFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => setLogoPreview(e.target.result);
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleUploadLogo = async () => {
+        if (!selectedFile) return;
+
+        setSaving(true);
+        try {
+            const response = await agenceService.uploadLogo(selectedFile);
+            if (response.success) {
+                alert('Logo téléchargé avec succès !');
+                setSelectedFile(null);
+                await loadAgence();
+            }
+        } catch (error) {
+            console.error('Error uploading logo:', error);
+            const errorMsg = error.response?.data?.message || 'Erreur lors du téléchargement du logo';
+            alert(errorMsg);
+
+            // Log more details for debugging
+            if (error.response) {
+                console.log('Status:', error.response.status);
+                console.log('Data:', error.response.data);
+            }
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDeleteLogo = async () => {
+        if (!confirm('Voulez-vous vraiment supprimer le logo ?')) return;
+
+        setSaving(true);
+        try {
+            const response = await agenceService.deleteLogo();
+            if (response.success) {
+                alert('Logo supprimé avec succès !');
+                setLogoPreview(null);
+                setSelectedFile(null);
+                await loadAgence();
+            }
+        } catch (error) {
+            console.error('Error deleting logo:', error);
+            alert('Erreur lors de la suppression du logo');
+        } finally {
+            setSaving(false);
+        }
+    };
 
     if (loading) {
-        return <div className="p-12 text-center">Chargement...</div>;
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-primary-600"></div>
+            </div>
+        );
     }
 
     return (
-        <div className="max-w-3xl mx-auto space-y-6">
-            <div className="flex items-center space-x-3">
-                <Settings className="h-8 w-8 text-primary-600" />
-                <h1 className="text-3xl font-bold text-gray-900">Paramètres de l'Agence</h1>
+        <div className="space-y-6">
+            <div className="sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Paramètres de l'Agence</h1>
+                    <p className="mt-1 text-sm text-gray-500">Gérez les informations de votre agence</p>
+                </div>
             </div>
 
-            <Card>
-                <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Logo Section */}
+                <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center">
-                            <Settings className="h-5 w-5 mr-2 text-primary-600" />
-                            Informations & Commissions
+                        <CardTitle className="flex items-center text-lg">
+                            <Upload className="mr-2 h-5 w-5 text-gray-400" />
+                            Logo de l'Agence
                         </CardTitle>
-                        <p className="text-sm text-gray-500 mt-2">
-                            Gérez les informations légales et les paramètres financiers de votre agence.
-                        </p>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                        {/* Legal Info Section */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                            <h4 className="text-sm font-medium text-gray-900 mb-4 border-b border-gray-200 pb-2">Identité et Légal</h4>
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                <div>
-                                    <Label htmlFor="raison_sociale">Raison Sociale</Label>
-                                    <Input
-                                        type="text"
-                                        id="raison_sociale"
-                                        name="raison_sociale"
-                                        value={settings.raison_sociale}
-                                        onChange={handleChange}
-                                        required
-                                        className="mt-1"
+                    <CardContent>
+                        <div className="space-y-4">
+                            {logoPreview && (
+                                <div className="relative">
+                                    <img
+                                        src={logoPreview}
+                                        alt="Logo"
+                                        className="w-full h-40 object-contain bg-gray-50 rounded border"
                                     />
+                                    {agence?.logo && (
+                                        <button
+                                            onClick={handleDeleteLogo}
+                                            className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700"
+                                            disabled={saving}
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    )}
                                 </div>
-                                <div>
-                                    <Label htmlFor="adresse">Adresse</Label>
-                                    <Input
-                                        type="text"
-                                        id="adresse"
-                                        name="adresse"
-                                        value={settings.adresse}
-                                        onChange={handleChange}
-                                        required
-                                        className="mt-1"
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="ninea">NINEA</Label>
-                                    <Input
-                                        type="text"
-                                        id="ninea"
-                                        name="ninea"
-                                        value={settings.ninea}
-                                        onChange={handleChange}
-                                        placeholder="Numéro d'Identification Nationale"
-                                        className="mt-1"
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="rccm">RCCM</Label>
-                                    <Input
-                                        type="text"
-                                        id="rccm"
-                                        name="rccm"
-                                        value={settings.rccm || ''}
-                                        onChange={handleChange}
-                                        placeholder="Registre du Commerce"
-                                        className="mt-1"
-                                    />
-                                </div>
-                            </div>
-                        </div>
+                            )}
 
-                        {/* Commission Settings Section */}
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                            <h4 className="text-sm font-medium text-blue-900 mb-4 flex items-center border-b border-blue-200 pb-2">
-                                <Percent className="h-4 w-4 mr-2" />
-                                Configuration des Commissions
-                            </h4>
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                <div>
-                                    <Label htmlFor="taux_commission_agence">Commission Agence (%)</Label>
-                                    <div className="mt-1 relative">
-                                        <Input
-                                            type="number"
-                                            id="taux_commission_agence"
-                                            name="taux_commission_agence"
-                                            step="0.01"
-                                            min="0"
-                                            max="100"
-                                            value={settings.taux_commission_agence}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                            <Percent className="h-4 w-4 text-gray-400" />
-                                        </div>
-                                    </div>
-                                    <p className="mt-1 text-xs text-gray-500">
-                                        Votre commission sur chaque loyer
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="taux_commission_plateforme">Commission Plateforme (%)</Label>
-                                    <div className="mt-1 relative">
-                                        <Input
-                                            type="number"
-                                            id="taux_commission_plateforme"
-                                            name="taux_commission_plateforme"
-                                            step="0.01"
-                                            min="0"
-                                            max="100"
-                                            value={settings.taux_commission_plateforme}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                            <Percent className="h-4 w-4 text-gray-400" />
-                                        </div>
-                                    </div>
-                                    <p className="mt-1 text-xs text-gray-500">
-                                        Commission de la plateforme Noor Immo
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Summary */}
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-                            <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
-                                <DollarSign className="h-4 w-4 mr-2 text-indigo-600" />
-                                Répartition pour un loyer de 100 000 F
-                            </h4>
-                            <dl className="grid grid-cols-3 gap-4 text-center">
-                                <div>
-                                    <dt className="text-xs text-gray-500">Agence</dt>
-                                    <dd className="text-lg font-semibold text-indigo-600">
-                                        {(100000 * (settings.taux_commission_agence / 100)).toLocaleString()} F
-                                    </dd>
-                                    <dd className="text-xs text-gray-500">{settings.taux_commission_agence}%</dd>
-                                </div>
-                                <div>
-                                    <dt className="text-xs text-gray-500">Plateforme</dt>
-                                    <dd className="text-lg font-semibold text-purple-600">
-                                        {(100000 * (settings.taux_commission_plateforme / 100)).toLocaleString()} F
-                                    </dd>
-                                    <dd className="text-xs text-gray-500">{settings.taux_commission_plateforme}%</dd>
-                                </div>
-                                <div>
-                                    <dt className="text-xs text-gray-500">Bailleur</dt>
-                                    <dd className="text-lg font-semibold text-green-600">
-                                        {(100000 * (tauxBailleur / 100)).toLocaleString()} F
-                                    </dd>
-                                    <dd className="text-xs text-gray-500">{tauxBailleur.toFixed(2)}%</dd>
-                                </div>
-                            </dl>
-                        </div>
-
-                        {tauxBailleur < 0 && (
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                                <p className="text-sm text-red-600">
-                                    ⚠️ La somme des commissions dépasse 100%. Veuillez ajuster les valeurs.
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Choisir un nouveau logo
+                                </label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileSelect}
+                                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                                />
+                                <p className="mt-1 text-xs text-gray-500">
+                                    JPG, PNG ou SVG. Max 2MB.
                                 </p>
                             </div>
-                        )}
 
-                        <div className="flex justify-end pt-4">
-                            <Button type="submit" isLoading={submitting} disabled={tauxBailleur < 0}>
-                                Enregistrer les modifications
-                            </Button>
+                            {selectedFile && (
+                                <Button
+                                    onClick={handleUploadLogo}
+                                    disabled={saving}
+                                    className="w-full"
+                                >
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    {saving ? 'Téléchargement...' : 'Télécharger'}
+                                </Button>
+                            )}
                         </div>
                     </CardContent>
-                </form>
-            </Card>
+                </Card>
+
+                {/* Settings Form */}
+                <Card className="lg:col-span-2">
+                    <CardHeader>
+                        <CardTitle className="flex items-center text-lg">
+                            <Building2 className="mr-2 h-5 w-5 text-gray-400" />
+                            Informations de l'Agence
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleSaveSettings} className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Raison Sociale <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="raison_sociale"
+                                        value={formData.raison_sociale}
+                                        onChange={handleInputChange}
+                                        required
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Email (Non modifiable)
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={formData.email}
+                                        disabled
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        NINEA
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="ninea"
+                                        value={formData.ninea}
+                                        onChange={handleInputChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        RCCM
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="rccm"
+                                        value={formData.rccm}
+                                        onChange={handleInputChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Téléphone
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        name="telephone"
+                                        value={formData.telephone}
+                                        onChange={handleInputChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                    />
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Adresse
+                                    </label>
+                                    <textarea
+                                        name="adresse"
+                                        value={formData.adresse}
+                                        onChange={handleInputChange}
+                                        rows="3"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                    ></textarea>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end">
+                                <Button
+                                    type="submit"
+                                    disabled={saving}
+                                    className="flex items-center"
+                                >
+                                    <Save className="h-4 w-4 mr-2" />
+                                    {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                                </Button>
+                            </div>
+                        </form>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }

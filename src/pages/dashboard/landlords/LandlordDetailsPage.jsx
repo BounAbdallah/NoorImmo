@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { landlordService } from '../../../services/landlordService';
-import { User, Phone, Mail, MapPin, Building, ArrowLeft, Loader, TrendingUp, Home, DollarSign } from 'lucide-react';
+import { propertyService } from '../../../services/propertyService';
+import { User, Phone, Mail, MapPin, Building, ArrowLeft, Loader, TrendingUp, Home, DollarSign, FileText, Download } from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 
@@ -209,10 +210,31 @@ export default function LandlordDetailsPage() {
                                             </div>
                                         </div>
                                         <div className="mt-2 sm:flex sm:justify-between">
-                                            <div className="sm:flex">
+                                            <div className="sm:flex sm:flex-col sm:items-end space-y-2">
                                                 <p className="flex items-center text-sm text-gray-500">
                                                     {bien.type} - {bien.surface} m² - {bien.nombre_pieces} pièces
                                                 </p>
+                                                <div className="flex space-x-2 mt-2">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            propertyService.viewMandat(bien.id);
+                                                        }}
+                                                        className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                                                    >
+                                                        <FileText className="h-3 w-3 mr-1 text-gray-500" />
+                                                        Mandat
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            propertyService.downloadMandat(bien.id);
+                                                        }}
+                                                        className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                                                    >
+                                                        <Download className="h-3 w-3 mr-1 text-gray-500" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

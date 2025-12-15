@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { paymentService } from '../../services/paymentService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { DollarSign, AlertCircle, User, Home } from 'lucide-react';
+import { DollarSign, AlertCircle, User, Home, FileText, Download } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
 export default function UnpaidRentsPage() {
@@ -145,11 +145,27 @@ export default function UnpaidRentsPage() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Link to={`/payments/new?bail_id=${rent.bail_id}&montant=${rent.dette}&periode_debut=${rent.periode_debut || ''}&periode_fin=${rent.periode_fin || ''}`}>
-                                            <Button size="sm">
-                                                Enregistrer Paiement
-                                            </Button>
-                                        </Link>
+                                        <div className="flex justify-end space-x-2">
+                                            <button
+                                                onClick={() => paymentService.viewDebtDocument(rent.paiements[0]?.id)}
+                                                className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                                                title="Visualiser reconnaissance de dette"
+                                            >
+                                                <FileText className="h-3 w-3" />
+                                            </button>
+                                            <button
+                                                onClick={() => paymentService.downloadDebtDocument(rent.paiements[0]?.id)}
+                                                className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                                                title="Télécharger reconnaissance de dette"
+                                            >
+                                                <Download className="h-3 w-3" />
+                                            </button>
+                                            <Link to={`/payments/new?bail_id=${rent.bail_id}&montant=${rent.dette}&periode_debut=${rent.periode_debut || ''}&periode_fin=${rent.periode_fin || ''}`}>
+                                                <Button size="sm">
+                                                    Enregistrer Paiement
+                                                </Button>
+                                            </Link>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { paymentService } from '../../services/paymentService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { Plus, Download, CreditCard, TrendingUp, AlertTriangle, CheckCircle, ChevronLeft, ChevronRight, Search, Filter } from 'lucide-react';
+import { Plus, Download, CreditCard, TrendingUp, AlertTriangle, CheckCircle, ChevronLeft, ChevronRight, Search, Filter, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Bar, Doughnut } from 'react-chartjs-2';
@@ -515,20 +515,38 @@ export default function PaymentHistory() {
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                                                     <div className="flex justify-end items-center gap-2">
                                                         {isPartiel && (
-                                                            <Link
-                                                                to={`/payments/new?bail_id=${payment.bail_id}&montant=${reste}&periode_debut=${payment.periode_debut || ''}&periode_fin=${payment.periode_fin || ''}`}
-                                                                className="px-2 py-1 text-xs font-medium rounded text-white bg-orange-600 hover:bg-orange-700"
-                                                            >
-                                                                Compléter
-                                                            </Link>
+                                                            <>
+                                                                <button
+                                                                    onClick={() => paymentService.viewDebtDocument(payment.id)}
+                                                                    className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded"
+                                                                    title="Visualiser reconnaissance de dette"
+                                                                >
+                                                                    <FileText className="h-4 w-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => paymentService.downloadDebtDocument(payment.id)}
+                                                                    className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded"
+                                                                    title="Télécharger reconnaissance de dette"
+                                                                >
+                                                                    <Download className="h-4 w-4" />
+                                                                </button>
+                                                                <Link
+                                                                    to={`/payments/new?bail_id=${payment.bail_id}&montant=${reste}&periode_debut=${payment.periode_debut || ''}&periode_fin=${payment.periode_fin || ''}`}
+                                                                    className="px-2 py-1 text-xs font-medium rounded text-white bg-orange-600 hover:bg-orange-700"
+                                                                >
+                                                                    Compléter
+                                                                </Link>
+                                                            </>
                                                         )}
-                                                        <button
-                                                            onClick={() => handleDownloadReceipt(payment.id)}
-                                                            className="p-1 text-primary-600 hover:text-primary-900 hover:bg-primary-50 rounded"
-                                                            title="Télécharger quittance"
-                                                        >
-                                                            <Download className="h-5 w-5" />
-                                                        </button>
+                                                        {!isPartiel && (
+                                                            <button
+                                                                onClick={() => handleDownloadReceipt(payment.id)}
+                                                                className="p-1 text-primary-600 hover:text-primary-900 hover:bg-primary-50 rounded"
+                                                                title="Télécharger quittance"
+                                                            >
+                                                                <Download className="h-5 w-5" />
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>

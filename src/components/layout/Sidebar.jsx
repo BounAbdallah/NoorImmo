@@ -21,6 +21,7 @@ export function Sidebar({ isOpen, onClose }) {
         { name: 'Locataires', href: '/tenants', icon: Users, roles: ['agence', 'bailleur', 'admin'] },
         { name: 'Notifications', href: '/notifications', icon: Bell },
         { name: 'Portefeuille', href: '/wallet', icon: Wallet },
+        { name: 'Paramètres Agence', href: '/agency/settings', icon: Settings, roles: ['agence'] },
         { name: 'Paramètres', href: '/settings', icon: Settings },
     ];
 

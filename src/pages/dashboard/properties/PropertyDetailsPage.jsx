@@ -225,7 +225,7 @@ export default function PropertyDetailsPage() {
                             <CardTitle>Gestionnaire</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-3 mb-4">
                                 <div className="h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600">
                                     <User className="h-5 w-5" />
                                 </div>
@@ -233,6 +233,24 @@ export default function PropertyDetailsPage() {
                                     <p className="text-sm font-medium text-gray-900">{property.bailleur?.user?.nom_complet || 'Moi'}</p>
                                     <p className="text-xs text-gray-500">Propriétaire</p>
                                 </div>
+                            </div>
+                            <div className="border-t pt-4 grid grid-cols-2 gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => propertyService.viewMandat(property.id)}
+                                    className="w-full text-xs"
+                                >
+                                    Voir Mandat
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => propertyService.downloadMandat(property.id)}
+                                    className="w-full text-xs"
+                                >
+                                    Télécharger
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>
