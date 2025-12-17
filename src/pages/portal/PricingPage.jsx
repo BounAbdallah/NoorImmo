@@ -123,7 +123,7 @@ export default function PricingPage() {
                             onClick={() => setBillingCycle('yearly')}
                             className={cn("px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center", billingCycle === 'yearly' ? "bg-slate-900 text-white shadow-md" : "text-slate-600 hover:text-slate-900")}
                         >
-                            Annuel <span className="ml-2 bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">-20%</span>
+                            Annuel <span className="ml-2 bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">-10%</span>
                         </button>
                     </div>
                 </div>

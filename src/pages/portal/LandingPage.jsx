@@ -1,540 +1,472 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { planService } from '../../services/planService';
 import {
-    Check, Shield, TrendingUp, Users, Home, Building,
-    Layout, FileText, ArrowRight, Activity, Smartphone,
-    PieChart, MessageSquare, Briefcase, Key, Menu, X, Star, Zap
+    Check, ArrowRight, Building, Menu, X, Star,
+    Shield, BarChart3, Users, Clock, Home, Zap
 } from 'lucide-react';
 
 export default function LandingPage() {
-    const [activeTab, setActiveTab] = useState('agence');
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [stats, setStats] = useState({ users: 0, properties: 0, rate: 0 });
+    const [pricingPlans, setPricingPlans] = useState([]);
 
-    // Scroll effect for navbar
+    // --- EFFECTS ---
+
+    // 1. Scroll Handler for Sticky Navbar
     useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 50);
+        const handleScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const features = {
-        agence: [
-            { title: 'Gestion de Parc Unifiée', desc: 'Centralisez la gestion de vos Immeubles, Biens et Locataires.', icon: Building },
-            { title: 'Suivi des Impayés', desc: 'Identifiez instantanément les retards et suivez les paiements.', icon: Activity },
-            { title: 'Gestion des Bailleurs', desc: 'Gérez vos propriétaires et leurs portefeuilles.', icon: Briefcase },
-            { title: 'Tableau de Bord', desc: 'Vues statistiques précises sur les performances.', icon: PieChart },
-        ],
-        bailleur: [
-            { title: 'Vue Portfolio', desc: 'Accédez à la liste complète de vos immeubles et biens.', icon: Building },
-            { title: 'Suivi Financier', desc: 'Consultez l\'historique des paiements de loyers.', icon: TrendingUp },
-            { title: 'Documents Numériques', desc: 'Visualisez les états des lieux et contrats.', icon: FileText },
-            { title: 'Suivi des Incidents', desc: 'Soyez informé des demandes d\'intervention.', icon: MessageSquare },
-        ],
-        locataire: [
-            { title: 'Signalement Incidents', desc: 'Déclarez facilement un problème technique.', icon: MessageSquare },
-            { title: 'Suivi des Demandes', desc: 'Suivez l\'avancement de vos signalements.', icon: Activity },
-            { title: 'Communication Agence', desc: 'Un canal direct avec votre gestionnaire.', icon: Users },
-            { title: 'Espace Personnel', desc: 'Accès sécurisé à vos informations.', icon: Key },
-        ]
-    };
+    // 2. Load Pricing Plans from API
+    useEffect(() => {
+        const loadPlans = async () => {
+            try {
+                const response = await planService.getAllPlans();
+                if (response.success && Array.isArray(response.data)) {
+                    const mappedPlans = response.data.slice(0, 3).map((plan, index) => ({
+                        id: plan.id,
+                        name: plan.nom,
+                        price: parseFloat(plan.prix_mensuel).toLocaleString('fr-FR'),
+                        period: '/mois',
+                        features: plan.fonctionnalites || [],
+                        cta: index === 0 ? 'Commencer' : 'Essai 14 jours',
+                        // Highlight the middle plan (Standard) for better UX flow
+                        highlighted: index === 1
+                    }));
+                    setPricingPlans(mappedPlans);
+                }
+            } catch (error) {
+                console.error("Failed to load plans:", error);
+                // Fallback in case of API error to avoid white screen
+                setPricingPlans([]);
+            }
+        };
+        loadPlans();
+    }, []);
+
+    // 3. Animated Statistics
+    useEffect(() => {
+        const duration = 2000;
+        const targets = { users: 1500, properties: 8000, rate: 99 };
+        const start = Date.now();
+
+        const animate = () => {
+            const now = Date.now();
+            const progress = Math.min((now - start) / duration, 1);
+
+            // Easing function for smooth animation
+            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+
+            setStats({
+                users: Math.floor(targets.users * easeOutQuart),
+                properties: Math.floor(targets.properties * easeOutQuart),
+                rate: Math.floor(targets.rate * easeOutQuart)
+            });
+
+            if (progress < 1) requestAnimationFrame(animate);
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) animate();
+        }, { threshold: 0.5 });
+
+        const statsElement = document.getElementById('stats-counter');
+        if (statsElement) observer.observe(statsElement);
+
+        return () => observer.disconnect();
+    }, []);
+
+
+    // --- RENDERING HELPERS ---
+
+    const FeatureCard = ({ icon: Icon, title, desc, delay }) => (
+        <div className="group p-8 rounded-3xl bg-white border border-slate-100 hover:border-blue-100 shadow-sm hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-500 hover:-translate-y-1">
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-600 transition-colors duration-300">
+                <Icon className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors duration-300" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">{title}</h3>
+            <p className="text-slate-500 leading-relaxed">{desc}</p>
+        </div>
+    );
 
     return (
-        <div className="bg-white overflow-hidden font-sans selection:bg-primary-100 selection:text-primary-900">
+        <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden selection:bg-blue-100 selection:text-blue-900">
 
-            {/* HERRO SECTION */}
-            <div className="relative bg-slate-900 min-h-[90vh] flex items-center overflow-hidden">
-                {/* Dynamic Background */}
-                <div className="absolute inset-0 z-0">
-                    <img
-                        src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=2850&q=80"
-                        alt="Background"
-                        className="w-full h-full object-cover opacity-20"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/95 to-primary-900/40" />
-                    {/* Architectural Mesh */}
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
+            {/* --- NAVBAR --- */}
+            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-lg border-b border-slate-200 py-4' : 'bg-transparent py-6'}`}>
+                <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+                    <Link to="/" className="flex items-center gap-2 group">
+                        <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20 group-hover:scale-105 transition-transform">
+                            <Building className="text-white w-6 h-6" />
+                        </div>
+                        <span className={`text-2xl font-bold tracking-tight ${scrolled ? 'text-slate-900' : 'text-slate-900 lg:text-white'} transition-colors`}>
+                            Noor<span className="text-blue-500">Immo</span>.
+                        </span>
+                    </Link>
 
-                    {/* Animated Blobs */}
-                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-500/20 rounded-full blur-[100px] animate-pulse"></div>
-                    <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px]"></div>
+                    {/* Desktop Menu */}
+                    <div className="hidden lg:flex items-center gap-8">
+                        {['Fonctionnalités', 'Tarifs', 'Témoignages'].map((item) => (
+                            <a
+                                key={item}
+                                href={`#${item.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}
+                                className={`text-sm font-medium hover:text-blue-500 transition-colors ${scrolled ? 'text-slate-600' : 'text-slate-300 hover:text-white'}`}
+                            >
+                                {item}
+                            </a>
+                        ))}
+                        <div className={`h-4 w-px ${scrolled ? 'bg-slate-300' : 'bg-slate-700'}`}></div>
+                        <Link to="/login" className={`text-sm font-semibold ${scrolled ? 'text-slate-900' : 'text-white'} hover:text-blue-500 transition-colors`}>
+                            Connexion
+                        </Link>
+                        <Link
+                            to="/register"
+                            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-full transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 hover:-translate-y-0.5"
+                        >
+                            S'inscrire
+                        </Link>
+                    </div>
+
+                    {/* Mobile Menu Toggle */}
+                    <button
+                        className="lg:hidden p-2 text-slate-600"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    >
+                        {mobileMenuOpen ? <X /> : <Menu />}
+                    </button>
+                </div>
+            </nav>
+
+            {/* Mobile Menu Overlay */}
+            {mobileMenuOpen && (
+                <div className="fixed inset-0 z-40 bg-white pt-24 px-6 lg:hidden animate-in slide-in-from-top-10">
+                    <div className="flex flex-col gap-6 text-center">
+                        <a href="#fonctionnalites" onClick={() => setMobileMenuOpen(false)} className="text-xl font-medium text-slate-900">Fonctionnalités</a>
+                        <a href="#tarifs" onClick={() => setMobileMenuOpen(false)} className="text-xl font-medium text-slate-900">Tarifs</a>
+                        <Link to="/login" className="text-xl font-medium text-blue-600">Connexion</Link>
+                        <Link to="/register" className="px-8 py-4 bg-blue-600 text-white font-bold rounded-xl shadow-xl">Créer un compte</Link>
+                    </div>
+                </div>
+            )}
+
+
+            {/* --- HERO SECTION --- */}
+            <header className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-slate-900 overflow-hidden">
+                {/* Background Effects */}
+                <div className="absolute inset-0">
+                    <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse"></div>
+                    <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px]"></div>
+                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
                 </div>
 
-                {/* Navbar */}
-                <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-slate-900/90 backdrop-blur-md border-b border-slate-700 py-4' : 'bg-transparent py-6'}`}>
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-                        <div className="text-white font-bold text-2xl tracking-tighter flex items-center gap-2">
-                            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                                <Building className="text-white h-5 w-5" />
-                            </div>
-                            <span>Noor<span className="text-primary-400">Immo</span>.</span>
+                <div className="relative max-w-7xl mx-auto px-6 text-center lg:text-left flex flex-col lg:flex-row items-center gap-16">
+                    {/* Text Content */}
+                    <div className="lg:w-1/2">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/30 border border-blue-800 text-blue-400 text-xs font-bold uppercase tracking-wider mb-8 backdrop-blur-sm">
+                            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                            Nouveau Standard 2025
                         </div>
-                        <div className="hidden md:flex space-x-8 items-center">
-                            <a href="#features" className="text-slate-300 hover:text-white transition-colors text-sm font-medium">Fonctionnalités</a>
-                            <a href="#testimonials" className="text-slate-300 hover:text-white transition-colors text-sm font-medium">Témoignages</a>
-                            <div className="h-6 w-px bg-slate-700 mx-2"></div>
-                            <Link to="/login" className="text-white hover:text-primary-400 font-medium text-sm">Connexion</Link>
-                            <Link to="/register" className="px-5 py-2.5 bg-white text-slate-900 rounded-full font-bold hover:bg-slate-100 transition-transform hover:scale-105 shadow-lg shadow-white/10 text-sm">
-                                S'inscrire
+                        <h1 className="text-5xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.1] mb-8">
+                            Gérez votre parc <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                                avec élégance.
+                            </span>
+                        </h1>
+                        <p className="text-lg lg:text-xl text-slate-400 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                            La plateforme tout-en-un pour les agences immobilières modernes.
+                            Automatisez les quittances, suivez les paiements et impressionnez vos clients.
+                        </p>
+                        <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+                            <Link to="/register" className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 hover:-translate-y-1 flex items-center justify-center gap-2">
+                                Commencer gratuitement
+                                <ArrowRight className="w-5 h-5" />
+                            </Link>
+                            <Link to="/pricing" className="w-full sm:w-auto px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all border border-slate-700">
+                                Voir les tarifs
                             </Link>
                         </div>
-                        {/* Mobile menu button */}
-                        <div className="flex items-center md:hidden">
-                            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-white">
-                                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                            </button>
+
+                        <div className="mt-12 flex items-center gap-8 justify-center lg:justify-start text-slate-500 text-sm font-medium">
+                            <div className="flex items-center gap-2">
+                                <Check className="w-5 h-5 text-blue-500" />
+                                <span>Installation instantanée</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Check className="w-5 h-5 text-blue-500" />
+                                <span>Sans engagement</span>
+                            </div>
                         </div>
                     </div>
-                    {/* Mobile Menu */}
-                    {mobileMenuOpen && (
-                        <div className="md:hidden absolute top-20 left-4 right-4 bg-slate-800/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-slate-700 z-50 space-y-4 animate-in slide-in-from-top-4">
-                            <Link to="/login" className="block text-white font-medium text-center py-2">Connexion</Link>
-                            <Link to="/register" className="block px-4 py-3 bg-primary-600 text-white rounded-xl font-bold text-center">S'inscrire</Link>
-                        </div>
-                    )}
-                </nav>
 
-                {/* Hero Content */}
-                <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
-                    <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-                        <div className="lg:w-1/2 text-center lg:text-left">
-                            <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-primary-500/30 bg-primary-500/10 text-primary-300 text-xs font-bold uppercase tracking-wider mb-8 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-700">
-                                <Zap className="w-3 h-3 mr-2 text-yellow-400 fill-yellow-400" />
-                                La plateforme #1 au Sénégal
-                            </div>
-                            <h1 className="text-5xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.1] mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-                                L'immobilier <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 via-cyan-400 to-primary-400 bg-[length:200%_auto] animate-gradient">
-                                    nouvelle génération.
-                                </span>
-                            </h1>
-                            <p className="text-xl text-slate-300 max-w-xl leading-relaxed mx-auto lg:mx-0 mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-                                Automatisez la gestion locative. Sécurisez les revenus. Simplifiez la vie des bailleurs et locataires. Tout cela, au même endroit.
-                            </p>
-
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-                                <Link to="/register" className="inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-xl text-slate-900 bg-white hover:bg-slate-50 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] hover:-translate-y-1">
-                                    Commencer gratuitement
-                                    <ArrowRight className="ml-2 h-5 w-5" />
-                                </Link>
-                                <Link to="/contact" className="inline-flex items-center justify-center px-8 py-4 border border-slate-600/50 bg-slate-800/50 backdrop-blur-sm text-base font-medium rounded-xl text-white hover:bg-slate-700/50 transition-all">
-                                    Nous contacter
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* Floating Morphing Dashboard Visual */}
-                        <div className="lg:w-1/2 relative animate-in fade-in zoom-in duration-1000 delay-300">
-                            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-700/50 group perspective-1000">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-primary-600/20 to-cyan-500/20 mix-blend-overlay z-10 pointer-events-none"></div>
+                    {/* Visual Content (Dashboard Preview) */}
+                    <div className="lg:w-1/2 relative">
+                        <div className="relative rounded-2xl bg-slate-800 border border-slate-700 p-2 shadow-2xl transform lg:rotate-2 hover:rotate-0 transition-transform duration-700">
+                            <div className="rounded-xl overflow-hidden bg-slate-900 aspect-video relative group">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-purple-500/10 pointer-events-none z-10"></div>
+                                {/* Replacing static image with a CSS-based placeholder if image fails, but trying image first */}
                                 <img
                                     src="/images/dashboard_banner.png"
-                                    alt="Interface Dashboard Batiyakaar"
-                                    className="w-full rounded-2xl transform transition-transform duration-700 group-hover:scale-[1.02]"
+                                    alt="Tableau de bord"
+                                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.style.display = 'none';
+                                        e.target.parentElement.classList.add('flex', 'items-center', 'justify-center');
+                                        e.target.parentElement.innerHTML = '<div class="text-slate-500 flex flex-col items-center"><svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg><span class="font-bold">Aperçu du Dashboard</span></div>';
+                                    }}
                                 />
-                                {/* Floating Badges */}
-                                <div className="absolute top-10 left-10 bg-slate-800/90 backdrop-blur border border-slate-700 p-3 rounded-xl shadow-xl flex items-center gap-3 animate-bounce [animation-duration:3s]">
-                                    <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                                        <Check className="w-4 h-4 text-green-500" />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs text-slate-400">Loyer reçu</div>
-                                        <div className="text-sm font-bold text-white">+ 150.000 FCFA</div>
-                                    </div>
+                            </div>
+                        </div>
+
+                        {/* Floating Widget 1 */}
+                        <div className="absolute -left-8 top-12 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 animate-bounce [animation-duration:3s]">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <Check className="w-5 h-5 text-green-600" />
                                 </div>
-                                <div className="absolute bottom-10 right-10 bg-slate-800/90 backdrop-blur border border-slate-700 p-3 rounded-xl shadow-xl flex items-center gap-3 animate-bounce [animation-duration:4s]">
-                                    <div className="w-8 h-8 rounded-full bg-primary-500/20 flex items-center justify-center">
-                                        <Users className="w-4 h-4 text-primary-400" />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs text-slate-400">Nouveau contrat</div>
-                                        <div className="text-sm font-bold text-white">Validé</div>
-                                    </div>
+                                <div>
+                                    <div className="text-xs text-slate-500 font-bold uppercase">Loyer Reçu</div>
+                                    <div className="text-lg font-extrabold text-slate-900">+ 250.000 F</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Floating Widget 2 */}
+                        <div className="absolute -right-8 bottom-12 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 animate-bounce [animation-duration:4s]">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <Users className="w-5 h-5 text-blue-600" />
+                                </div>
+                                <div>
+                                    <div className="text-xs text-slate-500 font-bold uppercase">Nouveaux Locataires</div>
+                                    <div className="text-lg font-extrabold text-slate-900">+ 12 this month</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </header>
 
-            {/* PARTNERS / TRUST STRIP */}
-            <div className="border-y border-slate-100 bg-slate-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-wrap justify-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                    {['Agence Immo', 'Sénégal Trust', 'Dakar Building', 'West Africa Prop'].map((p, i) => (
-                        <div key={i} className="text-lg font-bold text-slate-400 flex items-center gap-2">
-                            <Building className="w-5 h-5" /> {p}
-                        </div>
-                    ))}
-                </div>
-            </div>
 
-            {/* KEY STATS (NEW) */}
-            <div className="bg-white border-b border-slate-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-100 py-12">
+            {/* --- STATS SECTION --- */}
+            <div id="stats-counter" className="py-12 bg-white border-b border-slate-100">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-slate-100">
                         {[
-                            { label: 'Utilisateurs Actifs', value: '1,200+' },
-                            { label: 'Biens Gérés', value: '5,000+' },
-                            { label: 'Taux de Recouvrement', value: '98%' },
-                            { label: 'Support Client', value: '24/7' },
+                            { label: 'Utilisateurs Actifs', val: stats.users, suffix: '+' },
+                            { label: 'Biens Gérés', val: stats.properties, suffix: '+' },
+                            { label: 'Taux de Recouvrement', val: stats.rate, suffix: '%' },
+                            { label: 'Support Client', val: '24/7', suffix: '' },
                         ].map((stat, idx) => (
-                            <div key={idx} className="text-center px-4">
-                                <div className="text-4xl font-extrabold text-slate-900 mb-2">{stat.value}</div>
-                                <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">{stat.label}</div>
+                            <div key={idx} className="px-4">
+                                <div className="text-4xl lg:text-5xl font-extrabold text-slate-900 mb-2 tracking-tight">
+                                    {typeof stat.val === 'number' ? stat.val.toLocaleString() : stat.val}{stat.suffix}
+                                </div>
+                                <div className="text-sm font-bold text-slate-500 uppercase tracking-widest">{stat.label}</div>
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
 
-            {/* FEATURE TABS SECTION */}
-            <div id="features" className="py-24 bg-white relative">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center mb-16">
-                        <span className="text-primary-600 font-bold tracking-wider uppercase text-sm">Fonctionnalités</span>
-                        <h2 className="mt-2 text-4xl lg:text-5xl font-extrabold text-slate-900 mb-6">
-                            L'outil ultime pour<br />
-                            <span className="text-slate-400">les Agences Immobilières.</span>
+
+            {/* --- FEATURES GRID (Bento Style) --- */}
+            <section id="fonctionnalites" className="py-32 bg-slate-50">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="text-center max-w-3xl mx-auto mb-20">
+                        <span className="text-blue-600 font-bold tracking-widest uppercase text-sm">Fonctionnalités</span>
+                        <h2 className="mt-4 text-4xl lg:text-5xl font-extrabold text-slate-900 mb-6">
+                            Tout pour gérer votre agence.<br />
+                            <span className="text-slate-400">Rien de superflu.</span>
                         </h2>
+                        <p className="text-xl text-slate-600">
+                            Une suite d'outils puissants conçus spécifiquement pour le marché immobilier sénégalais.
+                        </p>
                     </div>
 
-                    {/* Styled Tabs */}
-                    <div className="flex justify-center mb-16">
-                        <div className="bg-slate-100 p-1.5 rounded-2xl inline-flex relative cursor-default">
-                            {['agence', 'bailleur', 'locataire'].map((role) => (
-                                <button
-                                    key={role}
-                                    onClick={() => role === 'agence' && setActiveTab(role)}
-                                    disabled={role !== 'agence'}
-                                    className={`relative z-10 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 capitalize flex items-center gap-2 ${activeTab === role
-                                        ? 'bg-white text-primary-600 shadow-xl scale-105 cursor-default'
-                                        : 'text-slate-400 bg-transparent cursor-not-allowed opacity-70'
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <FeatureCard
+                            icon={Building}
+                            title="Gestion de Parc"
+                            desc="Vue d'ensemble sur tous vos immeubles, appartements et studios. Filtrage intelligent et statut d'occupation en temps réel."
+                        />
+                        <FeatureCard
+                            icon={BarChart3}
+                            title="Comptabilité Automatisée"
+                            desc="Génération automatique des quittances, suivi des encaissements et calcul des commissions d'agence sans erreur."
+                        />
+                        <FeatureCard
+                            icon={Users}
+                            title="Portail Locataire"
+                            desc="Offrez un espace moderne à vos locataires pour télécharger leurs documents et signaler des incidents."
+                        />
+                        <FeatureCard
+                            icon={Shield}
+                            title="Sécurité Bancaire"
+                            desc="Toutes les données sont chiffrées. Sauvegardes quotidiennes automatiques pour une tranquillité d'esprit totale."
+                        />
+                        <FeatureCard
+                            icon={Clock}
+                            title="Relances Intelligentes"
+                            desc="Notifications automatiques par SMS et Email pour les loyers impayés avant même qu'ils ne deviennent problématiques."
+                        />
+                        <FeatureCard
+                            icon={Zap}
+                            title="Performance"
+                            desc="Une interface ultra-rapide qui charge en moins de 0.5 seconde, même avec une connexion internet lente."
+                        />
+                    </div>
+                </div>
+            </section>
+
+
+            {/* --- PRICING SECTION --- */}
+            <section id="tarifs" className="py-32 bg-white">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+                        <div className="max-w-2xl">
+                            <h2 className="text-4xl font-extrabold text-slate-900 mb-6">Des tarifs transparents.</h2>
+                            <p className="text-xl text-slate-600">
+                                Choisissez le plan qui correspond à la taille de votre parc immobilier.
+                                Changez à tout moment.
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-full">
+                            <span className="px-4 py-2 text-sm font-bold text-slate-600">Mensuel</span>
+                            <span className="px-4 py-2 text-sm font-bold bg-white text-slate-900 rounded-full shadow-sm">Annuel (-10%)</span>
+                        </div>
+                    </div>
+
+                    {/* Pricing Grid */}
+                    <div className="grid md:grid-cols-3 gap-8 items-start">
+                        {pricingPlans.length > 0 ? pricingPlans.map((plan, idx) => (
+                            <div
+                                key={idx}
+                                className={`relative rounded-3xl p-8 transition-all duration-300 ${plan.highlighted
+                                        ? 'bg-slate-900 text-white shadow-2xl scale-105 z-10 ring-1 ring-slate-800'
+                                        : 'bg-white text-slate-900 border border-slate-200 shadow-xl hover:-translate-y-2'
+                                    }`}
+                            >
+                                {plan.highlighted && (
+                                    <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider">
+                                        Recommandé
+                                    </div>
+                                )}
+
+                                <div className="mb-8">
+                                    <h3 className={`text-xl font-bold mb-2 ${plan.highlighted ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h3>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className={`text-4xl font-extrabold ${plan.highlighted ? 'text-white' : 'text-slate-900'}`}>{plan.price}</span>
+                                        <span className={`text-sm ${plan.highlighted ? 'text-slate-400' : 'text-slate-500'}`}> F{plan.period}</span>
+                                    </div>
+                                </div>
+
+                                <ul className="space-y-4 mb-10">
+                                    {plan.features.map((feature, i) => (
+                                        <li key={i} className="flex items-start gap-3">
+                                            <div className={`mt-1 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${plan.highlighted ? 'bg-blue-600/20' : 'bg-blue-50'}`}>
+                                                <Check className={`w-3 h-3 ${plan.highlighted ? 'text-blue-400' : 'text-blue-600'}`} />
+                                            </div>
+                                            <span className={`text-sm ${plan.highlighted ? 'text-slate-300' : 'text-slate-600'}`}>{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                <Link
+                                    to="/register"
+                                    className={`block w-full py-4 rounded-xl font-bold text-center transition-all ${plan.highlighted
+                                            ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/50'
+                                            : 'bg-slate-100 hover:bg-slate-200 text-slate-900'
                                         }`}
                                 >
-                                    {role === 'agence' && <Briefcase className="w-4 h-4" />}
-                                    {role === 'bailleur' && <Key className="w-4 h-4" />}
-                                    {role === 'locataire' && <Home className="w-4 h-4" />}
-                                    {role}
-                                    {role !== 'agence' && (
-                                        <span className="ml-1 px-1.5 py-0.5 bg-slate-200 text-slate-500 rounded text-[10px] uppercase tracking-wider font-extrabold">
-                                            Bientôt
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
+                                    {plan.cta}
+                                </Link>
+                            </div>
+                        )) : (
+                            // Loading State Skeleton
+                            [1, 2, 3].map((i) => (
+                                <div key={i} className="bg-white border border-slate-200 rounded-3xl p-8 h-96 animate-pulse">
+                                    <div className="h-8 bg-slate-200 rounded w-1/3 mb-4"></div>
+                                    <div className="h-12 bg-slate-200 rounded w-1/2 mb-8"></div>
+                                    <div className="space-y-3">
+                                        <div className="h-4 bg-slate-200 rounded w-full"></div>
+                                        <div className="h-4 bg-slate-200 rounded w-5/6"></div>
+                                        <div className="h-4 bg-slate-200 rounded w-4/6"></div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
 
-                    {/* Cards Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {features[activeTab].map((feature, idx) => (
-                            <div key={idx} className="group bg-white p-8 rounded-3xl border border-slate-100 hover:border-primary-100 shadow-sm hover:shadow-2xl hover:shadow-primary-900/5 transition-all duration-300 hover:-translate-y-2 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-primary-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-150 duration-500"></div>
-                                <div className={`relative w-14 h-14 rounded-2xl mb-8 flex items-center justify-center bg-slate-50 text-slate-900 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300 shadow-inner`}>
-                                    <feature.icon className="h-7 w-7" />
-                                </div>
-                                <h4 className="text-xl font-bold text-slate-900 mb-4">{feature.title}</h4>
-                                <p className="text-slate-500 text-sm leading-relaxed">
-                                    {feature.desc}
-                                </p>
-                            </div>
-                        ))}
+                    <div className="mt-16 text-center">
+                        <Link to="/pricing" className="text-blue-600 font-bold hover:text-blue-800 transition-colors inline-flex items-center gap-2 group">
+                            Voir le comparatif complet
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </Link>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {/* WORKFLOW SECTION (NEW) */}
-            <div className="py-24 bg-slate-50 border-t border-slate-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <span className="text-primary-600 font-bold tracking-wider uppercase text-sm">Simplicité</span>
-                        <h2 className="mt-2 text-3xl font-extrabold text-slate-900 sm:text-4xl">
-                            Démarrez en moins de 5 minutes
-                        </h2>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-12 relative">
-                        {/* Connecting Line (Hidden on Mobile) */}
-                        <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-0.5 bg-slate-200 -z-10"></div>
 
-                        {[
-                            { step: "01", title: "Créez votre compte", desc: "Inscrivez votre agence et configurez votre profil en quelques clics.", icon: Users },
-                            { step: "02", title: "Importez vos données", desc: "Ajoutez vos immeubles, biens et locataires existants facilement.", icon: FileText },
-                            { step: "03", title: "Automatisez tout", desc: "Laissez la plateforme gérer les quittances, relances et rapports.", icon: Zap }
-                        ].map((s, i) => (
-                            <div key={i} className="text-center">
-                                <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg border-4 border-slate-50 relative z-10">
-                                    <s.icon className="w-10 h-10 text-primary-600" />
-                                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-sm border-2 border-white">
-                                        {s.step}
-                                    </div>
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-3">{s.title}</h3>
-                                <p className="text-slate-500 max-w-xs mx-auto text-sm leading-relaxed">{s.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* MOBILE SECTION (NEW) */}
-            <div className="py-24 bg-white overflow-hidden">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="lg:grid lg:grid-cols-2 gap-12 items-center">
-                        <div className="mb-12 lg:mb-0">
-                            <h2 className="text-3xl font-extrabold text-slate-900 mb-6">
-                                Votre agence,<br />
-                                <span className="text-primary-600">partout avec vous.</span>
-                            </h2>
-                            <p className="text-lg text-slate-500 mb-8 leading-relaxed">
-                                Ne soyez plus enchaîné à votre bureau. Accédez à vos dossiers,validez des paiements et répondez aux incidents depuis votre smartphone, où que vous soyez.
-                            </p>
-                            <div className="flex flex-col gap-4">
-                                <div className="flex items-center">
-                                    <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center mr-4">
-                                        <Smartphone className="w-6 h-6 text-primary-600" />
-                                    </div>
-                                    <div>
-                                        <div className="font-bold text-slate-900">Interface Mobile First</div>
-                                        <div className="text-sm text-slate-500">Optimisé pour iPhone et Android</div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center">
-                                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
-                                        <Zap className="w-6 h-6 text-green-600" />
-                                    </div>
-                                    <div>
-                                        <div className="font-bold text-slate-900">Notifications Temps Réel</div>
-                                        <div className="text-sm text-slate-500">Soyez alerté instantanément</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="relative flex justify-center">
-                            <div className="absolute inset-0 bg-primary-500/20 blur-[100px] rounded-full"></div>
-                            {/* Simple Mobile Mockup using CSS borders */}
-                            <div className="relative w-64 h-[500px] bg-slate-900 rounded-[3rem] border-8 border-slate-800 shadow-2xl p-2 relative z-10">
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-slate-800 rounded-b-xl z-20"></div>
-                                <div className="w-full h-full bg-white rounded-[2.5rem] overflow-hidden relative">
-                                    {/* Mock App Content */}
-                                    <div className="bg-primary-600 h-32 p-6 text-white pt-12">
-                                        <div className="text-sm opacity-80">Bonjour, Alioune</div>
-                                        <div className="font-bold text-2xl">324.000 F</div>
-                                        <div className="text-xs opacity-80">Encaissé ce mois</div>
-                                    </div>
-                                    <div className="p-4 space-y-4">
-                                        <div className="bg-slate-100 h-20 rounded-xl"></div>
-                                        <div className="bg-slate-100 h-20 rounded-xl"></div>
-                                        <div className="bg-slate-100 h-20 rounded-xl"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* COMPARISON TABLE (NEW) */}
-            <div className="py-24 bg-slate-50">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl font-extrabold text-slate-900 mb-4">Pourquoi changer ?</h2>
-                        <p className="text-slate-500">Voyez la différence par vous-même.</p>
-                    </div>
-                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
-                        <div className="grid grid-cols-3 bg-slate-900 text-white p-6 font-bold text-center">
-                            <div className="text-left pl-4">Fonctionnalité</div>
-                            <div className="text-slate-400 font-normal">Excel / Papier</div>
-                            <div className="text-primary-400">NoorImmo</div>
-                        </div>
-                        {[
-                            { label: "Génération de Quittances", old: "Manuelle (Lent)", new: "Automatique (Instantané)" },
-                            { label: "Suivi des Impayés", old: "Difficile à voir", new: "Alertes automatiques" },
-                            { label: "Historique Locataire", old: "Dossiers éparpillés", new: "Centralisé & Sécurisé" },
-                            { label: "Rapports Financiers", old: "Calculs complexes", new: "Temps réel" },
-                            { label: "Accès à distance", old: "Impossible", new: "100% Cloud" },
-                        ].map((row, idx) => (
-                            <div key={idx} className="grid grid-cols-3 p-6 border-b border-slate-100 hover:bg-slate-50 transition-colors text-center items-center">
-                                <div className="text-left font-bold text-slate-900 pl-4">{row.label}</div>
-                                <div className="text-slate-500 text-sm">{row.old}</div>
-                                <div className="text-primary-600 font-bold flex justify-center items-center gap-2">
-                                    <Check className="w-4 h-4" /> {row.new}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* SECURITY & TRUST (NEW) */}
-            <div className="bg-slate-900 py-20 border-y border-slate-800">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid md:grid-cols-2 gap-16 items-center">
-                        <div>
-                            <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-900/30 text-green-400 text-xs font-bold uppercase tracking-wider mb-6 border border-green-900/50">
-                                <Shield className="w-3 h-3 mr-2" /> Sécurité Maximale
-                            </div>
-                            <h2 className="text-3xl font-extrabold text-white mb-6">
-                                Vos données sont blindées.
-                            </h2>
-                            <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-                                Nous savons que la confidentialité de vos propriétaires et locataires est critique. C'est pourquoi nous utilisons les standards de sécurité bancaire.
-                            </p>
-                            <ul className="space-y-4">
-                                {[
-                                    'Chiffrement SSL/TLS de bout en bout',
-                                    'Sauvegardes quotidiennes automatiques',
-                                    'Hébergement Cloud sécurisé et redondant',
-                                    'Conformité aux normes de protection des données'
-                                ].map((item, i) => (
-                                    <li key={i} className="flex items-center text-slate-300">
-                                        <Check className="w-5 h-5 mr-3 text-green-500" />
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-primary-600/20 blur-3xl rounded-full"></div>
-                            <div className="relative bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-2xl">
-                                <div className="flex items-center mb-6 border-b border-slate-700 pb-4">
-                                    <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                                    <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
-                                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                </div>
-                                <div className="space-y-3 font-mono text-sm">
-                                    <div className="flex justify-between text-slate-400">
-                                        <span>Status du serveur</span>
-                                        <span className="text-green-400">Opérationnel</span>
-                                    </div>
-                                    <div className="flex justify-between text-slate-400">
-                                        <span>Dernière sauvegarde</span>
-                                        <span className="text-blue-400">Il y a 10 min</span>
-                                    </div>
-                                    <div className="flex justify-between text-slate-400">
-                                        <span>Chiffrement</span>
-                                        <span className="text-purple-400">AES-256 Enabled</span>
-                                    </div>
-                                    <div className="mt-4 p-3 bg-slate-900/50 rounded text-xs text-slate-500">
-                                        &gt; System check complete.<br />
-                                        &gt; Data integrity verified.<br />
-                                        &gt; All systems go.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* FAQ SECTION (NEW) */}
-            <div className="py-24 bg-white">
-                <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">Questions Fréquentes</h2>
-                        <p className="mt-4 text-slate-500">Tout ce que vous devez savoir avant de commencer.</p>
-                    </div>
-                    <div className="space-y-6">
-                        {[
-                            { q: "Est-ce difficile de migrer mes données ?", r: "Non, notre outil d'importation Excel vous permet d'ajouter tout votre parc en quelques minutes. Notre équipe support peut aussi le faire pour vous." },
-                            { q: "Puis-je gérer plusieurs utilisateurs ?", r: "Absolument. Selon votre abonnement, vous pouvez ajouter des collaborateurs avec des droits d'accès spécifiques." },
-                            { q: "Mes données sont-elles accessibles partout ?", r: "Oui, NoorImmo est une solution 100% cloud. Vous pouvez gérer votre agence depuis votre bureau, votre maison ou en déplacement sur mobile." },
-                            { q: "Y a-t-il un engagement de durée ?", r: "Non, nos offres sont sans engagement. Vous pouvez arrêter à tout moment. Nous croyons à la qualité de notre service pour vous retenir." }
-                        ].map((faq, i) => (
-                            <div key={i} className="border border-slate-200 rounded-xl p-6 hover:border-primary-200 transition-colors bg-slate-50 hover:bg-white shadow-sm">
-                                <h3 className="text-lg font-bold text-slate-900 mb-2">{faq.q}</h3>
-                                <p className="text-slate-600 text-sm leading-relaxed">{faq.r}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-            <div id="testimonials" className="py-24 bg-slate-900 text-white relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <h2 className="text-3xl font-bold text-center mb-16">Ils ont transformé leur gestion</h2>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {[
-                            { name: "Moussa Diop", role: "Gestionnaire Agence", text: "Un gain de temps phénoménal. Mes quittances partent toutes seules." },
-                            { name: "Fatou Sow", role: "Propriétaire Bailleur", text: "Enfin je vois clair dans mes revenus locatifs. Transparence totale." },
-                            { name: "Jean Gomis", role: "Locataire", text: "L'interface est super simple pour signaler un problème de plomberie." }
-                        ].map((t, i) => (
-                            <div key={i} className="bg-slate-800/50 backdrop-blur p-8 rounded-2xl border border-slate-700 hover:bg-slate-800 transition-colors">
-                                <div className="flex text-yellow-400 mb-4 gap-1">
-                                    {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-4 h-4 fill-current" />)}
-                                </div>
-                                <p className="text-slate-300 mb-6 italic">"{t.text}"</p>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-cyan-400 rounded-full flex items-center justify-center font-bold text-slate-900">
-                                        {t.name.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <div className="font-bold">{t.name}</div>
-                                        <div className="text-sm text-slate-500">{t.role}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* FINAL CTA */}
-            <div className="relative py-24 bg-white overflow-hidden">
-                <div className="max-w-5xl mx-auto px-4 text-center">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary-50 to-transparent blur-3xl -z-10"></div>
-                    <h2 className="text-4xl md:text-6xl font-extrabold text-slate-900 mb-8 tracking-tight">
-                        Prêt à passer au <span className="text-primary-600">niveau supérieur</span> ?
+            {/* --- CTA FINAL --- */}
+            <section className="py-24 bg-slate-900 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+                <div className="relative max-w-4xl mx-auto px-6 text-center">
+                    <h2 className="text-4xl lg:text-5xl font-extrabold text-white mb-8 tracking-tight">
+                        Une gestion immobilière <br />
+                        <span className="text-blue-500">enfin simplifiée.</span>
                     </h2>
-                    <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
-                        Rejoignez les agences modernes qui utilisent Bati Yakaar pour leur croissance.
+                    <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto">
+                        Rejoignez plus de 1500 agences qui font confiance à Batiyakaar pour automatiser leur croissance.
                     </p>
-                    <Link
-                        to="/register"
-                        className="inline-flex items-center justify-center px-12 py-5 bg-slate-900 text-white rounded-full text-lg font-bold shadow-2xl hover:bg-primary-600 hover:scale-105 transition-all duration-300"
-                    >
-                        Créer un compte maintenant
-                        <ArrowRight className="ml-2 w-5 h-5" />
-                    </Link>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <Link to="/register" className="w-full sm:w-auto px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full shadow-2xl hover:scale-105 transition-all duration-300">
+                            Créer mon compte
+                        </Link>
+                        <Link to="/login" className="w-full sm:w-auto px-10 py-5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-full backdrop-blur-sm transition-all">
+                            Démo gratuite
+                        </Link>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            {/* FOOTER */}
-            <footer className="bg-slate-50 border-t border-slate-200 pt-16 pb-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-                        <div className="col-span-2 md:col-span-1">
-                            <span className="text-xl font-bold text-slate-900">Noor<span className="text-primary-600">Immo</span>.</span>
-                            <p className="mt-4 text-sm text-slate-500">
-                                La solution complète pour la gestion immobilière au Sénégal.
-                            </p>
+            {/* --- FOOTER --- */}
+            <footer className="bg-slate-950 border-t border-slate-900 text-slate-400 py-12">
+                <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+                    <div className="col-span-2">
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <Building className="text-white w-5 h-5" />
+                            </div>
+                            <span className="text-xl font-bold text-white">Noor<span className="text-blue-500">Immo</span>.</span>
                         </div>
-                        <div>
-                            <h4 className="font-bold text-slate-900 mb-4">Produit</h4>
-                            <ul className="space-y-2 text-sm text-slate-600">
-                                <li><a href="#" className="hover:text-primary-600">Fonctionnalités</a></li>
-                                <li><a href="#" className="hover:text-primary-600">Tarifs</a></li>
-                                <li><a href="#" className="hover:text-primary-600">Témoignages</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-slate-900 mb-4">Légal</h4>
-                            <ul className="space-y-2 text-sm text-slate-600">
-                                <li><a href="#" className="hover:text-primary-600">Confidentialité</a></li>
-                                <li><a href="#" className="hover:text-primary-600">CGU</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-slate-900 mb-4">Contact</h4>
-                            <ul className="space-y-2 text-sm text-slate-600">
-                                <li>support@batimmo.sn</li>
-                                <li>+221 33 000 00 00</li>
-                                <li>Dakar, Sénégal</li>
-                            </ul>
-                        </div>
+                        <p className="max-w-xs text-sm">
+                            La solution complète pour digitaliser votre agence immobilière au Sénégal.
+                        </p>
                     </div>
-                    <div className="border-t border-slate-200 pt-8 text-center text-sm text-slate-500">
-                        &copy; {new Date().getFullYear()} Noor Immo. Tous droits réservés.
+                    <div>
+                        <h4 className="text-white font-bold mb-4">Plateforme</h4>
+                        <ul className="space-y-2 text-sm">
+                            <li><a href="#" className="hover:text-blue-400 transition-colors">Fonctionnalités</a></li>
+                            <li><a href="#" className="hover:text-blue-400 transition-colors">Tarifs</a></li>
+                            <li><a href="#" className="hover:text-blue-400 transition-colors">Connexion</a></li>
+                        </ul>
                     </div>
+                    <div>
+                        <h4 className="text-white font-bold mb-4">Légal</h4>
+                        <ul className="space-y-2 text-sm">
+                            <li><a href="#" className="hover:text-blue-400 transition-colors">Mentions Légales</a></li>
+                            <li><a href="#" className="hover:text-blue-400 transition-colors">CGU</a></li>
+                            <li><a href="#" className="hover:text-blue-400 transition-colors">Confidentialité</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-slate-900 text-center text-sm text-slate-600">
+                    &copy; 2025 Noor Immobilier. Tous droits réservés.
                 </div>
             </footer>
         </div>

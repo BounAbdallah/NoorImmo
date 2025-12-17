@@ -320,14 +320,7 @@ export default function LoginPage() {
                     </form>
 
                     {/* Demo Credentials (Dev Mode Only) */}
-                    {process.env.NODE_ENV === 'development' && (
-                        <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                            <p className="text-xs font-bold text-blue-900 mb-2">🔐 Comptes de test :</p>
-                            <p className="text-xs text-blue-800">Bailleur: amadou.diop@diaspora.sn</p>
-                            <p className="text-xs text-blue-800">Agence: contact@immoplus.sn</p>
-                            <p className="text-xs text-blue-800">Mot de passe: password123</p>
-                        </div>
-                    )}
+                
                 </div>
             </div>
         </div>

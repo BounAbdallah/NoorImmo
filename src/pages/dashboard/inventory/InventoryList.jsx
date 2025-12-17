@@ -79,8 +79,13 @@ export default function InventoryList() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {report.bail?.locataire?.user?.prenom} {report.bail?.locataire?.user?.nom}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="#" className="text-primary-600 hover:text-primary-900">Voir</a>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                        <button
+                                            onClick={() => inventoryService.downloadPdf(report.id)}
+                                            className="text-primary-600 hover:text-primary-900 flex inline-flex items-center"
+                                        >
+                                            <ClipboardCheck className="w-4 h-4 mr-1" /> PDF
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
