@@ -6,7 +6,7 @@ import { Button } from '../../../components/ui/Button';
 import {
     ArrowLeft, User, Mail, Phone, Briefcase, Building2, CreditCard,
     FileText, AlertTriangle, TrendingUp, Calendar, Home, CheckCircle,
-    Clock, XCircle
+    Clock, XCircle, Edit, Trash2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -60,6 +60,39 @@ export default function TenantDetailsPage() {
             navigate('/tenants');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        const result = await Swal.fire({
+            title: 'Êtes-vous sûr ?',
+            html: `Voulez-vous vraiment supprimer le locataire <strong>${tenant.user?.prenom} ${tenant.user?.nom}</strong> ?<br/><span class="text-red-600">Cette action est irréversible.</span>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await tenantService.delete(id);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Supprimé !',
+                    text: 'Le locataire a été supprimé avec succès.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                navigate('/tenants');
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: error.response?.data?.message || 'Impossible de supprimer ce locataire.'
+                });
+            }
         }
     };
 
@@ -128,34 +161,53 @@ export default function TenantDetailsPage() {
             {/* Header Card */}
             <Card>
                 <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                        <div className="flex-shrink-0 h-20 w-20 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 text-2xl font-bold">
-                            {tenant.user?.prenom?.[0]}{tenant.user?.nom?.[0]}
-                        </div>
-                        <div className="flex-1">
-                            <h1 className="text-2xl font-bold text-gray-900">
-                                {tenant.user?.prenom} {tenant.user?.nom}
-                            </h1>
-                            <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-gray-600">
-                                <div className="flex items-center gap-2">
-                                    <Mail className="h-4 w-4 text-gray-400" />
-                                    {tenant.user?.email}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Phone className="h-4 w-4 text-gray-400" />
-                                    {tenant.user?.telephone || 'Non renseigné'}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Briefcase className="h-4 w-4 text-gray-400" />
-                                    {tenant.profession || 'Non renseigné'}
-                                </div>
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                        <div className="flex items-start md:items-center gap-6 flex-1">
+                            <div className="flex-shrink-0 h-20 w-20 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 text-2xl font-bold">
+                                {tenant.user?.prenom?.[0]}{tenant.user?.nom?.[0]}
                             </div>
-                            {tenant.employeur && (
-                                <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
-                                    <Building2 className="h-4 w-4 text-gray-400" />
-                                    Employeur: {tenant.employeur}
+                            <div className="flex-1">
+                                <h1 className="text-2xl font-bold text-gray-900">
+                                    {tenant.user?.prenom} {tenant.user?.nom}
+                                </h1>
+                                <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-gray-600">
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="h-4 w-4 text-gray-400" />
+                                        {tenant.user?.email}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="h-4 w-4 text-gray-400" />
+                                        {tenant.user?.telephone || 'Non renseigné'}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Briefcase className="h-4 w-4 text-gray-400" />
+                                        {tenant.profession || 'Non renseigné'}
+                                    </div>
                                 </div>
-                            )}
+                                {tenant.employeur && (
+                                    <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                                        <Building2 className="h-4 w-4 text-gray-400" />
+                                        Employeur: {tenant.employeur}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        {/* Action Buttons */}
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => navigate(`/tenants/edit/${id}`)}
+                                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                            >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Modifier
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="inline-flex items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none"
+                            >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Supprimer
+                            </button>
                         </div>
                     </div>
                 </CardContent>
@@ -264,8 +316,8 @@ export default function TenantDetailsPage() {
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`py-4 px-1 border-b-2 font-medium text-sm capitalize ${activeTab === tab
-                                    ? 'border-primary-500 text-primary-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-primary-500 text-primary-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             {tab}
@@ -425,16 +477,16 @@ export default function TenantDetailsPage() {
                                             <p className="font-medium text-gray-900">{incident.titre}</p>
                                             <p className="text-sm text-gray-600">{incident.bail?.bien?.reference}</p>
                                             <span className={`text-xs px-2 py-1 rounded-full ${incident.priorite === 'urgente' ? 'bg-red-100 text-red-800' :
-                                                    incident.priorite === 'haute' ? 'bg-orange-100 text-orange-800' :
-                                                        'bg-gray-100 text-gray-800'
+                                                incident.priorite === 'haute' ? 'bg-orange-100 text-orange-800' :
+                                                    'bg-gray-100 text-gray-800'
                                                 }`}>
                                                 {incident.priorite}
                                             </span>
                                         </div>
                                         <div className="text-right">
                                             <span className={`px-2 py-1 text-xs rounded-full ${incident.statut === 'resolu' ? 'bg-green-100 text-green-800' :
-                                                    incident.statut === 'en_cours' ? 'bg-blue-100 text-blue-800' :
-                                                        'bg-yellow-100 text-yellow-800'
+                                                incident.statut === 'en_cours' ? 'bg-blue-100 text-blue-800' :
+                                                    'bg-yellow-100 text-yellow-800'
                                                 }`}>
                                                 {incident.statut}
                                             </span>

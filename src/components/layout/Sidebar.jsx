@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Building, Home, Users, Settings, LogOut, Wallet, FileText, CreditCard, AlertTriangle, ClipboardCheck, Bell, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Building, Home, Users, Settings, LogOut, Wallet, FileText, CreditCard, AlertTriangle, ClipboardCheck, Bell, DollarSign, MessageSquare, Package } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { cn } from '../../utils/cn';
@@ -36,7 +36,8 @@ export function Sidebar({ isOpen, onClose }) {
     const adminNavigation = [
         { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Gestion Abonnements', href: '/admin/plans', icon: CreditCard },
-        { name: 'Commissions', href: '/admin/commissions', icon: DollarSign },
+        { name: 'Plans personnalisés', href: '/admin/custom-plan-requests', icon: Package, adminOnly: true },
+        { name: 'Messages de contact', href: '/admin/contact-messages', icon: MessageSquare, adminOnly: true },
         { name: 'Notifications', href: '/notifications', icon: Bell },
         { name: 'Paramètres', href: '/settings', icon: Settings },
     ];
@@ -163,15 +164,13 @@ export function Sidebar({ isOpen, onClose }) {
                 <div
                     className={`fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity duration-300 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0'}`}
                     onClick={onClose}
-                />
+                ></div>
 
-                {/* Sidebar Drawer */}
-                <div className={`relative flex-1 flex flex-col max-w-xs w-full bg-white transform transition ease-in-out duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                {/* Sidebar */}
+                <div className={`relative flex-1 flex flex-col max-w-xs w-full bg-white transition-transform duration-300 ease-in-out transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                    {/* Close button */}
+                    <div className="absolute top-0 right-0 -mr-12 pt-2"></div>
                     <SidebarContent />
-                </div>
-
-                <div className="flex-shrink-0 w-14">
-                    {/* Force sidebar to shrink to fit close icon if needed, though usually overlay handles click */}
                 </div>
             </div>
 

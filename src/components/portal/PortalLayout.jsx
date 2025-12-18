@@ -62,9 +62,6 @@ export default function PortalLayout() {
 
                         {/* CTA Buttons */}
                         <div className="hidden md:flex items-center space-x-4">
-                            <Link to="/login" className="text-gray-600 hover:text-primary-600 font-medium text-sm transition-colors">
-                                Se connecter
-                            </Link>
                             <Link
                                 to="/register"
                                 className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all hover:shadow-md hover:-translate-y-0.5"

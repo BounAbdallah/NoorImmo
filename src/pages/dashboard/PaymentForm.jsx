@@ -88,23 +88,23 @@ export default function PaymentForm() {
     };
 
     const handleSubmit = async (e) => {
-        console.log('🔵 handleSubmit called');
+        // console.log('🔵 handleSubmit called');
         e.preventDefault();
-        console.log('🔵 preventDefault executed');
-        console.log('🔵 Form data:', formData);
+        // console.log('🔵 preventDefault executed');
+        // console.log('🔵 Form data:', formData);
         setSubmitting(true);
 
         try {
-            console.log('🔵 Calling paymentService.recordPayment...');
+            // console.log('🔵 Calling paymentService.recordPayment...');
             const response = await paymentService.recordPayment(formData);
-            console.log('🔵 Response:', response);
+            // console.log('🔵 Response:', response);
             if (response.success) {
                 Swal.fire('Succès', 'Paiement enregistré avec succès', 'success');
-                console.log('🔵 Navigating to /payments');
+                // console.log('🔵 Navigating to /payments');
                 navigate('/payments');
             }
         } catch (error) {
-            console.error('🔴 Error:', error);
+            // console.error('🔴 Error:', error);
             Swal.fire('Erreur', error.response?.data?.message || 'Erreur lors de l\'enregistrement.', 'error');
         } finally {
             setSubmitting(false);

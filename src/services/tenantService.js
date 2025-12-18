@@ -15,5 +15,15 @@ export const tenantService = {
     create: async (data) => {
         const response = await api.post('/locataires', data);
         return response.data;
+    },
+
+    update: async (id, data) => {
+        const response = await api.put(`/locataires/${id}`, data);
+        return response.data;
+    },
+
+    delete: async (id) => {
+        const response = await api.delete(`/locataires/${id}`);
+        return response.data;
     }
 };

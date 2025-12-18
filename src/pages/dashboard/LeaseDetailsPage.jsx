@@ -353,11 +353,11 @@ export default function LeaseDetailsPage() {
                                                             const totalDue = unpaidMonths.reduce((sum, m) => sum + parseFloat(m.montant_du || 0), 0);
                                                             const monthsList = unpaidMonths.map(m => format(m.date, 'MMMM yyyy', { locale: fr }));
 
-                                                            console.log('Demeure params:', {
-                                                                montant: totalDue,
-                                                                mois: monthsList,
-                                                                unpaidMonths
-                                                            });
+                                                            // console.log('Demeure params:', {
+                                                            //     montant: totalDue,
+                                                            //     mois: monthsList,
+                                                            //     unpaidMonths
+                                                            // });
 
                                                             leaseService.viewDemandLetter(lease.id, {
                                                                 montant: totalDue,
@@ -373,7 +373,7 @@ export default function LeaseDetailsPage() {
                                                         size="sm"
                                                         className="text-gray-500 hover:text-gray-700"
                                                         onClick={() => {
-                                                            console.log('Debt button clicked - item:', item);
+                                                            // console.log('Debt button clicked - item:', item);
                                                             leaseService.viewDebtForBail(lease.id, {
                                                                 montant: item.montant_du,
                                                                 periode_debut: item.periodStart,

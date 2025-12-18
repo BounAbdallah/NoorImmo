@@ -10,11 +10,14 @@ export default function RegisterPage() {
     const { register } = useAuth();
     const [searchParams] = useSearchParams();
     const planIdParam = searchParams.get('plan');
+    const tokenParam = searchParams.get('token');
 
     // State
     const [plans, setPlans] = useState([]);
-    const [selectedPlanId, setSelectedPlanId] = useState(planIdParam ? parseInt(planIdParam) : null);
-    const [loadingPlans, setLoadingPlans] = useState(true);
+    const [selectedPlanId, setSelectedPlanId] = useState(null);
+    const [plansLoading, setPlansLoading] = useState(true);
+    const [tokenValidated, setTokenValidated] = useState(false);
+    const [privatePlan, setPrivatePlan] = useState(null);
 
     const [formData, setFormData] = useState({
         nom: '',
@@ -36,21 +39,51 @@ export default function RegisterPage() {
     useEffect(() => {
         const fetchPlans = async () => {
             try {
+                // If token is present, validate it for private plan access
+                if (planIdParam && tokenParam) {
+                    try {
+                        const tokenResponse = await planService.validateToken(planIdParam, tokenParam);
+                        if (tokenResponse.success) {
+                            setPrivatePlan(tokenResponse.data);
+                            setSelectedPlanId(parseInt(planIdParam));
+                            setTokenValidated(true);
+                            setPlansLoading(false);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Plan Personnalisé Validé',
+                                text: `Votre plan "${tokenResponse.data.nom}" est prêt! Complétez votre inscription ci - dessous.`,
+                                confirmButtonColor: '#2563eb'
+                            });
+                            return; // Skip fetching public plans
+                        }
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lien Invalide',
+                            text: error.response?.data?.message || 'Ce lien est invalide ou a expiré. Veuillez contacter notre équipe.',
+                            confirmButtonColor: '#dc2626'
+                        });
+                        setPlansLoading(false);
+                        return;
+                    }
+                }
+
+                // Fetch public plans
                 const response = await planService.getAllPlans();
-                if (response.success && Array.isArray(response.data)) {
+                if (response.success) {
                     setPlans(response.data);
-                    if (planIdParam) {
+                    if (planIdParam && !tokenParam) {
                         setSelectedPlanId(parseInt(planIdParam));
                     }
                 }
             } catch (error) {
-                console.error("Failed to load plans", error);
+                console.error('Error fetching plans:', error);
             } finally {
-                setLoadingPlans(false);
+                setPlansLoading(false);
             }
         };
         fetchPlans();
-    }, [planIdParam]);
+    }, [planIdParam, tokenParam]);
 
 
     const handleChange = (e) => {
@@ -196,10 +229,11 @@ export default function RegisterPage() {
                                                 <div
                                                     key={plan.id}
                                                     onClick={() => setSelectedPlanId(plan.id)}
-                                                    className={`cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 relative ${isSelected
-                                                        ? 'bg-primary-50 border-primary-600 shadow-lg shadow-primary-900/10'
-                                                        : 'bg-white border-slate-200 hover:border-slate-300'
-                                                        }`}
+                                                    className={`cursor - pointer rounded - xl p - 4 border - 2 transition - all duration - 200 relative ${
+    isSelected
+        ? 'bg-primary-50 border-primary-600 shadow-lg shadow-primary-900/10'
+        : 'bg-white border-slate-200 hover:border-slate-300'
+} `}
                                                 >
                                                     {isSelected && <div className="absolute top-2 right-2 text-primary-600"><Check className="w-4 h-4" /></div>}
                                                     <div className="font-bold text-slate-900 text-sm mb-1">{plan.nom}</div>
@@ -208,13 +242,30 @@ export default function RegisterPage() {
                                                     </div>
                                                     {/* Compact feature list for sidebar */}
                                                     <div className="text-xs text-slate-500 line-clamp-2">
-                                                        {(plan.fonctionnalites || []).join(', ')}
+                                                        {(() => {
+                                                            try {
+                                                                const features = typeof plan.fonctionnalites === 'string'
+                                                                    ? JSON.parse(plan.fonctionnalites)
+                                                                    : (Array.isArray(plan.fonctionnalites) ? plan.fonctionnalites : []);
+                                                                return features.join(', ');
+                                                            } catch (e) {
+                                                                return '';
+                                                            }
+                                                        })()}
                                                     </div>
                                                 </div>
                                             );
                                         })}
                                     </div>
                                 )}
+                                <div className="mt-4 text-center">
+                                    <Link
+                                        to="/custom-plan-request"
+                                        className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                                    >
+                                        Besoin d'un plan sur mesure ? Demandez un devis →
+                                    </Link>
+                                </div>
                             </div>
 
 

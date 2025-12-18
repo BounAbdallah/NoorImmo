@@ -31,13 +31,21 @@ import IncidentDetails from './pages/dashboard/incidents/IncidentDetails';
 import InventoryList from './pages/dashboard/inventory/InventoryList';
 import InventoryForm from './pages/dashboard/inventory/InventoryForm';
 import AgencySettingsPage from './pages/dashboard/AgencySettingsPage';
+import CommissionsPage from './pages/dashboard/admin/CommissionsPage';
+import CustomPlanRequestsPage from './pages/dashboard/admin/CustomPlanRequestsPage';
+import ContactMessagesPage from './pages/dashboard/admin/ContactMessagesPage';
+import AdminPlansPage from './pages/dashboard/admin/AdminPlansPage';
+import AgencyDetailsAdminPage from './pages/dashboard/admin/AgencyDetailsAdminPage';
+import TestAdminPage from './pages/dashboard/admin/TestAdminPage';
 import LandlordListPage from './pages/dashboard/landlords/LandlordListPage';
 import LandlordDetailsPage from './pages/dashboard/landlords/LandlordDetailsPage';
+import EditLandlord from './pages/dashboard/landlords/EditLandlord';
 import BailleurForm from './pages/dashboard/bailleurs/BailleurForm';
 import BuildingList from './pages/dashboard/immeubles/BuildingList';
 import BuildingForm from './pages/dashboard/immeubles/BuildingForm';
 import BuildingDetails from './pages/dashboard/immeubles/BuildingDetails';
 import CreateTenant from './pages/dashboard/tenants/CreateTenant';
+import EditTenant from './pages/dashboard/tenants/EditTenant';
 import TenantDetailsPage from './pages/dashboard/tenants/TenantDetailsPage';
 import TenantPaymentsPage from './pages/dashboard/tenant/TenantPaymentsPage';
 import TenantLeasePage from './pages/dashboard/tenant/TenantLeasePage';
@@ -47,6 +55,8 @@ import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import PortalLayout from './components/portal/PortalLayout';
 import LandingPage from './pages/portal/LandingPage';
 import PricingPage from './pages/portal/PricingPage';
+import CustomPlanRequestPage from './pages/portal/CustomPlanRequestPage';
+import ContactPage from './pages/portal/ContactPage';
 import NotificationsPage from './pages/dashboard/NotificationsPage';
 import NotificationDetailsPage from './pages/dashboard/NotificationDetailsPage';
 
@@ -56,13 +66,14 @@ function App() {
       <AuthProvider>
         <Routes>
           {/* Portal Routes (Public) */}
-          {/* Landing Page (Standalone Layout) */}
+          {/* Landing Page (Standalone - has its own navbar) */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/features" element={<LandingPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/contact" element={<ContactPage />} />
 
           {/* Portal Routes (Shared Layout for generic pages) */}
           <Route element={<PortalLayout />}>
-            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/custom-plan-request" element={<CustomPlanRequestPage />} />
           </Route>
 
           <Route path="/login" element={<LoginPage />} />
@@ -90,6 +101,7 @@ function App() {
               <Route path="/leases/:id" element={<LeaseDetailsPage />} />
               <Route path="/tenants" element={<TenantsList />} />
               <Route path="/tenants/:id" element={<TenantDetailsPage />} />
+              <Route path="/tenants/edit/:id" element={<EditTenant />} />
 
               <Route path="/payments" element={<PaymentHistory />} />
               <Route path="/payments/new" element={<PaymentForm />} />
@@ -108,6 +120,7 @@ function App() {
               <Route path="/bailleurs" element={<LandlordListPage />} />
               <Route path="/bailleurs/create" element={<BailleurForm />} /> {/* Keep existing form if valid or rename */}
               <Route path="/bailleurs/:id" element={<LandlordDetailsPage />} />
+              <Route path="/bailleurs/edit/:id" element={<EditLandlord />} />
 
               {/* Immeubles */}
               <Route path="/immeubles" element={<BuildingList />} />
@@ -115,7 +128,12 @@ function App() {
               <Route path="/immeubles/:id" element={<BuildingDetails />} />
 
               {/* Admin Routes */}
-              <Route path="/admin/*" element={<DashboardPage />} />
+              <Route path="/admin/test" element={<TestAdminPage />} />
+              <Route path="/admin/plans" element={<AdminPlansPage />} />
+              <Route path="/admin/agencies/:id" element={<AgencyDetailsAdminPage />} />
+              <Route path="/admin/commissions" element={<CommissionsPage />} />
+              <Route path="/admin/custom-plan-requests" element={<CustomPlanRequestsPage />} />
+              <Route path="/admin/contact-messages" element={<ContactMessagesPage />} />
 
               {/* Agency Settings */}
               <Route path="/agency/settings" element={<AgencySettingsPage />} />

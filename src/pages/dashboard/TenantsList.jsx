@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { tenantService } from '../../services/tenantService';
-import { Search, User, Mail, Phone, ExternalLink, Plus } from 'lucide-react';
+import { Search, User, Mail, Phone, ExternalLink, Plus, Edit, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 export default function TenantsList() {
@@ -24,6 +24,42 @@ export default function TenantsList() {
             Swal.fire('Erreur', 'Impossible de charger les locataires', 'error');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (e, id, name) => {
+        e.preventDefault(); // Prevent navigation
+        e.stopPropagation();
+
+        const result = await Swal.fire({
+            title: 'Êtes-vous sûr ?',
+            html: `Voulez-vous vraiment supprimer le locataire <strong>${name}</strong> ?<br/><span class="text-red-600">Cette action est irréversible.</span>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await tenantService.delete(id);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Supprimé !',
+                    text: 'Le locataire a été supprimé avec succès.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                loadTenants(); // Refresh list
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: error.response?.data?.message || 'Impossible de supprimer ce locataire.'
+                });
+            }
         }
     };
 
@@ -94,6 +130,27 @@ export default function TenantsList() {
                                                             {tenant.baux.length} bail{tenant.baux.length > 1 ? 's' : ''} actif{tenant.baux.length > 1 ? 's' : ''}
                                                         </span>
                                                     )}
+                                                    <div className="flex gap-2">
+                                                        {/* TODO: Create edit page for tenants */}
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                window.location.href = `/dashboard/tenants/edit/${tenant.id}`;
+                                                            }}
+                                                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                                                            title="Modifier"
+                                                        >
+                                                            <Edit className="h-4 w-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => handleDelete(e, tenant.id, `${tenant.user?.prenom} ${tenant.user?.nom}`)}
+                                                            className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                                            title="Supprimer"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
                                                     <ExternalLink className="h-4 w-4 text-gray-400" />
                                                 </div>
                                             </div>

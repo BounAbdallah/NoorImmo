@@ -32,7 +32,9 @@ export default function LandingPage() {
                         name: plan.nom,
                         price: parseFloat(plan.prix_mensuel).toLocaleString('fr-FR'),
                         period: '/mois',
-                        features: plan.fonctionnalites || [],
+                        features: typeof plan.fonctionnalites === 'string'
+                            ? JSON.parse(plan.fonctionnalites)
+                            : (Array.isArray(plan.fonctionnalites) ? plan.fonctionnalites : []),
                         cta: index === 0 ? 'Commencer' : 'Essai 14 jours',
                         // Highlight the middle plan (Standard) for better UX flow
                         highlighted: index === 1
@@ -119,6 +121,9 @@ export default function LandingPage() {
                                 {item}
                             </a>
                         ))}
+                        <Link to="/contact" className={`text-sm font-medium hover:text-blue-500 transition-colors ${scrolled ? 'text-slate-600' : 'text-slate-300 hover:text-white'}`}>
+                            Contact
+                        </Link>
                         <div className={`h-4 w-px ${scrolled ? 'bg-slate-300' : 'bg-slate-700'}`}></div>
                         <Link to="/login" className={`text-sm font-semibold ${scrolled ? 'text-slate-900' : 'text-white'} hover:text-blue-500 transition-colors`}>
                             Connexion
@@ -347,8 +352,8 @@ export default function LandingPage() {
                             <div
                                 key={idx}
                                 className={`relative rounded-3xl p-8 transition-all duration-300 ${plan.highlighted
-                                        ? 'bg-slate-900 text-white shadow-2xl scale-105 z-10 ring-1 ring-slate-800'
-                                        : 'bg-white text-slate-900 border border-slate-200 shadow-xl hover:-translate-y-2'
+                                    ? 'bg-slate-900 text-white shadow-2xl scale-105 z-10 ring-1 ring-slate-800'
+                                    : 'bg-white text-slate-900 border border-slate-200 shadow-xl hover:-translate-y-2'
                                     }`}
                             >
                                 {plan.highlighted && (
@@ -379,8 +384,8 @@ export default function LandingPage() {
                                 <Link
                                     to="/register"
                                     className={`block w-full py-4 rounded-xl font-bold text-center transition-all ${plan.highlighted
-                                            ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/50'
-                                            : 'bg-slate-100 hover:bg-slate-200 text-slate-900'
+                                        ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/50'
+                                        : 'bg-slate-100 hover:bg-slate-200 text-slate-900'
                                         }`}
                                 >
                                     {plan.cta}
@@ -400,6 +405,17 @@ export default function LandingPage() {
                                 </div>
                             ))
                         )}
+                    </div>
+
+                    {/* Custom Plan CTA */}
+                    <div className="mt-12 text-center">
+                        <p className="text-slate-600 mb-4">Besoin de plus de flexibilité ?</p>
+                        <Link
+                            to="/custom-plan-request"
+                            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-600 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
+                        >
+                            Créer un plan sur mesure →
+                        </Link>
                     </div>
 
                     <div className="mt-16 text-center">

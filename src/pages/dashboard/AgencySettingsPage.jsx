@@ -111,8 +111,8 @@ export default function AgencySettingsPage() {
 
             // Log more details for debugging
             if (error.response) {
-                console.log('Status:', error.response.status);
-                console.log('Data:', error.response.data);
+                // console.log('Status:', error.response.status);
+                // console.log('Data:', error.response.data);
             }
         } finally {
             setSaving(false);
