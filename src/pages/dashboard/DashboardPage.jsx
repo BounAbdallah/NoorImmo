@@ -22,6 +22,7 @@ import { Bar, Doughnut, Pie } from 'react-chartjs-2';
 import SuperAdminDashboard from './SuperAdminDashboard';
 import AgencyDetailsAdminPage from './admin/AgencyDetailsAdminPage';
 import PlansManagementPage from './admin/PlansManagementPage';
+import PlanDetailsPage from './admin/PlanDetailsPage';
 import CommissionsPage from './admin/CommissionsPage';
 import { useLocation } from 'react-router-dom'; // Import useLocation
 
@@ -49,6 +50,10 @@ export default function DashboardPage() {
     // In a real app setup, these would be defined in App.js routes
     if (user?.user_type === 'admin') {
         if (location.pathname === '/admin/plans') return <PlansManagementPage />;
+
+        const planMatch = location.pathname.match(/^\/admin\/plans\/(\d+)$/);
+        if (planMatch) return <PlanDetailsPage planId={planMatch[1]} />;
+
         if (location.pathname === '/admin/commissions') return <CommissionsPage />;
 
         const agencyMatch = location.pathname.match(/^\/admin\/agencies\/(\d+)$/);

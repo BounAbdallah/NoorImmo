@@ -39,6 +39,9 @@ import BuildingForm from './pages/dashboard/immeubles/BuildingForm';
 import BuildingDetails from './pages/dashboard/immeubles/BuildingDetails';
 import CreateTenant from './pages/dashboard/tenants/CreateTenant';
 import TenantDetailsPage from './pages/dashboard/tenants/TenantDetailsPage';
+import TenantPaymentsPage from './pages/dashboard/tenant/TenantPaymentsPage';
+import TenantLeasePage from './pages/dashboard/tenant/TenantLeasePage';
+import TeamPage from './pages/dashboard/team/TeamPage';
 import DashboardLayout from './components/layout/DashboardLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import PortalLayout from './components/portal/PortalLayout';
@@ -114,8 +117,9 @@ function App() {
               {/* Admin Routes */}
               <Route path="/admin/*" element={<DashboardPage />} />
 
-              {/* Agency Settings - Renamed or protected inside SettingsPage */}
+              {/* Agency Settings */}
               <Route path="/agency/settings" element={<AgencySettingsPage />} />
+              <Route path="/agency/team" element={<TeamPage />} />
 
               {/* Baux */}
               <Route path="/dashboard/tenants/new" element={<CreateTenant />} />
@@ -124,6 +128,10 @@ function App() {
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/notifications/:id" element={<NotificationDetailsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+
+              {/* Tenant Special Routes */}
+              <Route path="/my-payments" element={<TenantPaymentsPage />} />
+              <Route path="/my-lease" element={<TenantLeasePage />} />
             </Route>
           </Route>
 

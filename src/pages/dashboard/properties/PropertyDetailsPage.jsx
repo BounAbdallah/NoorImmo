@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { propertyService } from '../../../services/propertyService';
 import { Button } from '../../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
-import { ArrowLeft, MapPin, Tag, Home, Maximize, Calendar, User, Edit, Trash2, Building } from 'lucide-react';
+import { ArrowLeft, MapPin, Tag, Home, Maximize, Calendar, User, Edit, Trash2, Building, FileText } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 export default function PropertyDetailsPage() {
@@ -156,10 +156,19 @@ export default function PropertyDetailsPage() {
                                                     {new Date(bail.date_debut).toLocaleDateString()} - {new Date(bail.date_fin).toLocaleDateString()}
                                                 </p>
                                             </div>
-                                            <span className={`px-2 py-1 text-xs rounded-full ${bail.statut === 'actif' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                            <span className={`px-2 py-1 text-xs rounded-full mr-3 ${bail.statut === 'actif' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                                                 }`}>
                                                 {bail.statut}
                                             </span>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => navigate(`/leases/${bail.id}`)}
+                                                className="h-8 w-8 p-0"
+                                                title="Voir le contrat"
+                                            >
+                                                <FileText className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     ))}
                                 </div>

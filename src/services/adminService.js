@@ -26,6 +26,11 @@ export const adminService = {
         return response.data;
     },
 
+    getPlanDetails: async (id) => {
+        const response = await api.get(`/admin/plans/${id}`);
+        return response.data;
+    },
+
     savePlan: async (plan) => {
         if (plan.id) {
             const response = await api.put(`/admin/plans/${plan.id}`, plan);

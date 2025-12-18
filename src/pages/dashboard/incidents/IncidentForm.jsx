@@ -149,7 +149,7 @@ export default function IncidentForm() {
                             >
                                 <option value="faible">Faible (Peut attendre)</option>
                                 <option value="moyenne">Moyenne (Gênant)</option>
-                                <option value="elevee">Élevée (Urgent)</option>
+                                <option value="urgente">Élevée (Urgent)</option>
                             </select>
                         </div>
 

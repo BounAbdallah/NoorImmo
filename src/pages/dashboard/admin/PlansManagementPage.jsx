@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { Label } from '../../../components/ui/Label';
-import { Edit, Plus, Check, X, ArrowLeft } from 'lucide-react';
+import { Edit, Plus, Check, X, ArrowLeft, Users } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
@@ -171,9 +171,14 @@ export default function PlansManagementPage() {
                                     <span className="font-semibold">{plan.limite_utilisateurs}</span>
                                 </div>
                             </div>
-                            <Button className="w-full" variant="outline" onClick={() => setEditingPlan(plan)}>
-                                <Edit className="h-4 w-4 mr-2" /> Modifier
-                            </Button>
+                            <div className="grid grid-cols-2 gap-2">
+                                <Button className="w-full" variant="outline" onClick={() => setEditingPlan(plan)}>
+                                    <Edit className="h-4 w-4 mr-2" /> Modifier
+                                </Button>
+                                <Button className="w-full" variant="secondary" onClick={() => navigate(`/admin/plans/${plan.id}`)}>
+                                    <Users className="h-4 w-4 mr-2" /> Abonnés
+                                </Button>
+                            </div>
                         </CardContent>
                     </Card>
                 ))}
