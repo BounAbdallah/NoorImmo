@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import PermissionGuard from '../../components/auth/PermissionGuard';
 import { Link } from 'react-router-dom';
 import { paymentService } from '../../services/paymentService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -195,13 +196,15 @@ export default function PaymentHistory() {
                     <h1 className="text-2xl font-bold text-gray-900">Historique des Paiements</h1>
                     <p className="mt-1 text-sm text-gray-500">Suivi des encaissements de loyers et quittances.</p>
                 </div>
-                <Link
-                    to="/payments/new"
-                    className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
-                >
-                    <Plus className="-ml-1 mr-2 h-5 w-5" />
-                    Enregistrer un paiement
-                </Link>
+                <PermissionGuard permission="paiements.create">
+                    <Link
+                        to="/payments/new"
+                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
+                    >
+                        <Plus className="-ml-1 mr-2 h-5 w-5" />
+                        Enregistrer un paiement
+                    </Link>
+                </PermissionGuard>
             </div>
 
             {/* Statistics Cards */}
@@ -530,12 +533,14 @@ export default function PaymentHistory() {
                                                                 >
                                                                     <Download className="h-4 w-4" />
                                                                 </button>
-                                                                <Link
-                                                                    to={`/payments/new?bail_id=${payment.bail_id}&montant=${reste}&periode_debut=${payment.periode_debut || ''}&periode_fin=${payment.periode_fin || ''}`}
-                                                                    className="px-2 py-1 text-xs font-medium rounded text-white bg-orange-600 hover:bg-orange-700"
-                                                                >
-                                                                    Compléter
-                                                                </Link>
+                                                                <PermissionGuard permission="paiements.create">
+                                                                    <Link
+                                                                        to={`/payments/new?bail_id=${payment.bail_id}&montant=${reste}&periode_debut=${payment.periode_debut || ''}&periode_fin=${payment.periode_fin || ''}`}
+                                                                        className="px-2 py-1 text-xs font-medium rounded text-white bg-orange-600 hover:bg-orange-700"
+                                                                    >
+                                                                        Compléter
+                                                                    </Link>
+                                                                </PermissionGuard>
                                                             </>
                                                         )}
                                                         {!isPartiel && (

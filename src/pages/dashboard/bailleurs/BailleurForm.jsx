@@ -7,10 +7,21 @@ import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { Info } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { useAuth } from '../../../context/AuthContext';
+import { useEffect } from 'react';
 
 export default function BailleurForm() {
     const navigate = useNavigate();
+    const { user, hasPermission } = useAuth();
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (user && !hasPermission('bailleurs', 'create')) {
+            navigate('/bailleurs');
+            Swal.fire('Accès refusé', 'Vous n\'avez pas la permission de créer un bailleur.', 'error');
+        }
+    }, [user, hasPermission, navigate]);
+
     const [formData, setFormData] = useState({
         prenom: '',
         nom: '',

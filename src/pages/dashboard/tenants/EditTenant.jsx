@@ -7,11 +7,21 @@ import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { Info, Loader } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function EditTenant() {
     const navigate = useNavigate();
     const { id } = useParams();
+    const { user, hasPermission } = useAuth();
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (user && !hasPermission('locataires', 'edit')) {
+            navigate('/tenants');
+            Swal.fire('Accès refusé', 'Vous n\'avez pas la permission de modifier un locataire.', 'error');
+        }
+    }, [user, hasPermission, navigate]);
+
     const [fetchingData, setFetchingData] = useState(true);
     const [formData, setFormData] = useState({
         prenom: '',

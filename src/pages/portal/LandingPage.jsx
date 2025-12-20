@@ -40,19 +40,7 @@ const Logo = ({ className = "" }) => (
             <div className="absolute inset-0 bg-blue-600 rounded-xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
 
             {/* Conteneur principal de l'icône */}
-            <div className="relative w-full h-full bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] rounded-xl border border-blue-500/30 flex items-center justify-center shadow-xl overflow-hidden group-hover:border-blue-500/60 transition-colors duration-500">
-
-                {/* Reflet brillant animé */}
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-transparent via-white/10 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out"></div>
-
-                {/* Icône SVG customisée (N stylisé en immeuble) */}
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10 text-white transform group-hover:scale-105 transition-transform duration-300">
-                    <path d="M3 21H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M5 21V7L12 3L19 7V21" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                    <path d="M9 21V11L12 9.5L15 11V21" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                    <path d="M12 14V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-            </div>
+           
 
             {/* Petit badge de notification (optionnel pour le look "app active") */}
             <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-black animate-pulse"></div>
@@ -224,13 +212,14 @@ export default function LandingPage() {
                     <div className="hidden md:flex items-center gap-8 bg-white/5 px-8 py-2.5 rounded-full border border-white/5 backdrop-blur-sm">
                         <a href="#fonctionnalites" className="text-sm font-medium hover:text-white transition-colors">Fonctionnalités</a>
                         <a href="#tarifs" className="text-sm font-medium hover:text-white transition-colors">Tarifs</a>
+                        <Link to="/contact" className="text-sm font-medium hover:text-white transition-colors">Contact</Link>
                         <a href="#temoignages" className="text-sm font-medium hover:text-white transition-colors">Témoignages</a>
                     </div>
 
                     <div className="flex items-center gap-4">
                         <Link to="/login" className="hidden sm:block text-sm font-semibold hover:text-white transition-colors">Connexion</Link>
                         <Link to="/register" className="bg-white text-black px-5 py-2.5 rounded-full text-sm font-bold hover:bg-blue-50 transition-all transform hover:scale-105 shadow-[0_0_15px_rgba(255,255,255,0.15)] flex items-center gap-2">
-                            Essai Gratuit <ArrowUpRight className="w-4 h-4" />
+                            Abonnements <ArrowUpRight className="w-4 h-4" />
                         </Link>
                         <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(true)}>
                             <Menu />
@@ -247,6 +236,7 @@ export default function LandingPage() {
                     </button>
                     <a href="#fonctionnalites" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold">Fonctionnalités</a>
                     <a href="#tarifs" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold">Tarifs</a>
+                    <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold">Contact</Link>
                     <Link to="/login" className="text-xl text-slate-400">Connexion</Link>
                     <Link to="/register" className="bg-blue-600 text-white px-8 py-3 rounded-full text-xl font-bold w-full text-center">S'inscrire</Link>
                 </div>
@@ -283,11 +273,11 @@ export default function LandingPage() {
 
                     <div className={`pt-8 border-t border-white/5 flex items-center gap-8 transition-all duration-1000 ease-out-expo delay-500 ${revealHero.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                         <div>
-                            <div className="text-2xl font-bold text-white">150+</div>
+                            <div className="text-2xl font-bold text-white">03+</div>
                             <div className="text-xs text-slate-500 uppercase tracking-wider font-bold">Agences</div>
                         </div>
                         <div>
-                            <div className="text-2xl font-bold text-white">12k+</div>
+                            <div className="text-2xl font-bold text-white">12+</div>
                             <div className="text-xs text-slate-500 uppercase tracking-wider font-bold">Biens gérés</div>
                         </div>
                         <div>
@@ -894,7 +884,7 @@ export default function LandingPage() {
                             <Link to="/register" className="group relative px-8 py-4 bg-white text-black rounded-2xl font-black text-lg hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                                 <span className="relative flex items-center gap-3">
-                                    Créer un compte gratuit
+                                    Voir l'abonnement
                                     <ArrowUpRight className="w-5 h-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
                                 </span>
                             </Link>
@@ -913,7 +903,7 @@ export default function LandingPage() {
                             <div className="hidden sm:block w-1 h-1 bg-slate-700 rounded-full"></div>
                             <div className="flex items-center gap-2">
                                 <Check className="w-4 h-4 text-blue-500" />
-                                <span>Configuration en 2 min</span>
+                                <span>Configuration en quelques clics</span>
                             </div>
                             <div className="hidden sm:block w-1 h-1 bg-slate-700 rounded-full"></div>
                             <div className="flex items-center gap-2">
@@ -922,7 +912,7 @@ export default function LandingPage() {
                                         <div key={i} className="w-6 h-6 rounded-full bg-slate-700 border border-[#0a0a0a]"></div>
                                     ))}
                                 </div>
-                                <span>Rejoint par 150+ agences</span>
+                                <span>Rejoignez-nous</span>
                             </div>
                         </div>
                     </div>

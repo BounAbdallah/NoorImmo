@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { tenantService } from '../../services/tenantService';
 import { Search, User, Mail, Phone, ExternalLink, Plus, Edit, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import PermissionGuard from '../../components/auth/PermissionGuard';
 
 export default function TenantsList() {
     const [tenants, setTenants] = useState([]);
@@ -83,13 +84,15 @@ export default function TenantsList() {
                             <Search className="h-4 w-4 text-gray-400" />
                         </div>
                     </div>
-                    <Link
-                        to="/dashboard/tenants/new"
-                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
-                    >
-                        <Plus className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-                        Nouveau Locataire
-                    </Link>
+                    <PermissionGuard module="locataires" action="create">
+                        <Link
+                            to="/dashboard/tenants/new"
+                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
+                        >
+                            <Plus className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+                            Nouveau Locataire
+                        </Link>
+                    </PermissionGuard>
                 </div>
             </div>
 
@@ -131,25 +134,28 @@ export default function TenantsList() {
                                                         </span>
                                                     )}
                                                     <div className="flex gap-2">
-                                                        {/* TODO: Create edit page for tenants */}
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                e.stopPropagation();
-                                                                window.location.href = `/dashboard/tenants/edit/${tenant.id}`;
-                                                            }}
-                                                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                                                            title="Modifier"
-                                                        >
-                                                            <Edit className="h-4 w-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => handleDelete(e, tenant.id, `${tenant.user?.prenom} ${tenant.user?.nom}`)}
-                                                            className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                                                            title="Supprimer"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </button>
+                                                        <PermissionGuard module="locataires" action="edit">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    window.location.href = `/dashboard/tenants/edit/${tenant.id}`;
+                                                                }}
+                                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                                                                title="Modifier"
+                                                            >
+                                                                <Edit className="h-4 w-4" />
+                                                            </button>
+                                                        </PermissionGuard>
+                                                        <PermissionGuard module="locataires" action="delete">
+                                                            <button
+                                                                onClick={(e) => handleDelete(e, tenant.id, `${tenant.user?.prenom} ${tenant.user?.nom}`)}
+                                                                className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                                                title="Supprimer"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </button>
+                                                        </PermissionGuard>
                                                     </div>
                                                     <ExternalLink className="h-4 w-4 text-gray-400" />
                                                 </div>

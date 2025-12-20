@@ -11,7 +11,7 @@ import Swal from 'sweetalert2';
 
 export default function BuildingForm() {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, hasPermission } = useAuth();
     const [loading, setLoading] = useState(false);
     const [bailleurs, setBailleurs] = useState([]);
     const [formData, setFormData] = useState({
@@ -21,6 +21,13 @@ export default function BuildingForm() {
         description: '',
         bailleur_id: ''
     });
+
+    useEffect(() => {
+        if (user && !hasPermission('immeubles', 'create')) {
+            navigate('/immeubles');
+            Swal.fire('Accès refusé', 'Vous n\'avez pas la permission de créer un immeuble.', 'error');
+        }
+    }, [user, hasPermission, navigate]);
 
     useEffect(() => {
         if (user?.user_type === 'agence' || user?.user_type === 'admin') {

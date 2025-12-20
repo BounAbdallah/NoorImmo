@@ -5,6 +5,7 @@ import { Button } from '../../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { ArrowLeft, MapPin, Tag, Home, Maximize, Calendar, User, Edit, Trash2, Building, FileText } from 'lucide-react';
 import Swal from 'sweetalert2';
+import PermissionGuard from '../../../components/auth/PermissionGuard';
 
 export default function PropertyDetailsPage() {
     const { id } = useParams();
@@ -188,43 +189,48 @@ export default function PropertyDetailsPage() {
                             <CardTitle>Actions</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                            <Button
-                                variant="outline"
-                                className="w-full justify-start"
-                                onClick={() => navigate(`/biens/${property.id}/edit`)}
-                            >
-                                <Edit className="h-4 w-4 mr-2" />
-                                Modifier le bien
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                                onClick={() => {
-                                    Swal.fire({
-                                        title: 'Êtes-vous sûr ?',
-                                        text: "Cette action est irréversible !",
-                                        icon: 'warning',
-                                        showCancelButton: true,
-                                        confirmButtonColor: '#d33',
-                                        cancelButtonColor: '#3085d6',
-                                        confirmButtonText: 'Oui, supprimer',
-                                        cancelButtonText: 'Annuler'
-                                    }).then(async (result) => {
-                                        if (result.isConfirmed) {
-                                            try {
-                                                await propertyService.delete(property.id);
-                                                Swal.fire('Supprimé !', 'Le bien a été supprimé.', 'success');
-                                                navigate('/biens');
-                                            } catch (error) {
-                                                Swal.fire('Erreur', 'Une erreur est survenue lors de la suppression.', 'error');
+                            <PermissionGuard module="biens" action="edit">
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-start"
+                                    onClick={() => navigate(`/biens/${property.id}/edit`)}
+                                >
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Modifier le bien
+                                </Button>
+                            </PermissionGuard>
+
+                            <PermissionGuard module="biens" action="delete">
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    onClick={() => {
+                                        Swal.fire({
+                                            title: 'Êtes-vous sûr ?',
+                                            text: "Cette action est irréversible !",
+                                            icon: 'warning',
+                                            showCancelButton: true,
+                                            confirmButtonColor: '#d33',
+                                            cancelButtonColor: '#3085d6',
+                                            confirmButtonText: 'Oui, supprimer',
+                                            cancelButtonText: 'Annuler'
+                                        }).then(async (result) => {
+                                            if (result.isConfirmed) {
+                                                try {
+                                                    await propertyService.delete(property.id);
+                                                    Swal.fire('Supprimé !', 'Le bien a été supprimé.', 'success');
+                                                    navigate('/biens');
+                                                } catch (error) {
+                                                    Swal.fire('Erreur', 'Une erreur est survenue lors de la suppression.', 'error');
+                                                }
                                             }
-                                        }
-                                    });
-                                }}
-                            >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Supprimer
-                            </Button>
+                                        });
+                                    }}
+                                >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Supprimer
+                                </Button>
+                            </PermissionGuard>
                         </CardContent>
                     </Card>
 

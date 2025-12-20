@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PermissionGuard from '../../components/auth/PermissionGuard';
 import { useParams, Link } from 'react-router-dom';
 import { leaseService } from '../../services/leaseService';
 import { paymentService } from '../../services/paymentService'; // Ensure this is imported
@@ -436,13 +437,15 @@ export default function LeaseDetailsPage() {
                                             )}
 
                                             {item.status !== 'paye' && (
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-primary-600 hover:bg-primary-700 text-white"
-                                                    onClick={() => handleOpenPayModal(item)}
-                                                >
-                                                    <CreditCard className="h-4 w-4 mr-1" /> Payer
-                                                </Button>
+                                                <PermissionGuard permission="paiements.create">
+                                                    <Button
+                                                        size="sm"
+                                                        className="bg-primary-600 hover:bg-primary-700 text-white"
+                                                        onClick={() => handleOpenPayModal(item)}
+                                                    >
+                                                        <CreditCard className="h-4 w-4 mr-1" /> Payer
+                                                    </Button>
+                                                </PermissionGuard>
                                             )}
                                         </td>
                                     </tr>

@@ -3,6 +3,7 @@ import { landlordService } from '../../../services/landlordService';
 import { Link } from 'react-router-dom';
 import { Plus, Search, User, Phone, MapPin, Building, Loader, Edit, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import PermissionGuard from '../../../components/auth/PermissionGuard';
 
 export default function LandlordListPage() {
     const [landlords, setLandlords] = useState([]);
@@ -68,13 +69,15 @@ export default function LandlordListPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Mes Bailleurs</h1>
                     <p className="text-gray-500">Gérez vos propriétaires partenaires</p>
                 </div>
-                <Link
-                    to="/bailleurs/create"
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-                >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nouveau Bailleur
-                </Link>
+                <PermissionGuard module="bailleurs" action="create">
+                    <Link
+                        to="/bailleurs/create"
+                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                    >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nouveau Bailleur
+                    </Link>
+                </PermissionGuard>
             </div>
 
             {/* Search */}
@@ -128,24 +131,28 @@ export default function LandlordListPage() {
                                             </div>
                                             {/* Action buttons */}
                                             <div className="flex gap-1">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        window.location.href = `/bailleurs/edit/${landlord.id}`;
-                                                    }}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                                                    title="Modifier"
-                                                >
-                                                    <Edit className="h-4 w-4" />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => handleDelete(e, landlord.id, `${landlord.user?.prenom} ${landlord.user?.nom}`)}
-                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                                                    title="Supprimer"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
+                                                <PermissionGuard module="bailleurs" action="edit">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            window.location.href = `/bailleurs/edit/${landlord.id}`;
+                                                        }}
+                                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                                                        title="Modifier"
+                                                    >
+                                                        <Edit className="h-4 w-4" />
+                                                    </button>
+                                                </PermissionGuard>
+                                                <PermissionGuard module="bailleurs" action="delete">
+                                                    <button
+                                                        onClick={(e) => handleDelete(e, landlord.id, `${landlord.user?.prenom} ${landlord.user?.nom}`)}
+                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                                        title="Supprimer"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </PermissionGuard>
                                             </div>
                                         </div>
                                         <div className="mt-4 border-t border-gray-100 pt-4">

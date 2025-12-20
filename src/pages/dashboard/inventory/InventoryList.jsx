@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PermissionGuard from '../../../components/auth/PermissionGuard';
 import { Link } from 'react-router-dom';
 import { inventoryService } from '../../../services/inventoryService';
 import { Plus, ClipboardCheck, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -34,13 +35,15 @@ export default function InventoryList() {
                     <p className="mt-1 text-sm text-gray-500">Historique des états entrants et sortants.</p>
                 </div>
                 <div className="mt-4 sm:mt-0">
-                    <Link
-                        to="/dashboard/inventory/new"
-                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
-                    >
-                        <Plus className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-                        Nouvel État des lieux
-                    </Link>
+                    <PermissionGuard permission="etats_des_lieux.create">
+                        <Link
+                            to="/dashboard/inventory/new"
+                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
+                        >
+                            <Plus className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+                            Nouvel État des lieux
+                        </Link>
+                    </PermissionGuard>
                 </div>
             </div>
 

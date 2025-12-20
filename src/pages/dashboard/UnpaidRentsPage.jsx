@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PermissionGuard from '../../components/auth/PermissionGuard';
 import { Link } from 'react-router-dom';
 import { paymentService } from '../../services/paymentService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -160,11 +161,18 @@ export default function UnpaidRentsPage() {
                                             >
                                                 <Download className="h-3 w-3" />
                                             </button>
-                                            <Link to={`/payments/new?bail_id=${rent.bail_id}&montant=${rent.dette}&periode_debut=${rent.periode_debut || ''}&periode_fin=${rent.periode_fin || ''}`}>
-                                                <Button size="sm">
-                                                    Enregistrer Paiement
+                                            <Link to={`/leases/${rent.bail_id}`} title="Voir les détails du bail">
+                                                <Button size="sm" variant="outline" className="mr-2">
+                                                    Détails
                                                 </Button>
                                             </Link>
+                                            <PermissionGuard permission="paiements.create">
+                                                <Link to={`/payments/new?bail_id=${rent.bail_id}&montant=${rent.dette}&periode_debut=${rent.periode_debut || ''}&periode_fin=${rent.periode_fin || ''}`}>
+                                                    <Button size="sm">
+                                                        Enregistrer Paiement
+                                                    </Button>
+                                                </Link>
+                                            </PermissionGuard>
                                         </div>
                                     </td>
                                 </tr>

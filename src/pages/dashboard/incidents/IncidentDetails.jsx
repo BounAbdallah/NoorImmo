@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PermissionGuard from '../../../components/auth/PermissionGuard';
 import { useParams, useNavigate } from 'react-router-dom';
 import { incidentService } from '../../../services/incidentService';
 import { Button } from '../../../components/ui/Button';
@@ -105,10 +106,12 @@ export default function IncidentDetails() {
                 </div>
                 <div className="bg-gray-50 px-4 py-4 sm:px-6 flex justify-end">
                     {incident.statut !== 'resolu' && incident.statut !== 'ferme' && (
-                        <Button onClick={handleResolve} isLoading={resolving}>
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Marquer comme résolu
-                        </Button>
+                        <PermissionGuard permission="incidents.edit">
+                            <Button onClick={handleResolve} isLoading={resolving}>
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Marquer comme résolu
+                            </Button>
+                        </PermissionGuard>
                     )}
                 </div>
             </div>

@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { agenceService } from '../../services/agenceService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { Building2, Upload, X, Save } from 'lucide-react';
+import { Building2, Upload, X, Save, Lock } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AgencySettingsPage() {
+    const { hasPermission } = useAuth();
+    const canEdit = hasPermission('agence', 'edit');
+
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [agence, setAgence] = useState(null);
@@ -58,6 +62,7 @@ export default function AgencySettingsPage() {
 
     const handleSaveSettings = async (e) => {
         e.preventDefault();
+        if (!canEdit) return;
         setSaving(true);
         try {
             const response = await agenceService.updateSettings(formData);
@@ -95,6 +100,7 @@ export default function AgencySettingsPage() {
 
     const handleUploadLogo = async () => {
         if (!selectedFile) return;
+        if (!canEdit) return;
 
         setSaving(true);
         try {
@@ -121,6 +127,7 @@ export default function AgencySettingsPage() {
 
     const handleDeleteLogo = async () => {
         if (!confirm('Voulez-vous vraiment supprimer le logo ?')) return;
+        if (!canEdit) return;
 
         setSaving(true);
         try {
@@ -154,6 +161,12 @@ export default function AgencySettingsPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Paramètres de l'Agence</h1>
                     <p className="mt-1 text-sm text-gray-500">Gérez les informations de votre agence</p>
                 </div>
+                {!canEdit && (
+                    <div className="mt-4 sm:mt-0 px-4 py-2 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center text-yellow-800 text-sm">
+                        <Lock className="h-4 w-4 mr-2" />
+                        Lecture seule
+                    </div>
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -174,7 +187,7 @@ export default function AgencySettingsPage() {
                                         alt="Logo"
                                         className="w-full h-40 object-contain bg-gray-50 rounded border"
                                     />
-                                    {agence?.logo && (
+                                    {agence?.logo_url && canEdit && (
                                         <button
                                             onClick={handleDeleteLogo}
                                             className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700"
@@ -186,30 +199,36 @@ export default function AgencySettingsPage() {
                                 </div>
                             )}
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Choisir un nouveau logo
-                                </label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleFileSelect}
-                                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
-                                />
-                                <p className="mt-1 text-xs text-gray-500">
-                                    JPG, PNG ou SVG. Max 2MB.
-                                </p>
-                            </div>
+                            {canEdit ? (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Choisir un nouveau logo
+                                        </label>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleFileSelect}
+                                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                                        />
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            JPG, PNG ou SVG. Max 2MB.
+                                        </p>
+                                    </div>
 
-                            {selectedFile && (
-                                <Button
-                                    onClick={handleUploadLogo}
-                                    disabled={saving}
-                                    className="w-full"
-                                >
-                                    <Upload className="h-4 w-4 mr-2" />
-                                    {saving ? 'Téléchargement...' : 'Télécharger'}
-                                </Button>
+                                    {selectedFile && (
+                                        <Button
+                                            onClick={handleUploadLogo}
+                                            disabled={saving}
+                                            className="w-full"
+                                        >
+                                            <Upload className="h-4 w-4 mr-2" />
+                                            {saving ? 'Téléchargement...' : 'Télécharger'}
+                                        </Button>
+                                    )}
+                                </>
+                            ) : (
+                                <p className="text-sm text-gray-500 italic">Vous n'avez pas la permission de modifier le logo.</p>
                             )}
                         </div>
                     </CardContent>
@@ -236,7 +255,8 @@ export default function AgencySettingsPage() {
                                         value={formData.raison_sociale}
                                         onChange={handleInputChange}
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                        disabled={!canEdit}
+                                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 ${!canEdit && 'bg-gray-100 cursor-not-allowed'}`}
                                     />
                                 </div>
 
@@ -261,7 +281,8 @@ export default function AgencySettingsPage() {
                                         name="ninea"
                                         value={formData.ninea}
                                         onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                        disabled={!canEdit}
+                                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 ${!canEdit && 'bg-gray-100 cursor-not-allowed'}`}
                                     />
                                 </div>
 
@@ -274,7 +295,8 @@ export default function AgencySettingsPage() {
                                         name="rccm"
                                         value={formData.rccm}
                                         onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                        disabled={!canEdit}
+                                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 ${!canEdit && 'bg-gray-100 cursor-not-allowed'}`}
                                     />
                                 </div>
 
@@ -287,7 +309,8 @@ export default function AgencySettingsPage() {
                                         name="telephone"
                                         value={formData.telephone}
                                         onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                        disabled={!canEdit}
+                                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 ${!canEdit && 'bg-gray-100 cursor-not-allowed'}`}
                                     />
                                 </div>
 
@@ -300,21 +323,24 @@ export default function AgencySettingsPage() {
                                         value={formData.adresse}
                                         onChange={handleInputChange}
                                         rows="3"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                                        disabled={!canEdit}
+                                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 ${!canEdit && 'bg-gray-100 cursor-not-allowed'}`}
                                     ></textarea>
                                 </div>
                             </div>
 
-                            <div className="flex justify-end">
-                                <Button
-                                    type="submit"
-                                    disabled={saving}
-                                    className="flex items-center"
-                                >
-                                    <Save className="h-4 w-4 mr-2" />
-                                    {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
-                                </Button>
-                            </div>
+                            {canEdit && (
+                                <div className="flex justify-end">
+                                    <Button
+                                        type="submit"
+                                        disabled={saving}
+                                        className="flex items-center"
+                                    >
+                                        <Save className="h-4 w-4 mr-2" />
+                                        {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                                    </Button>
+                                </div>
+                            )}
                         </form>
                     </CardContent>
                 </Card>

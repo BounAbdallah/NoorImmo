@@ -4,6 +4,7 @@ import { propertyService } from '../../../services/propertyService';
 import { Button } from '../../../components/ui/Button';
 import { Card, CardContent } from '../../../components/ui/Card';
 import { Home, MapPin, Tag, Plus, Search, Building, DollarSign, CheckCircle, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import PermissionGuard from '../../../components/auth/PermissionGuard';
 
 export default function PropertyListPage() {
     const navigate = useNavigate();
@@ -153,10 +154,12 @@ export default function PropertyListPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Mes Biens Immobiliers</h1>
                     <p className="text-gray-500">Gérez votre parc locatif</p>
                 </div>
-                <Button onClick={() => navigate('/biens/create')}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Ajouter un bien
-                </Button>
+                <PermissionGuard module="biens" action="create">
+                    <Button onClick={() => navigate('/biens/create')}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Ajouter un bien
+                    </Button>
+                </PermissionGuard>
             </div>
 
             {/* Statistics Cards */}
@@ -331,8 +334,8 @@ export default function PropertyListPage() {
                                             key={pageNum}
                                             onClick={() => setCurrentPage(pageNum)}
                                             className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${currentPage === pageNum
-                                                    ? 'bg-primary-600 text-white'
-                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                ? 'bg-primary-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                         >
                                             {pageNum}

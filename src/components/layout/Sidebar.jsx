@@ -19,7 +19,7 @@ export function Sidebar({ isOpen, onClose }) {
         { name: 'Paiements', href: '/payments', icon: CreditCard, roles: ['agence', 'bailleur', 'admin'], module: 'paiements' },
         { name: 'Dettes Locataires', href: '/payments/unpaid', icon: AlertTriangle, roles: ['agence', 'bailleur', 'admin'], module: 'paiements' },
         { name: 'Incidents', href: '/incidents', icon: AlertTriangle, roles: ['agence', 'bailleur', 'locataire', 'admin'], module: 'incidents' },
-        { name: 'États des Lieux', href: '/dashboard/inventory', icon: ClipboardCheck, roles: ['agence', 'bailleur', 'admin'], module: 'etats_lieux' },
+        { name: 'États des Lieux', href: '/dashboard/inventory', icon: ClipboardCheck, roles: ['agence', 'admin'], module: 'etats_lieux' },
         { name: 'Locataires', href: '/tenants', icon: Users, roles: ['agence', 'bailleur', 'admin'], module: 'locataires' },
 
         // Tenant specific
@@ -94,11 +94,22 @@ export function Sidebar({ isOpen, onClose }) {
 
     const SidebarContent = () => (
         <div className="flex-1 flex flex-col min-h-0 bg-white border-r border-gray-200 h-full">
-            <div className="flex items-center justify-center h-28 border-b border-gray-200">
-                <img src="/logo.png" alt="Noor Immo" className="h-16 w-auto object-contain" />
+            <div className="flex flex-col items-center justify-center p-4 border-b border-gray-200 bg-gray-50/50">
+                <img src="/logo.png" alt="Noor Immo" className="h-10 w-auto object-contain mb-2" />
+                {user?.agence && (
+                    <div className="text-center w-full">
+                        {user.agence.logo_url && (
+                            <img src={user.agence.logo_url} alt={user.agence.raison_sociale} className="h-12 w-12 object-cover rounded-full mx-auto mb-2 border border-gray-200" />
+                        )}
+                        <h2 className="text-sm font-bold text-gray-900 truncate px-2">{user.agence.raison_sociale}</h2>
+                        <span className="text-xs text-black-500 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full inline-block mt-1">
+                            {user.user_type === 'agence' && !user.permissions ? 'Propriétaire' : 'Membre Équipe'}
+                        </span>
+                    </div>
+                )}
             </div>
-            <div className="flex-1 flex flex-col overflow-y-auto pt-5 pb-4">
-                <nav className="mt-5 flex-1 px-2 space-y-1">
+            <div className="flex-1 flex flex-col overflow-y-auto pt-2 pb-4">
+                <nav className="mt-2 flex-1 px-2 space-y-1">
                     {navigation.map((item) => {
                         const count = getBadgeCount(item.name);
                         return (

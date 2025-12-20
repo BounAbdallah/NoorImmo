@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tenantService } from '../../../services/tenantService';
+import { useAuth } from '../../../context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../../components/ui/Card';
 import { Label } from '../../../components/ui/Label';
 import { Input } from '../../../components/ui/Input';
@@ -10,7 +11,16 @@ import Swal from 'sweetalert2';
 
 export default function CreateTenant() {
     const navigate = useNavigate();
+    const { user, hasPermission } = useAuth();
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (user && !hasPermission('locataires', 'create')) {
+            navigate('/tenants');
+            Swal.fire('Accès refusé', 'Vous n\'avez pas la permission de créer un locataire.', 'error');
+        }
+    }, [user, hasPermission, navigate]);
+
     const [formData, setFormData] = useState({
         prenom: '',
         nom: '',

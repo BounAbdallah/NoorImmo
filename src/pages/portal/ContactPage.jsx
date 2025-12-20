@@ -1,8 +1,31 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, Building, User, MessageSquare, Loader } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, MessageSquare, Loader, ArrowLeft } from 'lucide-react';
 import { contactService } from '../../services/contactService';
 import Swal from 'sweetalert2';
 import { useNavigate, Link } from 'react-router-dom';
+
+// Logo component (reused for consistency)
+const Logo = () => (
+    <div className="flex items-center gap-3 select-none">
+        <div className="relative w-10 h-10 flex items-center justify-center">
+            <div className="absolute inset-0 bg-blue-600 rounded-xl blur-lg opacity-40"></div>
+            {/* <div className="relative w-full h-full bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] rounded-xl border border-blue-500/30 flex items-center justify-center shadow-xl overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-transparent via-white/10 to-transparent"></div>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10 text-white">
+                    <path d="M3 21H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M5 21V7L12 3L19 7V21" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                    <path d="M9 21V11L12 9.5L15 11V21" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                    <path d="M12 14V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+            </div> */}
+        </div>
+        <div className="flex flex-col justify-center">
+            <span className="text-xl font-black tracking-tighter text-white uppercase leading-none">
+                Noor<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Immo</span>
+            </span>
+        </div>
+    </div>
+);
 
 export default function ContactPage() {
     const navigate = useNavigate();
@@ -36,10 +59,11 @@ export default function ContactPage() {
                     icon: 'success',
                     title: 'Message envoyé !',
                     text: 'Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.',
+                    background: '#1e293b',
+                    color: '#fff',
                     confirmButtonColor: '#2563eb'
                 });
 
-                // Reset form
                 setFormData({
                     nom: '',
                     prenom: '',
@@ -57,6 +81,8 @@ export default function ContactPage() {
                 icon: 'error',
                 title: 'Erreur',
                 text: error.response?.data?.message || 'Une erreur est survenue lors de l\'envoi du message.',
+                background: '#1e293b',
+                color: '#fff',
                 confirmButtonColor: '#dc2626'
             });
         } finally {
@@ -65,308 +91,180 @@ export default function ContactPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200 py-4">
-                <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-                    <Link to="/" className="flex items-center gap-2 group">
-                        <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20 group-hover:scale-105 transition-transform">
-                            <Building className="text-white w-6 h-6" />
-                        </div>
-                        <span className="text-2xl font-bold tracking-tight text-slate-900 transition-colors">
-                            Noor<span className="text-blue-500">Immo</span>.
-                        </span>
-                    </Link>
+        <div className="min-h-screen bg-[#050505] text-slate-200 selection:bg-blue-500 selection:text-white font-sans">
 
-                    {/* Desktop Menu */}
-                    <div className="hidden lg:flex items-center gap-8">
-                        <Link to="/" className="text-sm font-medium text-slate-600 hover:text-blue-500 transition-colors">
-                            Accueil
-                        </Link>
-                        <Link to="/pricing" className="text-sm font-medium text-slate-600 hover:text-blue-500 transition-colors">
-                            Tarifs
-                        </Link>
-                        <Link to="/contact" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
-                            Contact
-                        </Link>
-                        <div className="h-4 w-px bg-slate-300"></div>
-                        <Link to="/login" className="text-sm font-semibold text-slate-900 hover:text-blue-500 transition-colors">
-                            Connexion
-                        </Link>
-                        <Link
-                            to="/register"
-                            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all hover:scale-105"
-                        >
-                            Commencer gratuitement
-                        </Link>
-                    </div>
-                </div>
-            </nav>
-
-            {/* Hero Banner */}
-            <div className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white overflow-hidden mt-20">
-                {/* Decorative elements */}
-                <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]"></div>
-                <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-                <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-                    <div className="text-center">
-                        <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
-                            Parlons de votre projet
-                        </h1>
-                        <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-8">
-                            Notre équipe d'experts est à votre écoute pour transformer vos idées en réalité
-                        </p>
-                        <div className="flex flex-wrap justify-center gap-4 text-sm">
-                            <div className="flex items-center bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                                Réponse sous 24h
-                            </div>
-                            <div className="flex items-center bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                                Support 7j/7
-                            </div>
-                            <div className="flex items-center bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                                Consultation gratuite
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            {/* Background Effects */}
+            <div className="fixed inset-0 pointer-events-none">
+                <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-pulse"></div>
+                <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px]"></div>
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
             </div>
 
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 -mt-12">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Navbar */}
+            <nav className="relative z-50 px-6 py-6 max-w-7xl mx-auto flex justify-between items-center">
+                <Link to="/" className="hover:opacity-80 transition-opacity"><Logo /></Link>
+                <Link to="/" className="hidden md:flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors">
+                    <ArrowLeft className="w-4 h-4" /> Retour à l'accueil
+                </Link>
+            </nav>
+
+            <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
+                <div className="text-center mb-16">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider mb-6">
+                        <MessageSquare className="w-3 h-3" /> Support & Commercial
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
+                        Parlons de votre <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">projet.</span>
+                    </h1>
+                    <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                        Une question sur nos tarifs ? Besoin d'une démo personnalisée ? Notre équipe est basée à Dakar et vous répond sous 24h.
+                    </p>
+                </div>
+
+                <div className="grid lg:grid-cols-3 gap-8">
                     {/* Contact Info */}
                     <div className="lg:col-span-1 space-y-6">
-                        {/* Contact Cards */}
-                        <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                            <div className="flex items-start space-x-4">
-                                <div className="bg-blue-100 p-3 rounded-lg">
-                                    <Mail className="w-6 h-6 text-blue-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                                    <p className="text-gray-600">contact@noor-immo.com</p>
-                                    <p className="text-gray-600">support@noor-immo.com</p>
-                                </div>
+                        {/* Cards */}
+                        <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-blue-500/30 transition-all group">
+                            <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <Mail className="w-6 h-6 text-blue-400" />
                             </div>
+                            <h3 className="text-lg font-bold text-white mb-1">Email</h3>
+                            <p className="text-sm text-slate-400">contact@noorwebservices.com</p>
+                            {/* <p className="text-sm text-slate-400">support@noor-immo.sn</p> */}
                         </div>
 
-                        <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                            <div className="flex items-start space-x-4">
-                                <div className="bg-green-100 p-3 rounded-lg">
-                                    <Phone className="w-6 h-6 text-green-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900 mb-1">Téléphone</h3>
-                                    <p className="text-gray-600">+221 77 123 45 67</p>
-                                    <p className="text-gray-600">+221 33 123 45 67</p>
-                                </div>
+                        <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-green-500/30 transition-all group">
+                            <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <Phone className="w-6 h-6 text-green-400" />
                             </div>
+                            <h3 className="text-lg font-bold text-white mb-1">Téléphone & WhatsApp</h3>
+                            <p className="text-sm text-slate-400">+221 78 186 02 90</p>
+                            <p className="text-sm text-slate-400">Lun-Ven, 9h-18h</p>
                         </div>
 
-                        <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                            <div className="flex items-start space-x-4">
-                                <div className="bg-purple-100 p-3 rounded-lg">
-                                    <MapPin className="w-6 h-6 text-purple-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900 mb-1">Adresse</h3>
-                                    <p className="text-gray-600">
-                                        Dakar, Sénégal<br />
-                                        Plateau, Rue 123
-                                    </p>
-                                </div>
+                        <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-purple-500/30 transition-all group">
+                            <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <MapPin className="w-6 h-6 text-purple-400" />
                             </div>
-                        </div>
-
-                        {/* Hours */}
-                        <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
-                            <h3 className="font-semibold mb-3 flex items-center">
-                                <MessageSquare className="w-5 h-5 mr-2" />
-                                Horaires d'ouverture
-                            </h3>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span>Lundi - Vendredi</span>
-                                    <span className="font-medium">8h - 18h</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Samedi</span>
-                                    <span className="font-medium">9h - 13h</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Dimanche</span>
-                                    <span className="font-medium">Fermé</span>
-                                </div>
-                            </div>
+                            <h3 className="text-lg font-bold text-white mb-1">Bureaux</h3>
+                            <p className="text-sm text-slate-400">Khar Yallah, Front de terres . Villa 75</p>
+                            <p className="text-sm text-slate-400">Dakar, Sénégal</p>
                         </div>
                     </div>
 
                     {/* Contact Form */}
                     <div className="lg:col-span-2">
-                        <div className="bg-white rounded-xl shadow-lg p-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                                Envoyez-nous un message
-                            </h2>
+                        <div className="bg-[#0a0a0a] border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-3xl pointer-events-none"></div>
 
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                {/* Name Fields */}
+                            <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label htmlFor="prenom" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Prénom *
-                                        </label>
-                                        <div className="relative">
-                                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                            <input
-                                                type="text"
-                                                id="prenom"
-                                                name="prenom"
-                                                required
-                                                value={formData.prenom}
-                                                onChange={handleChange}
-                                                className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="Votre prénom"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor="nom" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Nom *
-                                        </label>
-                                        <div className="relative">
-                                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                            <input
-                                                type="text"
-                                                id="nom"
-                                                name="nom"
-                                                required
-                                                value={formData.nom}
-                                                onChange={handleChange}
-                                                className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="Votre nom"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Email & Phone */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Email *
-                                        </label>
-                                        <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                            <input
-                                                type="email"
-                                                id="email"
-                                                name="email"
-                                                required
-                                                value={formData.email}
-                                                onChange={handleChange}
-                                                className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="votre@email.com"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor="telephone" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Téléphone
-                                        </label>
-                                        <div className="relative">
-                                            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                            <input
-                                                type="tel"
-                                                id="telephone"
-                                                name="telephone"
-                                                value={formData.telephone}
-                                                onChange={handleChange}
-                                                className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="+221 77 123 45 67"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Company */}
-                                <div>
-                                    <label htmlFor="entreprise" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Entreprise
-                                    </label>
-                                    <div className="relative">
-                                        <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Prénom</label>
                                         <input
                                             type="text"
-                                            id="entreprise"
-                                            name="entreprise"
-                                            value={formData.entreprise}
+                                            name="prenom"
+                                            required
+                                            value={formData.prenom}
                                             onChange={handleChange}
-                                            className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Nom de votre entreprise"
+                                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                            placeholder="Votre prénom"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Nom</label>
+                                        <input
+                                            type="text"
+                                            name="nom"
+                                            required
+                                            value={formData.nom}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                            placeholder="Votre nom"
                                         />
                                     </div>
                                 </div>
 
-                                {/* Subject */}
-                                <div>
-                                    <label htmlFor="sujet" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Sujet *
-                                    </label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Email</label>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            required
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                            placeholder="nom@entreprise.com"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Téléphone</label>
+                                        <input
+                                            type="tel"
+                                            name="telephone"
+                                            value={formData.telephone}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                            placeholder="+221 77 000 00 00"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Entreprise</label>
                                     <input
                                         type="text"
-                                        id="sujet"
+                                        name="entreprise"
+                                        value={formData.entreprise}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                        placeholder="Nom de votre agence ou société"
+                                    />
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Sujet</label>
+                                    <input
+                                        type="text"
                                         name="sujet"
                                         required
                                         value={formData.sujet}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="Objet de votre message"
+                                        className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                        placeholder="Demande de démo, Support, Partenariat..."
                                     />
                                 </div>
 
-                                {/* Message */}
-                                <div>
-                                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Message *
-                                    </label>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Message</label>
                                     <textarea
-                                        id="message"
                                         name="message"
                                         required
-                                        rows="6"
+                                        rows={5}
                                         value={formData.message}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                        placeholder="Décrivez votre demande en détail..."
-                                        minLength="10"
+                                        className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all resize-none"
+                                        placeholder="Comment pouvons-nous vous aider ?"
+                                        minLength={10}
                                     />
-                                    <p className="mt-2 text-sm text-gray-500">
-                                        Minimum 10 caractères
-                                    </p>
                                 </div>
 
-                                {/* Submit Button */}
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-black uppercase tracking-wider shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 group"
                                 >
                                     {loading ? (
                                         <>
-                                            <Loader className="w-5 h-5 mr-2 animate-spin" />
-                                            Envoi en cours...
+                                            <Loader className="w-5 h-5 animate-spin" />
+                                            <span>Envoi en cours...</span>
                                         </>
                                     ) : (
                                         <>
-                                            <Send className="w-5 h-5 mr-2" />
-                                            Envoyer le message
+                                            <Send className="w-4 h-4" />
+                                            <span>Envoyer le message</span>
                                         </>
                                     )}
                                 </button>

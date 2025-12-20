@@ -1,37 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-// import { useAuth } from '../../context/AuthContext'; // Décommentez si le contexte existe
-import { planService } from '../services/planService';
+import { useAuth } from '../../context/AuthContext';
+import { planService } from '../../services/planService';
 import Swal from 'sweetalert2';
-import { 
-    Building, Mail, Lock, Phone, Check, ArrowRight, Loader, 
-    LayoutDashboard, Briefcase, Sparkles, AlertTriangle, ArrowLeft 
+import {
+    Building, Mail, Lock, Phone, Check, ArrowRight, Loader,
+    LayoutDashboard, Briefcase, Sparkles, AlertTriangle, ArrowLeft
 } from 'lucide-react';
-
-// Mock Auth pour le fonctionnement autonome si le contexte n'existe pas encore
-const useAuthMock = () => ({
-    register: async (data: any) => {
-        return new Promise<{success: boolean}>((resolve) => {
-            setTimeout(() => resolve({ success: true }), 2000);
-        });
-    }
-});
 
 // Composant Logo (Réutilisé pour la cohérence)
 const Logo = () => (
     <div className="flex items-center gap-3 select-none">
-        <div className="relative w-10 h-10 flex items-center justify-center">
-            <div className="absolute inset-0 bg-blue-600 rounded-xl blur-lg opacity-40"></div>
-            <div className="relative w-full h-full bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] rounded-xl border border-blue-500/30 flex items-center justify-center shadow-xl overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-transparent via-white/10 to-transparent"></div>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10 text-white">
-                    <path d="M3 21H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    <path d="M5 21V7L12 3L19 7V21" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
-                    <path d="M9 21V11L12 9.5L15 11V21" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                    <path d="M12 14V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-            </div>
-        </div>
+     
         <div className="flex flex-col justify-center">
             <span className="text-xl font-black tracking-tighter text-white uppercase leading-none">
                 Noor<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Immo</span>
@@ -42,20 +22,19 @@ const Logo = () => (
 
 export default function RegisterPage() {
     const navigate = useNavigate();
-    // Utilisation du Mock. Remplacez par useAuth() si le contexte est prêt.
-    const { register } = useAuthMock(); 
+    const { register } = useAuth();
     const [searchParams] = useSearchParams();
     const planIdParam = searchParams.get('plan');
     const tokenParam = searchParams.get('token');
 
     // State
-    const [plans, setPlans] = useState<any[]>([]);
-    const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
+    const [plans, setPlans] = useState([]);
+    const [selectedPlanId, setSelectedPlanId] = useState(null);
     const [plansLoading, setPlansLoading] = useState(true);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [tokenValidated, setTokenValidated] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [privatePlan, setPrivatePlan] = useState<any>(null);
+    const [privatePlan, setPrivatePlan] = useState(null);
 
     const [formData, setFormData] = useState({
         nom: '',
@@ -83,7 +62,7 @@ export default function RegisterPage() {
                    If not present in current planService, this block might need adjustment.
                    For now, we follow the structure provided.
                 */
-               
+
                 // Fetch public plans
                 const response = await planService.getAllPlans();
                 if (response.success) {
@@ -101,11 +80,11 @@ export default function RegisterPage() {
         fetchPlans();
     }, [planIdParam, tokenParam]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
@@ -133,7 +112,7 @@ export default function RegisterPage() {
                     navigate('/login');
                 });
             }
-        } catch (err: any) {
+        } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || 'Erreur lors de l\'inscription. Vérifiez vos données.');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -144,7 +123,7 @@ export default function RegisterPage() {
 
     return (
         <div className="min-h-screen bg-[#050505] flex font-sans selection:bg-blue-500 selection:text-white text-slate-200">
-            
+
             {/* LEFT PANEL - Visual (Hidden on mobile) */}
             <div className="hidden lg:flex lg:w-5/12 bg-[#0a0a0a] border-r border-white/5 relative overflow-hidden flex-col justify-between p-12">
                 {/* Effects */}
@@ -167,7 +146,7 @@ export default function RegisterPage() {
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">vers le succès.</span>
                     </h2>
                     <p className="text-lg text-slate-400 mb-10 leading-relaxed font-medium">
-                        La solution complète pour digitaliser votre agence immobilière au Sénégal. Rejoignez plus de 150 agences qui nous font confiance.
+                        La solution complète pour digitaliser votre agence immobilière au Sénégal. Rejoignez nous.
                     </p>
 
                     <div className="space-y-4">
@@ -262,17 +241,17 @@ export default function RegisterPage() {
                                                     <div className="text-white font-black text-2xl mb-4 tracking-tight">
                                                         {parseFloat(plan.prix_mensuel).toLocaleString('fr-FR')} <span className="text-xs font-bold text-slate-500">F</span>
                                                     </div>
-                                                    
+
                                                     {/* Feature preview */}
                                                     <div className="mt-auto pt-4 border-t border-white/5">
                                                         <div className="text-[10px] font-medium text-slate-500 leading-relaxed">
-                                                        {(() => {
-                                                            try {
-                                                                const raw = plan.fonctionnalites;
-                                                                const arr = typeof raw === 'string' ? JSON.parse(raw) : raw;
-                                                                return Array.isArray(arr) ? arr.slice(0, 3).join(' • ') + (arr.length > 3 ? '...' : '') : '';
-                                                            } catch (e) { return 'Fonctionnalités standards'; }
-                                                        })()}
+                                                            {(() => {
+                                                                try {
+                                                                    const raw = plan.fonctionnalites;
+                                                                    const arr = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                                                                    return Array.isArray(arr) ? arr.slice(0, 3).join(' • ') + (arr.length > 3 ? '...' : '') : '';
+                                                                } catch (e) { return 'Fonctionnalités standards'; }
+                                                            })()}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -301,24 +280,24 @@ export default function RegisterPage() {
                                     <div className="grid grid-cols-2 gap-5">
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Prénom</label>
-                                            <input 
-                                                id="prenom" 
-                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all" 
-                                                value={formData.prenom} 
-                                                onChange={handleChange} 
-                                                required 
-                                                placeholder="Votre prénom" 
+                                            <input
+                                                id="prenom"
+                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                                value={formData.prenom}
+                                                onChange={handleChange}
+                                                required
+                                                placeholder="Votre prénom"
                                             />
                                         </div>
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Nom</label>
-                                            <input 
-                                                id="nom" 
-                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all" 
-                                                value={formData.nom} 
-                                                onChange={handleChange} 
-                                                required 
-                                                placeholder="Votre nom" 
+                                            <input
+                                                id="nom"
+                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                                value={formData.nom}
+                                                onChange={handleChange}
+                                                required
+                                                placeholder="Votre nom"
                                             />
                                         </div>
                                     </div>
@@ -326,14 +305,14 @@ export default function RegisterPage() {
                                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Email Pro</label>
                                         <div className="relative group">
                                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
-                                            <input 
-                                                type="email" 
-                                                id="email" 
-                                                className="w-full pl-12 pr-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all" 
-                                                value={formData.email} 
-                                                onChange={handleChange} 
-                                                required 
-                                                placeholder="nom@agence.com" 
+                                            <input
+                                                type="email"
+                                                id="email"
+                                                className="w-full pl-12 pr-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                                value={formData.email}
+                                                onChange={handleChange}
+                                                required
+                                                placeholder="nom@agence.com"
                                             />
                                         </div>
                                     </div>
@@ -341,13 +320,13 @@ export default function RegisterPage() {
                                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Téléphone</label>
                                         <div className="relative group">
                                             <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
-                                            <input 
-                                                id="telephone" 
-                                                className="w-full pl-12 pr-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all" 
-                                                value={formData.telephone} 
-                                                onChange={handleChange} 
-                                                required 
-                                                placeholder="77 000 00 00" 
+                                            <input
+                                                id="telephone"
+                                                className="w-full pl-12 pr-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                                value={formData.telephone}
+                                                onChange={handleChange}
+                                                required
+                                                placeholder="77 000 00 00"
                                             />
                                         </div>
                                     </div>
@@ -365,37 +344,37 @@ export default function RegisterPage() {
                                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Raison Sociale</label>
                                         <div className="relative group">
                                             <Building className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
-                                            <input 
-                                                id="raison_sociale" 
-                                                className="w-full pl-12 pr-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all" 
-                                                value={formData.raison_sociale} 
-                                                onChange={handleChange} 
-                                                required 
-                                                placeholder="Nom de votre agence" 
+                                            <input
+                                                id="raison_sociale"
+                                                className="w-full pl-12 pr-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                                value={formData.raison_sociale}
+                                                onChange={handleChange}
+                                                required
+                                                placeholder="Nom de votre agence"
                                             />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-5">
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">NINEA</label>
-                                            <input 
-                                                id="ninea" 
-                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all" 
-                                                value={formData.ninea} 
-                                                onChange={handleChange} 
-                                                required 
-                                                placeholder="Identification" 
+                                            <input
+                                                id="ninea"
+                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                                value={formData.ninea}
+                                                onChange={handleChange}
+                                                required
+                                                placeholder="Identification"
                                             />
                                         </div>
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Adresse</label>
-                                            <input 
-                                                id="adresse" 
-                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all" 
-                                                value={formData.adresse} 
-                                                onChange={handleChange} 
-                                                required 
-                                                placeholder="Siège social" 
+                                            <input
+                                                id="adresse"
+                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                                value={formData.adresse}
+                                                onChange={handleChange}
+                                                required
+                                                placeholder="Siège social"
                                             />
                                         </div>
                                     </div>
@@ -413,15 +392,15 @@ export default function RegisterPage() {
                                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Mot de passe</label>
                                         <div className="relative group">
                                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
-                                            <input 
-                                                type="password" 
-                                                id="password" 
-                                                className="w-full pl-12 pr-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all" 
-                                                value={formData.password} 
-                                                onChange={handleChange} 
-                                                required 
-                                                minLength={8} 
-                                                placeholder="8+ caractères" 
+                                            <input
+                                                type="password"
+                                                id="password"
+                                                className="w-full pl-12 pr-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                                value={formData.password}
+                                                onChange={handleChange}
+                                                required
+                                                minLength={8}
+                                                placeholder="8+ caractères"
                                             />
                                         </div>
                                     </div>
@@ -429,15 +408,15 @@ export default function RegisterPage() {
                                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Confirmation</label>
                                         <div className="relative group">
                                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
-                                            <input 
-                                                type="password" 
-                                                id="password_confirmation" 
-                                                className="w-full pl-12 pr-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all" 
-                                                value={formData.password_confirmation} 
-                                                onChange={handleChange} 
-                                                required 
-                                                minLength={8} 
-                                                placeholder="Répéter" 
+                                            <input
+                                                type="password"
+                                                id="password_confirmation"
+                                                className="w-full pl-12 pr-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                                value={formData.password_confirmation}
+                                                onChange={handleChange}
+                                                required
+                                                minLength={8}
+                                                placeholder="Répéter"
                                             />
                                         </div>
                                     </div>

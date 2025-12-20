@@ -4,6 +4,7 @@ import { structureService } from '../../../services/structureService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Building, MapPin, Layers, ChevronDown, ChevronUp, ArrowRight, Users, Coins, AlertTriangle, Search } from 'lucide-react';
+import PermissionGuard from '../../../components/auth/PermissionGuard';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function BuildingDetails() {
@@ -334,12 +335,14 @@ export default function BuildingDetails() {
                                     )}
 
                                     <div className="mt-4 pt-4 border-t border-gray-200">
-                                        <Link
-                                            to={`/biens/create?immeuble_id=${building.id}&etage_id=${etage.id}`}
-                                            className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-900"
-                                        >
-                                            + Ajouter un bien à cet étage
-                                        </Link>
+                                        <PermissionGuard module="biens" action="create">
+                                            <Link
+                                                to={`/biens/create?immeuble_id=${building.id}&etage_id=${etage.id}`}
+                                                className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-900"
+                                            >
+                                                + Ajouter un bien à cet étage
+                                            </Link>
+                                        </PermissionGuard>
                                     </div>
                                 </div>
                             )}

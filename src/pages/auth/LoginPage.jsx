@@ -1,23 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, Eye, EyeOff, Check, ArrowRight, User, AlertTriangle, ArrowLeft } from 'lucide-react';
-
-// Simulation de useAuth si le fichier n'existe pas encore dans votre structure
-// Vous pouvez décommenter la ligne suivante si vous avez le fichier Context
-// import { useAuth } from '../context/AuthContext';
-
-const useAuthMock = () => {
-    return {
-        login: async (email, password) => {
-            return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    if (email.includes('@') && password.length > 3) resolve(true);
-                    else reject({ response: { data: { message: 'Identifiants invalides.' } } });
-                }, 1500);
-            });
-        }
-    };
-};
+import { useAuth } from '../../context/AuthContext';
 
 // --- COMPOSANTS UI ---
 
@@ -25,7 +9,7 @@ const Logo = ({ className = "" }) => (
     <div className={`flex items-center gap-3 select-none ${className}`}>
         <div className="relative w-10 h-10 flex items-center justify-center">
             <div className="absolute inset-0 bg-blue-600 rounded-xl blur-lg opacity-40"></div>
-            <div className="relative w-full h-full bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] rounded-xl border border-blue-500/30 flex items-center justify-center shadow-xl overflow-hidden">
+            {/* <div className="relative w-full h-full bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] rounded-xl border border-blue-500/30 flex items-center justify-center shadow-xl overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-transparent via-white/10 to-transparent"></div>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10 text-white">
                     <path d="M3 21H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -33,7 +17,7 @@ const Logo = ({ className = "" }) => (
                     <path d="M9 21V11L12 9.5L15 11V21" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
                     <path d="M12 14V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
-            </div>
+            </div> */}
         </div>
         <div className="flex flex-col justify-center">
             <span className="text-xl font-black tracking-tighter text-white uppercase leading-none">
@@ -96,8 +80,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [currentSlide, setCurrentSlide] = useState(0);
 
-    // Utilisation du Mock ou du vrai hook
-    const { login } = useAuthMock();
+    const { login } = useAuth();
     const navigate = useNavigate();
 
     // Carousel auto-rotate

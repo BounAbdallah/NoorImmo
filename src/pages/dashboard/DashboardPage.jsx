@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { Building, Home, FileText, Activity, Users, Wallet, AlertTriangle, TrendingUp, CheckCircle, XCircle, DollarSign } from 'lucide-react';
+import { Building, Home, FileText, Activity, Users, Wallet, AlertTriangle, TrendingUp, CheckCircle, XCircle, DollarSign, Clock } from 'lucide-react';
 import { dashboardService } from '../../services/dashboardService';
 import { projectService } from '../../services/projectService';
 import { Link } from 'react-router-dom';
@@ -207,6 +207,53 @@ export default function DashboardPage() {
                     </>
                 )}
             </div>
+
+            {/* Quick Actions / Shortcuts */}
+            {['agence', 'bailleur'].includes(user?.user_type) && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Link to="/payments/unpaid" className="group">
+                        <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-red-500">
+                            <CardContent className="p-4 flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">Loyers Impayés</p>
+                                    <p className="text-xs text-gray-500 group-hover:text-primary-600">Voir la liste &rarr;</p>
+                                </div>
+                                <div className="p-2 rounded-full bg-red-100 group-hover:bg-red-200">
+                                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+
+                    <Link to="/payments/unpaid?filter=late" className="group">
+                        <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-yellow-500">
+                            <CardContent className="p-4 flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">Paiements en Retard</p>
+                                    <p className="text-xs text-gray-500 group-hover:text-primary-600">Voir la liste &rarr;</p>
+                                </div>
+                                <div className="p-2 rounded-full bg-yellow-100 group-hover:bg-yellow-200">
+                                    <Clock className="h-5 w-5 text-yellow-600" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+
+                    <Link to="/leases?statut=expire" className="group">
+                        <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-gray-500">
+                            <CardContent className="p-4 flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">Contrats Expirés</p>
+                                    <p className="text-xs text-gray-500 group-hover:text-primary-600">Voir la liste &rarr;</p>
+                                </div>
+                                <div className="p-2 rounded-full bg-gray-100 group-hover:bg-gray-200">
+                                    <FileText className="h-5 w-5 text-gray-600" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+                </div>
+            )}
 
             {/* Charts Grid (Agency/Bailleur) */}
             {['agence', 'bailleur'].includes(user?.user_type) && !statsLoading && (

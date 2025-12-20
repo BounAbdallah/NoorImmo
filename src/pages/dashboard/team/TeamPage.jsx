@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../context/AuthContext';
+import PermissionGuard from '../../../components/auth/PermissionGuard';
+import { useNavigate } from 'react-router-dom';
 import { teamService } from '../../../services/teamService';
 import { agenceService } from '../../../services/agenceService';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/Card';
@@ -17,6 +20,25 @@ export default function TeamPage() {
     const [editingMember, setEditingMember] = useState(null);
     const [editPermissions, setEditPermissions] = useState({});
     const [agence, setAgence] = useState(null);
+
+    const { hasPermission } = useAuth();
+    const navigate = useNavigate(); // Assume useNavigate is imported or add it
+
+    useEffect(() => {
+        // if (!hasPermission('team.read')) { ... }
+        // Actually, let's allow read but restrict actions. Or strict check?
+        // Let's assume team page is "team.read" access.
+        if (!hasPermission('team.read')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Accès refusé',
+                text: "Vous n'avez pas la permission de gérer l'équipe.",
+                timer: 3000,
+                showConfirmButton: false
+            });
+            navigate('/dashboard');
+        }
+    }, []);
 
     useEffect(() => {
         fetchData();
@@ -171,66 +193,75 @@ export default function TeamPage() {
             <div className="space-y-6">
                 {/* Invite Form */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Informations du membre</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <form onSubmit={handleInvite} className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                    <PermissionGuard permission="team.create" fallback={
+                        <Card>
+                            <CardContent className="py-8 text-center text-gray-500">
+                                <Shield className="h-12 w-12 mx-auto text-gray-300 mb-2" />
+                                <p>Vous n'avez pas la permission d'inviter des membres.</p>
+                            </CardContent>
+                        </Card>
+                    }>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Informations du membre</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={handleInvite} className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label>Prénom</Label>
+                                            <Input
+                                                type="text"
+                                                value={formData.prenom}
+                                                onChange={(e) => setFormData({ ...formData, prenom: e.target.value })}
+                                                placeholder="Prénom"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Nom</Label>
+                                            <Input
+                                                type="text"
+                                                value={formData.nom}
+                                                onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
+                                                placeholder="Nom"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
                                     <div>
-                                        <Label>Prénom</Label>
+                                        <Label>Adresse Email</Label>
                                         <Input
-                                            type="text"
-                                            value={formData.prenom}
-                                            onChange={(e) => setFormData({ ...formData, prenom: e.target.value })}
-                                            placeholder="Prénom"
+                                            type="email"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            placeholder="collegue@agence.com"
                                             required
                                         />
                                     </div>
-                                    <div>
-                                        <Label>Nom</Label>
-                                        <Input
-                                            type="text"
-                                            value={formData.nom}
-                                            onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
-                                            placeholder="Nom"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <Label>Adresse Email</Label>
-                                    <Input
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        placeholder="collegue@agence.com"
-                                        required
-                                    />
-                                </div>
-                                <Button
-                                    type="submit"
-                                    className="w-full"
-                                    disabled={inviteLoading || count >= limit}
-                                >
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    {inviteLoading ? 'Envoi...' : 'Envoyer l\'invitation'}
-                                </Button>
-                                {count >= limit && (
-                                    <p className="text-xs text-red-500 text-center">
-                                        Limite atteinte. Mettez à jour votre plan pour ajouter plus de membres.
-                                    </p>
-                                )}
-                            </form>
-                        </CardContent>
-                    </Card>
+                                    <Button
+                                        type="submit"
+                                        className="w-full"
+                                        disabled={inviteLoading || count >= limit}
+                                    >
+                                        <Plus className="w-4 h-4 mr-2" />
+                                        {inviteLoading ? 'Envoi...' : 'Envoyer l\'invitation'}
+                                    </Button>
+                                    {count >= limit && (
+                                        <p className="text-xs text-red-500 text-center">
+                                            Limite atteinte. Mettez à jour votre plan pour ajouter plus de membres.
+                                        </p>
+                                    )}
+                                </form>
+                            </CardContent>
+                        </Card>
 
-                    <PermissionsEditor
-                        permissions={formData.permissions}
-                        onChange={(permissions) => setFormData({ ...formData, permissions })}
-                        disabled={inviteLoading}
-                    />
+                        <PermissionsEditor
+                            permissions={formData.permissions}
+                            onChange={(permissions) => setFormData({ ...formData, permissions })}
+                            disabled={inviteLoading}
+                        />
+                    </PermissionGuard>
                 </div>
 
                 {/* Team List */}
@@ -260,22 +291,26 @@ export default function TeamPage() {
                                         <div className="flex gap-2">
                                             {member.id !== agence?.user?.id && (
                                                 <>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => handleEditPermissions(member)}
-                                                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                    >
-                                                        <Edit className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => handleRemove(member.id)}
-                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
+                                                    <PermissionGuard permission="team.edit">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleEditPermissions(member)}
+                                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                        >
+                                                            <Edit className="w-4 h-4" />
+                                                        </Button>
+                                                    </PermissionGuard>
+                                                    <PermissionGuard permission="team.delete">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleRemove(member.id)}
+                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </PermissionGuard>
                                                 </>
                                             )}
                                         </div>

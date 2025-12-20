@@ -12,7 +12,20 @@ import Swal from 'sweetalert2';
 
 export default function LeaseForm() {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, hasPermission } = useAuth();
+
+    useEffect(() => {
+        if (!hasPermission('baux.create')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Accès refusé',
+                text: "Vous n'avez pas la permission de créer un bail.",
+                timer: 3000,
+                showConfirmButton: false
+            });
+            navigate('/leases');
+        }
+    }, [hasPermission, navigate]);
 
     const [properties, setProperties] = useState([]);
     const [tenants, setTenants] = useState([]);

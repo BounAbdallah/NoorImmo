@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { paymentService } from '../../services/paymentService';
 import { leaseService } from '../../services/leaseService';
+import { useAuth } from '../../context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/Card';
 import { Label } from '../../components/ui/Label';
 import { Input } from '../../components/ui/Input';
@@ -9,8 +10,22 @@ import { Button } from '../../components/ui/Button';
 import Swal from 'sweetalert2';
 
 export default function PaymentForm() {
+    const { user, hasPermission } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+
+    useEffect(() => {
+        if (!hasPermission('paiements.create')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Accès refusé',
+                text: "Vous n'avez pas la permission d'enregistrer un paiement.",
+                timer: 3000,
+                showConfirmButton: false
+            });
+            navigate('/payments');
+        }
+    }, [hasPermission, navigate]);
     const searchParams = new URLSearchParams(location.search);
     const prefillBailId = searchParams.get('bail_id');
     const prefillMontant = searchParams.get('montant');

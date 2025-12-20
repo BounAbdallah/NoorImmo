@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 import { inventoryService } from '../../../services/inventoryService';
 import { leaseService } from '../../../services/leaseService';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../../components/ui/Card';
@@ -10,7 +11,21 @@ import { Trash2, PlusCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 export default function InventoryForm() {
+    const { user, hasPermission } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!hasPermission('etats_des_lieux.create')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Accès refusé',
+                text: "Vous n'avez pas la permission de créer un état des lieux.",
+                timer: 3000,
+                showConfirmButton: false
+            });
+            navigate('/dashboard/inventory');
+        }
+    }, [hasPermission, navigate]);
     const [leases, setLeases] = useState([]);
     const [loadingData, setLoadingData] = useState(true);
     const [submitting, setSubmitting] = useState(false);

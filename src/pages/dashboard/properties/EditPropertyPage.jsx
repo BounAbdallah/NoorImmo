@@ -14,9 +14,16 @@ import Swal from 'sweetalert2';
 export default function EditPropertyPage() {
     const navigate = useNavigate();
     const { id } = useParams();
-    const { user } = useAuth();
+    const { user, hasPermission } = useAuth();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (user && !hasPermission('biens', 'edit')) {
+            navigate('/biens');
+            Swal.fire('Accès refusé', 'Vous n\'avez pas la permission de modifier ce bien.', 'error');
+        }
+    }, [user, hasPermission, navigate]);
 
     // Data Sources
     const [bailleurs, setBailleurs] = useState([]);

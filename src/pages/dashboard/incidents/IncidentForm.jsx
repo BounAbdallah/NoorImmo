@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 import { incidentService } from '../../../services/incidentService';
 import { leaseService } from '../../../services/leaseService';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../../components/ui/Card';
@@ -9,7 +10,22 @@ import { Button } from '../../../components/ui/Button';
 import Swal from 'sweetalert2';
 
 export default function IncidentForm() {
+    const { user, hasPermission } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!hasPermission('incidents.create')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Accès refusé',
+                text: "Vous n'avez pas la permission de signaler un incident.",
+                timer: 3000,
+                showConfirmButton: false
+            });
+            navigate('/incidents');
+        }
+    }, [hasPermission, navigate]);
+
     const [leases, setLeases] = useState([]);
     const [loadingData, setLoadingData] = useState(true);
     const [submitting, setSubmitting] = useState(false);

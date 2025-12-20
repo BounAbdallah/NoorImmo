@@ -4,6 +4,7 @@ import { structureService } from '../../../services/structureService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Building, Plus, Search, Home, Users, CreditCard, TrendingUp, ChevronLeft, ChevronRight, MapPin, Layers } from 'lucide-react';
+import PermissionGuard from '../../../components/auth/PermissionGuard';
 import { Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -155,13 +156,15 @@ export default function BuildingList() {
                     <h1 className="text-2xl font-bold text-gray-900">Mes Immeubles</h1>
                     <p className="mt-1 text-sm text-gray-500">Gérez vos immeubles, étages et appartements.</p>
                 </div>
-                <Link
-                    to="/immeubles/new"
-                    className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
-                >
-                    <Plus className="-ml-1 mr-2 h-5 w-5" />
-                    Nouvel Immeuble
-                </Link>
+                <PermissionGuard module="immeubles" action="create">
+                    <Link
+                        to="/immeubles/new"
+                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
+                    >
+                        <Plus className="-ml-1 mr-2 h-5 w-5" />
+                        Nouvel Immeuble
+                    </Link>
+                </PermissionGuard>
             </div>
 
             {/* Statistics Cards */}
@@ -345,13 +348,15 @@ export default function BuildingList() {
                     </p>
                     {!searchTerm && (
                         <div className="mt-6">
-                            <Link
-                                to="/immeubles/new"
-                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
-                            >
-                                <Plus className="-ml-1 mr-2 h-5 w-5" />
-                                Créer un immeuble
-                            </Link>
+                            <PermissionGuard module="immeubles" action="create">
+                                <Link
+                                    to="/immeubles/new"
+                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+                                >
+                                    <Plus className="-ml-1 mr-2 h-5 w-5" />
+                                    Créer un immeuble
+                                </Link>
+                            </PermissionGuard>
                         </div>
                     )}
                 </div>
