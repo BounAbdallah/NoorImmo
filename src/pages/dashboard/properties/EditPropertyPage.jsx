@@ -32,6 +32,7 @@ export default function EditPropertyPage() {
         loyer_mensuel: '',
         nombre_pieces: '',
         surface: '',
+        taux_commission: '',
         bailleur_id: '',
         immeuble_id: '',
         etage_id: ''
@@ -74,6 +75,7 @@ export default function EditPropertyPage() {
                     loyer_mensuel: property.loyer_mensuel,
                     nombre_pieces: property.nombre_pieces,
                     surface: property.surface,
+                    taux_commission: property.taux_commission || '',
                     bailleur_id: property.bailleur_id,
                     immeuble_id: property.immeuble_id || '',
                     etage_id: property.etage_id || ''
@@ -260,6 +262,12 @@ export default function EditPropertyPage() {
                                 <option value="vendu">Vendu</option>
                                 <option value="indisponible">Indisponible</option>
                             </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Taux Commission Agence (%) (Défaut Mandat)</Label>
+                            <Input name="taux_commission" type="number" step="0.01" value={formData.taux_commission} onChange={handleChange} placeholder="Ex: 10" />
+                            <p className="text-xs text-gray-500">Si vide, le taux par défaut de l'agence sera utilisé.</p>
                         </div>
 
                         <div className="space-y-2">

@@ -219,7 +219,7 @@ export default function RegisterPage() {
                                     Choisir une offre
                                 </h3>
 
-                                {loadingPlans ? (
+                                {plansLoading ? (
                                     <div className="flex justify-center p-8"><Loader className="animate-spin text-primary-600" /></div>
                                 ) : (
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -229,11 +229,10 @@ export default function RegisterPage() {
                                                 <div
                                                     key={plan.id}
                                                     onClick={() => setSelectedPlanId(plan.id)}
-                                                    className={`cursor - pointer rounded - xl p - 4 border - 2 transition - all duration - 200 relative ${
-    isSelected
-        ? 'bg-primary-50 border-primary-600 shadow-lg shadow-primary-900/10'
-        : 'bg-white border-slate-200 hover:border-slate-300'
-} `}
+                                                    className={`cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 relative ${isSelected
+                                                        ? 'bg-primary-50 border-primary-600 shadow-lg shadow-primary-900/10'
+                                                        : 'bg-white border-slate-200 hover:border-slate-300'
+                                                        }`}
                                                 >
                                                     {isSelected && <div className="absolute top-2 right-2 text-primary-600"><Check className="w-4 h-4" /></div>}
                                                     <div className="font-bold text-slate-900 text-sm mb-1">{plan.nom}</div>
@@ -244,10 +243,14 @@ export default function RegisterPage() {
                                                     <div className="text-xs text-slate-500 line-clamp-2">
                                                         {(() => {
                                                             try {
-                                                                const features = typeof plan.fonctionnalites === 'string'
-                                                                    ? JSON.parse(plan.fonctionnalites)
-                                                                    : (Array.isArray(plan.fonctionnalites) ? plan.fonctionnalites : []);
-                                                                return features.join(', ');
+                                                                const rawFeatures = plan.fonctionnalites;
+                                                                let featuresArr = [];
+                                                                if (typeof rawFeatures === 'string') {
+                                                                    featuresArr = JSON.parse(rawFeatures);
+                                                                } else if (Array.isArray(rawFeatures)) {
+                                                                    featuresArr = rawFeatures;
+                                                                }
+                                                                return Array.isArray(featuresArr) ? featuresArr.join(', ') : '';
                                                             } catch (e) {
                                                                 return '';
                                                             }

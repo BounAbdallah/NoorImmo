@@ -30,6 +30,7 @@ export default function CreatePropertyPage() {
         loyer_mensuel: '',
         nombre_pieces: '',
         surface: '',
+        taux_commission: '',
         bailleur_id: '',
         immeuble_id: searchParams.get('immeuble_id') || '',
         etage_id: searchParams.get('etage_id') || ''
@@ -123,6 +124,24 @@ export default function CreatePropertyPage() {
         } catch (error) { console.error(error); }
     };
 
+    const handleImmeubleChange = async (e) => {
+        const immeubleId = e.target.value;
+        setFormData(prev => ({ ...prev, immeuble_id: immeubleId, etage_id: '' }));
+
+        if (immeubleId) {
+            try {
+                const response = await structureService.getBuilding(immeubleId);
+                setEtages(response.data.etages || []);
+                // Auto-fill address if switching building
+                setFormData(prev => ({ ...prev, adresse: response.data.adresse }));
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            setEtages([]);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -185,7 +204,7 @@ export default function CreatePropertyPage() {
                                 <select
                                     name="immeuble_id"
                                     value={formData.immeuble_id}
-                                    onChange={handleChange}
+                                    onChange={handleImmeubleChange}
                                     className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:text-gray-500"
                                     disabled={!!searchParams.get('immeuble_id')}
                                 >
@@ -260,6 +279,12 @@ export default function CreatePropertyPage() {
                                 <Label>Surface (m²)</Label>
                                 <Input name="surface" type="number" value={formData.surface} onChange={handleChange} required />
                             </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Taux Commission Agence (%) (Défaut Mandat)</Label>
+                            <Input name="taux_commission" type="number" step="0.01" value={formData.taux_commission} onChange={handleChange} placeholder="Ex: 10" />
+                            <p className="text-xs text-gray-500">Si vide, le taux par défaut de l'agence sera utilisé.</p>
                         </div>
 
                         <div className="space-y-2">

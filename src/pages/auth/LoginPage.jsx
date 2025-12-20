@@ -303,7 +303,7 @@ export default function LoginPage() {
                                 <div className="w-full border-t border-slate-200"></div>
                             </div>
                             <div className="relative flex justify-center text-sm">
-                                <span className="px-4 bg-slate-50 text-slate-500">Nouveau sur Batiyakaar ?</span>
+                                <span className="px-4 bg-slate-50 text-slate-500">Nouveau sur Noor-Immo ?</span>
                             </div>
                         </div>
 
@@ -320,7 +320,7 @@ export default function LoginPage() {
                     </form>
 
                     {/* Demo Credentials (Dev Mode Only) */}
-                
+
                 </div>
             </div>
         </div>

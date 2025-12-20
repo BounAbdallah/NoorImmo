@@ -21,7 +21,21 @@ export default function PricingPage() {
         try {
             const response = await planService.getAllPlans();
             if (response.success) {
-                setPlans(response.data);
+                const formattedPlans = response.data.map(plan => {
+                    let features = [];
+                    try {
+                        const rawFeatures = plan.fonctionnalites;
+                        if (typeof rawFeatures === 'string') {
+                            features = JSON.parse(rawFeatures);
+                        } else if (Array.isArray(rawFeatures)) {
+                            features = rawFeatures;
+                        }
+                    } catch (e) {
+                        console.error("Error parsing features for plan:", plan.nom, e);
+                    }
+                    return { ...plan, fonctionnalites: features };
+                });
+                setPlans(formattedPlans);
             }
         } catch (error) {
             console.error("Error loading plans:", error);
