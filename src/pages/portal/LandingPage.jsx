@@ -40,7 +40,7 @@ const Logo = ({ className = "" }) => (
             <div className="absolute inset-0 bg-blue-600 rounded-xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
 
             {/* Conteneur principal de l'icône */}
-           
+
 
             {/* Petit badge de notification (optionnel pour le look "app active") */}
             <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-black animate-pulse"></div>
@@ -809,6 +809,18 @@ export default function LandingPage() {
                                 </div>
 
                                 <ul className="space-y-4 mb-8 flex-1">
+                                    <li className="flex items-start gap-3 text-sm text-slate-300">
+                                        <div className="mt-0.5 w-4 h-4 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                                            <Check className="w-2.5 h-2.5 text-blue-400" />
+                                        </div>
+                                        {plan.limite_utilisateurs === -1 ? 'Utilisateurs illimités' : `${plan.limite_utilisateurs} utilisateurs`}
+                                    </li>
+                                    <li className="flex items-start gap-3 text-sm text-slate-300">
+                                        <div className="mt-0.5 w-4 h-4 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                                            <Check className="w-2.5 h-2.5 text-blue-400" />
+                                        </div>
+                                        {plan.limite_biens === -1 ? 'Biens illimités' : `${plan.limite_biens} biens`}
+                                    </li>
                                     {plan.featuresList.map((feat, fIdx) => (
                                         <li key={fIdx} className="flex items-start gap-3 text-sm text-slate-300">
                                             <div className="mt-0.5 w-4 h-4 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
