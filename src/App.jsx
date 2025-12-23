@@ -60,6 +60,7 @@ import ContactPage from './pages/portal/ContactPage';
 import NotificationsPage from './pages/dashboard/NotificationsPage';
 import NotificationDetailsPage from './pages/dashboard/NotificationDetailsPage';
 import FeaturesManagementPage from './pages/admin/FeaturesManagementPage';
+import ChatWidget from './components/ai/ChatWidget';
 
 function App() {
   return (
@@ -158,6 +159,9 @@ function App() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+
+        {/* AI Chat Widget - Available on all pages */}
+        <ChatWidget />
       </AuthProvider>
     </Router>
   );

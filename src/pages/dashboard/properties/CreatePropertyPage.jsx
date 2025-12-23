@@ -33,7 +33,21 @@ export default function CreatePropertyPage() {
         taux_commission: '',
         bailleur_id: '',
         immeuble_id: searchParams.get('immeuble_id') || '',
-        etage_id: searchParams.get('etage_id') || ''
+        etage_id: searchParams.get('etage_id') || '',
+        // Detailed specifications
+        nombre_chambres: '',
+        nombre_salons: '',
+        nombre_cuisines: '',
+        nombre_salles_bain: '',
+        nombre_toilettes: '',
+        nombre_balcons: '',
+        nombre_terrasses: '',
+        nombre_parkings: '',
+        // Equipment
+        meuble: false,
+        climatisation: false,
+        jardin: false,
+        piscine: false
     });
 
     // 0. Initial Load from Params (Deep linking from Building Details)
@@ -261,7 +275,9 @@ export default function CreatePropertyPage() {
                                     <option value="appartement">Appartement</option>
                                     <option value="maison">Maison</option>
                                     <option value="studio">Studio</option>
+                                    <option value="villa">Villa</option>
                                     <option value="commerce">Commerce</option>
+                                    <option value="terrain">Terrain</option>
                                 </select>
                             </div>
                             <div className="space-y-2">
@@ -272,14 +288,112 @@ export default function CreatePropertyPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Nombre de pièces</Label>
-                                <Input name="nombre_pieces" type="number" value={formData.nombre_pieces} onChange={handleChange} required />
-                            </div>
-                            <div className="space-y-2">
                                 <Label>Surface (m²)</Label>
                                 <Input name="surface" type="number" value={formData.surface} onChange={handleChange} required />
                             </div>
+                            <div className="space-y-2">
+                                <Label>Nombre de pièces (Total)</Label>
+                                <Input name="nombre_pieces" type="number" value={formData.nombre_pieces} onChange={handleChange} placeholder="Auto-calculé si détails fournis" />
+                            </div>
                         </div>
+
+                        {/* Detailed Composition Section */}
+                        {!['terrain', 'commerce'].includes(formData.type) && (
+                            <div className="space-y-4 bg-blue-50 p-4 rounded-md">
+                                <h3 className="font-semibold text-gray-900">Composition Détaillée</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {formData.type !== 'studio' && (
+                                        <div className="space-y-2">
+                                            <Label>Chambres</Label>
+                                            <Input name="nombre_chambres" type="number" min="0" value={formData.nombre_chambres} onChange={handleChange} />
+                                        </div>
+                                    )}
+                                    {formData.type !== 'studio' && (
+                                        <div className="space-y-2">
+                                            <Label>Salons</Label>
+                                            <Input name="nombre_salons" type="number" min="0" value={formData.nombre_salons} onChange={handleChange} />
+                                        </div>
+                                    )}
+                                    <div className="space-y-2">
+                                        <Label>Cuisines</Label>
+                                        <Input name="nombre_cuisines" type="number" min="0" value={formData.nombre_cuisines} onChange={handleChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Salles de bain</Label>
+                                        <Input name="nombre_salles_bain" type="number" min="0" value={formData.nombre_salles_bain} onChange={handleChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Toilettes</Label>
+                                        <Input name="nombre_toilettes" type="number" min="0" value={formData.nombre_toilettes} onChange={handleChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Balcons</Label>
+                                        <Input name="nombre_balcons" type="number" min="0" value={formData.nombre_balcons} onChange={handleChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Terrasses</Label>
+                                        <Input name="nombre_terrasses" type="number" min="0" value={formData.nombre_terrasses} onChange={handleChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Parkings</Label>
+                                        <Input name="nombre_parkings" type="number" min="0" value={formData.nombre_parkings} onChange={handleChange} />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Equipment Section */}
+                        {!['terrain'].includes(formData.type) && (
+                            <div className="space-y-4 bg-green-50 p-4 rounded-md">
+                                <h3 className="font-semibold text-gray-900">Équipements</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <label className="flex items-center space-x-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            name="meuble"
+                                            checked={formData.meuble}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, meuble: e.target.checked }))}
+                                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                        />
+                                        <span className="text-sm">Meublé</span>
+                                    </label>
+                                    <label className="flex items-center space-x-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            name="climatisation"
+                                            checked={formData.climatisation}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, climatisation: e.target.checked }))}
+                                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                        />
+                                        <span className="text-sm">Climatisation</span>
+                                    </label>
+                                    {['maison', 'villa'].includes(formData.type) && (
+                                        <label className="flex items-center space-x-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                name="jardin"
+                                                checked={formData.jardin}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, jardin: e.target.checked }))}
+                                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                            />
+                                            <span className="text-sm">Jardin</span>
+                                        </label>
+                                    )}
+                                    {['maison', 'villa'].includes(formData.type) && (
+                                        <label className="flex items-center space-x-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                name="piscine"
+                                                checked={formData.piscine}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, piscine: e.target.checked }))}
+                                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                            />
+                                            <span className="text-sm">Piscine</span>
+                                        </label>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="space-y-2">
                             <Label>Taux Commission Agence (%) (Défaut Mandat)</Label>

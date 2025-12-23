@@ -57,16 +57,22 @@ export const AuthProvider = ({ children }) => {
     const hasPermission = (module, action) => {
         if (!user) return false;
 
-        // Admin and Agency Owners (who are not team members) usually have full access
-        // But if we want strict owner vs member distinction check user_type
+        // Super Admin has access to everything
         if (user.user_type === 'admin') return true;
 
-        // If user is an agency owner (type 'agence' and no specific restricted permissions set, OR explicitly check logic)
-        // Usually, owners have all permissions. Team members have a 'permissions' object.
-        // If user.permissions is null/undefined, and they are type 'agence', they are likely the owner.
-        if (user.user_type === 'agence' && !user.permissions) return true;
+        // Agency Owner (not a team member) has access to all features in their subscription plan
+        if (user.user_type === 'agence' && !user.is_team_member) {
+            // Check if the feature is in the agency's subscription plan
+            if (user.plan_features && Array.isArray(user.plan_features)) {
+                return user.plan_features.some(feature =>
+                    feature.module === module && feature.action === action
+                );
+            }
+            // If no plan_features loaded, grant access (fallback for compatibility)
+            return true;
+        }
 
-        // Check granular permissions for team members
+        // Team members have granular permissions
         if (user.permissions && user.permissions[module] && user.permissions[module][action]) {
             return true;
         }

@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { propertyService } from '../../../services/propertyService';
 import { Button } from '../../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
-import { ArrowLeft, MapPin, Tag, Home, Maximize, Calendar, User, Edit, Trash2, Building, FileText } from 'lucide-react';
+import { ArrowLeft, MapPin, Tag, Home, Maximize, Calendar, User, Edit, Trash2, Building, FileText, Bed, Sofa, UtensilsCrossed, Bath, Toilet, Wind, Trees, Waves, Car, Package } from 'lucide-react';
 import Swal from 'sweetalert2';
 import PermissionGuard from '../../../components/auth/PermissionGuard';
 
@@ -139,6 +139,128 @@ export default function PropertyDetailsPage() {
                             </p>
                         </CardContent>
                     </Card>
+
+                    {/* Composition Détaillée */}
+                    {!['terrain', 'commerce'].includes(property.type) && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Composition Détaillée</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {property.nombre_chambres > 0 && (
+                                        <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                                            <Bed className="h-5 w-5 text-blue-600" />
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">{property.nombre_chambres}</p>
+                                                <p className="text-xs text-gray-500">Chambre{property.nombre_chambres > 1 ? 's' : ''}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {property.nombre_salons > 0 && (
+                                        <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
+                                            <Sofa className="h-5 w-5 text-purple-600" />
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">{property.nombre_salons}</p>
+                                                <p className="text-xs text-gray-500">Salon{property.nombre_salons > 1 ? 's' : ''}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {property.nombre_cuisines > 0 && (
+                                        <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                                            <UtensilsCrossed className="h-5 w-5 text-orange-600" />
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">{property.nombre_cuisines}</p>
+                                                <p className="text-xs text-gray-500">Cuisine{property.nombre_cuisines > 1 ? 's' : ''}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {property.nombre_salles_bain > 0 && (
+                                        <div className="flex items-center space-x-3 p-3 bg-cyan-50 rounded-lg">
+                                            <Bath className="h-5 w-5 text-cyan-600" />
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">{property.nombre_salles_bain}</p>
+                                                <p className="text-xs text-gray-500">Salle{property.nombre_salles_bain > 1 ? 's' : ''} de bain</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {property.nombre_toilettes > 0 && (
+                                        <div className="flex items-center space-x-3 p-3 bg-teal-50 rounded-lg">
+                                            <Toilet className="h-5 w-5 text-teal-600" />
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">{property.nombre_toilettes}</p>
+                                                <p className="text-xs text-gray-500">Toilette{property.nombre_toilettes > 1 ? 's' : ''}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {property.nombre_balcons > 0 && (
+                                        <div className="flex items-center space-x-3 p-3 bg-sky-50 rounded-lg">
+                                            <Home className="h-5 w-5 text-sky-600" />
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">{property.nombre_balcons}</p>
+                                                <p className="text-xs text-gray-500">Balcon{property.nombre_balcons > 1 ? 's' : ''}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {property.nombre_terrasses > 0 && (
+                                        <div className="flex items-center space-x-3 p-3 bg-amber-50 rounded-lg">
+                                            <Home className="h-5 w-5 text-amber-600" />
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">{property.nombre_terrasses}</p>
+                                                <p className="text-xs text-gray-500">Terrasse{property.nombre_terrasses > 1 ? 's' : ''}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {property.nombre_parkings > 0 && (
+                                        <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
+                                            <Car className="h-5 w-5 text-slate-600" />
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">{property.nombre_parkings}</p>
+                                                <p className="text-xs text-gray-500">Parking{property.nombre_parkings > 1 ? 's' : ''}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Équipements */}
+                    {!['terrain'].includes(property.type) && (property.meuble || property.climatisation || property.jardin || property.piscine) && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Équipements</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex flex-wrap gap-2">
+                                    {property.meuble && (
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                            <Package className="h-4 w-4 mr-2" />
+                                            Meublé
+                                        </span>
+                                    )}
+                                    {property.climatisation && (
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                            <Wind className="h-4 w-4 mr-2" />
+                                            Climatisation
+                                        </span>
+                                    )}
+                                    {property.jardin && (
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800">
+                                            <Trees className="h-4 w-4 mr-2" />
+                                            Jardin
+                                        </span>
+                                    )}
+                                    {property.piscine && (
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-cyan-100 text-cyan-800">
+                                            <Waves className="h-4 w-4 mr-2" />
+                                            Piscine
+                                        </span>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
 
                     <Card>
                         <CardHeader>
