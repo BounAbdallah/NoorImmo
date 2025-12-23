@@ -59,6 +59,7 @@ import CustomPlanRequestPage from './pages/portal/CustomPlanRequestPage';
 import ContactPage from './pages/portal/ContactPage';
 import NotificationsPage from './pages/dashboard/NotificationsPage';
 import NotificationDetailsPage from './pages/dashboard/NotificationDetailsPage';
+import FeaturesManagementPage from './pages/admin/FeaturesManagementPage';
 
 function App() {
   return (
@@ -130,6 +131,7 @@ function App() {
               {/* Admin Routes */}
               <Route path="/admin/test" element={<TestAdminPage />} />
               <Route path="/admin/plans" element={<AdminPlansPage />} />
+              <Route path="/admin/features" element={<FeaturesManagementPage />} />
               <Route path="/admin/agencies/:id" element={<AgencyDetailsAdminPage />} />
               <Route path="/admin/commissions" element={<CommissionsPage />} />
               <Route path="/admin/custom-plan-requests" element={<CustomPlanRequestsPage />} />

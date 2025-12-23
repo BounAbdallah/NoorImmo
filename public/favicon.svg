@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="buildingGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fb923c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="100" height="100" rx="20" fill="url(#bgGradient)"/>
+  
+  <!-- Main Building -->
+  <path d="M 30 70 L 30 35 L 45 25 L 60 35 L 60 70 Z" fill="url(#buildingGradient)"/>
+  
+  <!-- Building Windows -->
+  <rect x="35" y="40" width="6" height="6" fill="#fff" opacity="0.9"/>
+  <rect x="49" y="40" width="6" height="6" fill="#fff" opacity="0.9"/>
+  <rect x="35" y="50" width="6" height="6" fill="#fff" opacity="0.9"/>
+  <rect x="49" y="50" width="6" height="6" fill="#fff" opacity="0.9"/>
+  <rect x="35" y="60" width="6" height="6" fill="#fff" opacity="0.9"/>
+  <rect x="49" y="60" width="6" height="6" fill="#fff" opacity="0.9"/>
+  
+  <!-- Side Building -->
+  <rect x="60" y="50" width="15" height="20" fill="#fb923c" opacity="0.8"/>
+  <rect x="63" y="55" width="4" height="4" fill="#fff" opacity="0.9"/>
+  <rect x="68" y="55" width="4" height="4" fill="#fff" opacity="0.9"/>
+  <rect x="63" y="62" width="4" height="4" fill="#fff" opacity="0.9"/>
+  <rect x="68" y="62" width="4" height="4" fill="#fff" opacity="0.9"/>
+  
+  <!-- Construction Element (Crane arm) -->
+  <line x1="45" y1="25" x2="45" y2="15" stroke="#fbbf24" stroke-width="2"/>
+  <line x1="45" y1="15" x2="65" y2="15" stroke="#fbbf24" stroke-width="2"/>
+  <line x1="65" y1="15" x2="65" y2="20" stroke="#fbbf24" stroke-width="1.5"/>
+  
+  <!-- Ground Line -->
+  <rect x="25" y="70" width="50" height="3" fill="#1e293b" opacity="0.3"/>
+</svg>

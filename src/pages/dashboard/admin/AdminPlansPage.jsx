@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { planService } from '../../../services/planService';
-import { Plus, Edit, Trash2, Check, X, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Check, X, Eye, Settings } from 'lucide-react';
 import Swal from 'sweetalert2';
 import PlanFormModal from '../../../components/admin/PlanFormModal';
 import PlanSubscribersModal from '../../../components/admin/PlanSubscribersModal';
+import PlanFeaturesEditor from '../../../components/admin/PlanFeaturesEditor';
 
 export default function AdminPlansPage() {
     const [plans, setPlans] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [showSubscribersModal, setShowSubscribersModal] = useState(false);
+    const [showFeaturesModal, setShowFeaturesModal] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState(null);
 
     useEffect(() => {
@@ -49,6 +51,11 @@ export default function AdminPlansPage() {
     const handleViewSubscribers = (plan) => {
         setSelectedPlan(plan);
         setShowSubscribersModal(true);
+    };
+
+    const handleManageFeatures = (plan) => {
+        setSelectedPlan(plan);
+        setShowFeaturesModal(true);
     };
 
     const handleDelete = async (plan) => {
@@ -225,6 +232,13 @@ export default function AdminPlansPage() {
                                                 <Eye className="w-4 h-4" />
                                             </button>
                                             <button
+                                                onClick={() => handleManageFeatures(plan)}
+                                                className="text-purple-600 hover:text-purple-900 mr-4"
+                                                title="Gérer les fonctionnalités"
+                                            >
+                                                <Settings className="w-4 h-4" />
+                                            </button>
+                                            <button
                                                 onClick={() => handleEdit(plan)}
                                                 className="text-blue-600 hover:text-blue-900 mr-4"
                                                 title="Modifier"
@@ -261,6 +275,15 @@ export default function AdminPlansPage() {
                 onClose={() => setShowSubscribersModal(false)}
                 planId={selectedPlan?.id}
             />
+
+            {/* Plan Features Editor Modal */}
+            {showFeaturesModal && selectedPlan && (
+                <PlanFeaturesEditor
+                    plan={selectedPlan}
+                    onClose={() => setShowFeaturesModal(false)}
+                    onSave={fetchPlans}
+                />
+            )}
         </div>
     );
 }

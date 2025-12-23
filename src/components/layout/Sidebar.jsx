@@ -3,24 +3,26 @@ import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Building, Home, Users, Settings, LogOut, Wallet, FileText, CreditCard, AlertTriangle, ClipboardCheck, Bell, DollarSign, MessageSquare, Package } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useFeatures } from '../../hooks/useFeatures';
 import { cn } from '../../utils/cn';
 
 export function Sidebar({ isOpen, onClose }) {
     const { logout, user } = useAuth();
     const { canView } = usePermissions();
+    const { hasFeature, canAccess } = useFeatures();
 
     const allNavigation = [
         { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Mes Projets', href: '/projects', icon: Building, roles: ['bailleur', 'entrepreneur', 'admin'] },
-        { name: 'Mes Bailleurs', href: '/bailleurs', icon: Users, roles: ['agence', 'admin'], module: 'bailleurs' },
-        { name: 'Mes Immeubles', href: '/immeubles', icon: Building, roles: ['agence', 'bailleur', 'admin'], module: 'immeubles' },
-        { name: 'Mes Biens', href: '/biens', icon: Home, roles: ['agence', 'bailleur', 'admin'], module: 'biens' },
-        { name: 'Baux', href: '/leases', icon: FileText, roles: ['agence', 'bailleur', 'admin'], module: 'baux' },
-        { name: 'Paiements', href: '/payments', icon: CreditCard, roles: ['agence', 'bailleur', 'admin'], module: 'paiements' },
-        { name: 'Dettes Locataires', href: '/payments/unpaid', icon: AlertTriangle, roles: ['agence', 'bailleur', 'admin'], module: 'paiements' },
-        { name: 'Incidents', href: '/incidents', icon: AlertTriangle, roles: ['agence', 'bailleur', 'locataire', 'admin'], module: 'incidents' },
-        { name: 'États des Lieux', href: '/dashboard/inventory', icon: ClipboardCheck, roles: ['agence', 'admin'], module: 'etats_lieux' },
-        { name: 'Locataires', href: '/tenants', icon: Users, roles: ['agence', 'bailleur', 'admin'], module: 'locataires' },
+        { name: 'Mes Bailleurs', href: '/bailleurs', icon: Users, roles: ['agence', 'admin'], module: 'bailleurs', feature: 'gestion_bailleurs' },
+        { name: 'Mes Immeubles', href: '/immeubles', icon: Building, roles: ['agence', 'bailleur', 'admin'], module: 'immeubles', feature: 'gestion_immeubles' },
+        { name: 'Mes Biens', href: '/biens', icon: Home, roles: ['agence', 'bailleur', 'admin'], module: 'biens', feature: 'gestion_biens' },
+        { name: 'Baux', href: '/leases', icon: FileText, roles: ['agence', 'bailleur', 'admin'], module: 'baux', feature: 'gestion_baux' },
+        { name: 'Paiements', href: '/payments', icon: CreditCard, roles: ['agence', 'bailleur', 'admin'], module: 'paiements', feature: 'paiements_loyers' },
+        { name: 'Dettes Locataires', href: '/payments/unpaid', icon: AlertTriangle, roles: ['agence', 'bailleur', 'admin'], module: 'paiements', feature: 'paiements_loyers' },
+        { name: 'Incidents', href: '/incidents', icon: AlertTriangle, roles: ['agence', 'bailleur', 'locataire', 'admin'], module: 'incidents', feature: 'gestion_incidents' },
+        { name: 'États des Lieux', href: '/dashboard/inventory', icon: ClipboardCheck, roles: ['agence', 'admin'], module: 'etats_lieux', feature: 'etats_lieux' },
+        { name: 'Locataires', href: '/tenants', icon: Users, roles: ['agence', 'bailleur', 'admin'], module: 'locataires', feature: 'gestion_locataires' },
 
         // Tenant specific
         { name: 'Mes Paiements', href: '/my-payments', icon: CreditCard, roles: ['locataire'] },
@@ -29,13 +31,14 @@ export function Sidebar({ isOpen, onClose }) {
         { name: 'Notifications', href: '/notifications', icon: Bell },
         // { name: 'Portefeuille', href: '/wallet', icon: Wallet }, // Removed as requested
         { name: 'Paramètres Agence', href: '/agency/settings', icon: Settings, roles: ['agence'] },
-        { name: 'Gestion d\'équipe', href: '/agency/team', icon: Users, roles: ['agence'], module: 'equipe' },
+        { name: 'Gestion d\'équipe', href: '/agency/team', icon: Users, roles: ['agence'], module: 'equipe', feature: 'gestion_equipe' },
         { name: 'Paramètres', href: '/settings', icon: Settings },
     ];
 
     const adminNavigation = [
         { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Gestion Abonnements', href: '/admin/plans', icon: CreditCard },
+        { name: 'Gestion Fonctionnalités', href: '/admin/features', icon: Settings },
         { name: 'Plans personnalisés', href: '/admin/custom-plan-requests', icon: Package, adminOnly: true },
         { name: 'Messages de contact', href: '/admin/contact-messages', icon: MessageSquare, adminOnly: true },
         { name: 'Notifications', href: '/notifications', icon: Bell },
@@ -52,8 +55,19 @@ export function Sidebar({ isOpen, onClose }) {
                 return false;
             }
 
+            // Check feature-based access (for agency users)
+            if (item.feature && user && user.user_type === 'agence') {
+                if (!hasFeature(item.feature)) {
+                    return false;
+                }
+            }
+
             // Check permission-based access for team members
             if (item.module && user && user.agence_id) {
+                // Team members also need feature access
+                if (item.feature && !hasFeature(item.feature)) {
+                    return false;
+                }
                 return canView(item.module);
             }
 

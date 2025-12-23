@@ -67,14 +67,14 @@ export default function InventoryList() {
                             {reports.map((report) => (
                                 <tr key={report.id}>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${report.type === 'entrant' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${report.type === 'entree' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
                                             }`}>
-                                            {report.type === 'entrant' ? <ArrowRight className="mr-1 h-3 w-3" /> : <ArrowLeft className="mr-1 h-3 w-3" />}
-                                            {report.type.charAt(0).toUpperCase() + report.type.slice(1)}
+                                            {report.type === 'entree' ? <ArrowRight className="mr-1 h-3 w-3" /> : <ArrowLeft className="mr-1 h-3 w-3" />}
+                                            {report.type === 'entree' ? 'Entrée' : 'Sortie'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {format(new Date(report.date_etat_des_lieux), 'dd MMMM yyyy', { locale: fr })}
+                                        {format(new Date(report.date_etat), 'dd MMMM yyyy', { locale: fr })}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {report.bail?.bien?.nom}
