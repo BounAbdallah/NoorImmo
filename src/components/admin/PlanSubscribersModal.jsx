@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, Users, Mail, Phone, MapPin, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { X, Users, Mail, Phone, MapPin, Calendar, CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
 import { planService } from '../../services/planService';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import AgencyProfileModal from './AgencyProfileModal';
 
 export default function PlanSubscribersModal({ isOpen, onClose, planId }) {
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
+    const [selectedAgency, setSelectedAgency] = useState(null);
+    const [showProfileModal, setShowProfileModal] = useState(false);
 
     useEffect(() => {
         if (isOpen && planId) {
@@ -26,6 +29,17 @@ export default function PlanSubscribersModal({ isOpen, onClose, planId }) {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleViewAgency = (agency) => {
+        setSelectedAgency(agency);
+        setShowProfileModal(true);
+    };
+
+    const handleAgencyUpdate = (updatedAgency) => {
+        // Refresh the subscribers list
+        fetchSubscribers();
+        setShowProfileModal(false);
     };
 
     const getStatusBadge = (statut) => {
@@ -94,16 +108,16 @@ export default function PlanSubscribersModal({ isOpen, onClose, planId }) {
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                                                {agency.email && (
+                                                {agency.user?.email && (
                                                     <div className="flex items-center gap-2 text-sm text-gray-600">
                                                         <Mail className="w-4 h-4" />
-                                                        <span>{agency.email}</span>
+                                                        <span>{agency.user.email}</span>
                                                     </div>
                                                 )}
-                                                {agency.telephone && (
+                                                {agency.user?.telephone && (
                                                     <div className="flex items-center gap-2 text-sm text-gray-600">
                                                         <Phone className="w-4 h-4" />
-                                                        <span>{agency.telephone}</span>
+                                                        <span>{agency.user.telephone}</span>
                                                     </div>
                                                 )}
                                                 {agency.adresse && (
@@ -123,6 +137,17 @@ export default function PlanSubscribersModal({ isOpen, onClose, planId }) {
                                                 )}
                                             </div>
                                         </div>
+
+                                        {/* View Details Button */}
+                                        <div className="mt-3">
+                                            <button
+                                                onClick={() => handleViewAgency(agency)}
+                                                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                                Voir Détails
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -140,6 +165,15 @@ export default function PlanSubscribersModal({ isOpen, onClose, planId }) {
                     </div>
                 </div>
             </div>
+
+            {/* Agency Profile Modal */}
+            {showProfileModal && selectedAgency && (
+                <AgencyProfileModal
+                    agency={selectedAgency}
+                    onClose={() => setShowProfileModal(false)}
+                    onUpdate={handleAgencyUpdate}
+                />
+            )}
         </div>
     );
 }

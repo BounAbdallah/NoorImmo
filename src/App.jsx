@@ -49,6 +49,8 @@ import EditTenant from './pages/dashboard/tenants/EditTenant';
 import TenantDetailsPage from './pages/dashboard/tenants/TenantDetailsPage';
 import TenantPaymentsPage from './pages/dashboard/tenant/TenantPaymentsPage';
 import TenantLeasePage from './pages/dashboard/tenant/TenantLeasePage';
+import TenantIncidentsPage from './pages/dashboard/tenant/TenantIncidentsPage';
+import TenantReceiptsPage from './pages/dashboard/tenant/TenantReceiptsPage';
 import TeamPage from './pages/dashboard/team/TeamPage';
 import DashboardLayout from './components/layout/DashboardLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
@@ -153,6 +155,8 @@ function App() {
               {/* Tenant Special Routes */}
               <Route path="/my-payments" element={<TenantPaymentsPage />} />
               <Route path="/my-lease" element={<TenantLeasePage />} />
+              <Route path="/my-incidents" element={<TenantIncidentsPage />} />
+              <Route path="/my-receipts" element={<TenantReceiptsPage />} />
             </Route>
           </Route>
 

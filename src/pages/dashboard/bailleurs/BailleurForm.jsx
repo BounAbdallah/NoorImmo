@@ -80,36 +80,15 @@ export default function BailleurForm() {
 
             const response = await bailleurService.create(data);
             if (response.success) {
-                if (response.email_sent) {
-                    // Email was sent - plan allows landlord access
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Bailleur créé !',
-                        html: `Le compte a été créé avec succès.<br/>Un email avec les identifiants de connexion a été envoyé à <strong>${formData.email}</strong>`,
-                        confirmButtonText: 'OK'
-                    });
-                } else {
-                    // Email not sent - plan doesn't allow landlord access
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Bailleur créé !',
-                        html: `
-                            <p>Le compte bailleur a été créé avec succès dans votre système.</p>
-                            <br/>
-                            <div style="background-color: #fef3c7; padding: 12px; border-radius: 6px; border-left: 4px solid #f59e0b;">
-                                <p style="margin: 0; font-weight: bold; color: #92400e;">⚠️ Aucun email envoyé</p>
-                                <p style="margin: 8px 0 0 0; font-size: 14px; color: #92400e;">
-                                    Le bailleur ne pourra pas se connecter à la plateforme car votre plan actuel ne permet pas l'accès aux bailleurs.
-                                </p>
-                            </div>
-                            <br/>
-                            <p style="font-size: 14px;">Vous pouvez quand même gérer toutes ses informations (biens, baux, paiements) depuis votre interface.</p>
-                            <p style="font-size: 14px; font-weight: bold;">💡 Mettez à niveau vers le plan <strong>Enterprise</strong> pour permettre aux bailleurs de se connecter.</p>
-                        `,
-                        confirmButtonText: 'Compris',
-                        width: '600px'
-                    });
-                }
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Bailleur créé !',
+                    html: response.email_sent
+                        ? `Le compte a été créé avec succès.<br/>Un email avec les identifiants de connexion a été envoyé à <strong>${formData.email}</strong>`
+                        : `Le compte a été créé avec succès.<br/><span style="color: #f59e0b;">⚠️ L'email n'a pas pu être envoyé. Veuillez contacter le bailleur manuellement.</span>`,
+                    confirmButtonText: 'OK'
+                });
                 navigate('/bailleurs');
             }
         } catch (error) {

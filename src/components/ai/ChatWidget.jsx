@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Minimize2, Maximize2, Loader2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { aiService } from '../../services/aiService';
 
 export default function ChatWidget() {
+    const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [messages, setMessages] = useState([]);
@@ -11,6 +13,12 @@ export default function ChatWidget() {
     const [suggestions, setSuggestions] = useState([]);
     const [conversationId, setConversationId] = useState(null);
     const messagesEndRef = useRef(null);
+
+    // Hide widget on public pages
+    const publicPages = ['/', '/pricing', '/contact', '/login', '/register', '/custom-plan-request'];
+    if (publicPages.includes(location.pathname)) {
+        return null;
+    }
 
     useEffect(() => {
         if (isOpen && suggestions.length === 0) {

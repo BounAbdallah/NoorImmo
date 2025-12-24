@@ -77,36 +77,15 @@ export default function CreateTenant() {
 
             const response = await tenantService.create(data);
             if (response.success) {
-                if (response.email_sent) {
-                    // Email was sent - plan allows tenant access
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Locataire créé !',
-                        html: `Le compte a été créé avec succès.<br/>Un email avec les identifiants de connexion a été envoyé à <strong>${formData.email}</strong>`,
-                        confirmButtonText: 'OK'
-                    });
-                } else {
-                    // Email not sent - plan doesn't allow tenant access
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Locataire créé !',
-                        html: `
-                            <p>Le compte locataire a été créé avec succès dans votre système.</p>
-                            <br/>
-                            <div style="background-color: #fef3c7; padding: 12px; border-radius: 6px; border-left: 4px solid #f59e0b;">
-                                <p style="margin: 0; font-weight: bold; color: #92400e;">⚠️ Aucun email envoyé</p>
-                                <p style="margin: 8px 0 0 0; font-size: 14px; color: #92400e;">
-                                    Le locataire ne pourra pas se connecter à la plateforme car votre plan actuel ne permet pas l'accès aux locataires.
-                                </p>
-                            </div>
-                            <br/>
-                            <p style="font-size: 14px;">Vous pouvez quand même gérer toutes ses informations (baux, paiements, incidents) depuis votre interface.</p>
-                            <p style="font-size: 14px; font-weight: bold;">💡 Mettez à niveau vers le plan <strong>Enterprise</strong> pour permettre aux locataires de se connecter.</p>
-                        `,
-                        confirmButtonText: 'Compris',
-                        width: '600px'
-                    });
-                }
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Locataire créé !',
+                    html: response.email_sent
+                        ? `Le compte a été créé avec succès.<br/>Un email avec les identifiants de connexion a été envoyé à <strong>${formData.email}</strong>`
+                        : `Le compte a été créé avec succès.<br/><span style="color: #f59e0b;">⚠️ L'email n'a pas pu être envoyé. Veuillez contacter le locataire manuellement.</span>`,
+                    confirmButtonText: 'OK'
+                });
                 navigate('/tenants');
             }
         } catch (error) {
