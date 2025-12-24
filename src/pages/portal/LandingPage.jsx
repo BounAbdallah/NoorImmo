@@ -247,7 +247,7 @@ export default function LandingPage() {
                 <div ref={revealHero.ref} className="space-y-8">
                     <div className={`transition-all duration-1000 ease-out-expo delay-0 ${revealHero.isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95'}`}>
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider">
-                            <Sparkles className="w-3 h-3" /> Innovation Immobilière 2025
+                            <span className="w-3 h-3" />Produit de Noor Web Services ! <span/>
                         </div>
                     </div>
 
