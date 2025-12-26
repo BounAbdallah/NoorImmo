@@ -16,7 +16,7 @@ export default function TenantIncidentsPage() {
 
     const loadIncidents = async () => {
         try {
-            const res = await incidentService.getIncidents();
+            const res = await incidentService.getAll();
             if (res.data) {
                 const data = res.data.data || res.data;
                 setIncidents(data);
@@ -101,7 +101,7 @@ export default function TenantIncidentsPage() {
         <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold text-gray-900">Mes Signalements</h1>
-                <Button onClick={() => navigate('/dashboard/incidents/new')}>
+                <Button onClick={() => navigate('/incidents/new')}>
                     <Plus className="h-4 w-4 mr-2" />
                     Nouveau Signalement
                 </Button>
@@ -174,7 +174,7 @@ export default function TenantIncidentsPage() {
                             <p className="text-sm text-gray-400 mt-2">
                                 Signalez un problème pour que votre agence puisse intervenir rapidement.
                             </p>
-                            <Button onClick={() => navigate('/dashboard/incidents/new')} className="mt-4">
+                            <Button onClick={() => navigate('/incidents/new')} className="mt-4">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Créer un signalement
                             </Button>
@@ -185,7 +185,7 @@ export default function TenantIncidentsPage() {
                                 <div
                                     key={incident.id}
                                     className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-                                    onClick={() => navigate(`/dashboard/incidents/${incident.id}`)}
+                                    onClick={() => navigate(`/incidents/${incident.id}`)}
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">

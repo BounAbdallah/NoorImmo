@@ -13,7 +13,14 @@ export const incidentService = {
     },
 
     create: async (data) => {
-        const response = await api.post('/incidents', data);
+        // If data is FormData, let axios handle the Content-Type header automatically
+        const config = data instanceof FormData ? {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        } : {};
+
+        const response = await api.post('/incidents', data, config);
         return response.data;
     },
 

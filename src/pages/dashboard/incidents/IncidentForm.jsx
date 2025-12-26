@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../../c
 import { Label } from '../../../components/ui/Label';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
+import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 export default function IncidentForm() {
@@ -14,7 +15,9 @@ export default function IncidentForm() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!hasPermission('incidents.create')) {
+        // Allow tenants to create incidents without permission check
+        // For other user types (agence, team members), check permissions
+        if (user && user.user_type !== 'locataire' && !hasPermission('incidents.create')) {
             Swal.fire({
                 icon: 'error',
                 title: 'Accès refusé',
@@ -24,11 +27,13 @@ export default function IncidentForm() {
             });
             navigate('/incidents');
         }
-    }, [hasPermission, navigate]);
+    }, [hasPermission, navigate, user]);
 
     const [leases, setLeases] = useState([]);
     const [loadingData, setLoadingData] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [selectedImages, setSelectedImages] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
 
     const [formData, setFormData] = useState({
         bail_id: '',
@@ -48,7 +53,18 @@ export default function IncidentForm() {
             const response = await leaseService.getAllLeases();
             if (response.success) {
                 // Filter active leases
-                setLeases((response.data.data || []).filter(l => l.statut === 'actif'));
+                const activeLeases = (response.data.data || []).filter(l => l.statut === 'actif');
+                setLeases(activeLeases);
+
+                // Auto-select for tenants
+                if (user && user.user_type === 'locataire' && activeLeases.length > 0) {
+                    const firstLease = activeLeases[0];
+                    setFormData(prev => ({
+                        ...prev,
+                        bail_id: firstLease.id,
+                        locataire_id: firstLease.locataire_id
+                    }));
+                }
             }
         } catch (error) {
             console.error(error);
@@ -75,12 +91,62 @@ export default function IncidentForm() {
         });
     };
 
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+
+        // Validate file types and sizes
+        const validFiles = files.filter(file => {
+            const isImage = file.type.startsWith('image/');
+            const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
+
+            if (!isImage) {
+                Swal.fire('Erreur', `${file.name} n'est pas une image valide.`, 'error');
+                return false;
+            }
+            if (!isValidSize) {
+                Swal.fire('Erreur', `${file.name} dépasse la taille maximale de 5MB.`, 'error');
+                return false;
+            }
+            return true;
+        });
+
+        setSelectedImages(prev => [...prev, ...validFiles]);
+
+        // Create previews
+        validFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreviews(prev => [...prev, reader.result]);
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const removeImage = (index) => {
+        setSelectedImages(prev => prev.filter((_, i) => i !== index));
+        setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
 
         try {
-            const response = await incidentService.create(formData);
+            // Create FormData for file upload
+            const submitData = new FormData();
+            submitData.append('bail_id', formData.bail_id);
+            submitData.append('locataire_id', formData.locataire_id);
+            submitData.append('titre', formData.titre);
+            submitData.append('description', formData.description);
+            submitData.append('categorie', formData.categorie);
+            submitData.append('priorite', formData.priorite);
+
+            // Append images
+            selectedImages.forEach((image, index) => {
+                submitData.append('images[]', image);
+            });
+
+            const response = await incidentService.create(submitData);
             if (response.success) {
                 Swal.fire('Succès', 'Incident signalé avec succès', 'success');
                 navigate('/incidents');
@@ -181,6 +247,61 @@ export default function IncidentForm() {
                                 onChange={handleChange}
                                 required
                             />
+                        </div>
+
+                        {/* Image Upload Section */}
+                        <div>
+                            <Label htmlFor="images">Photos de l'incident (optionnel)</Label>
+                            <div className="mt-2">
+                                <label
+                                    htmlFor="images"
+                                    className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-gray-50 transition-colors"
+                                >
+                                    <div className="text-center">
+                                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                                        <p className="mt-2 text-sm text-gray-600">
+                                            Cliquez pour ajouter des photos
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            PNG, JPG, GIF jusqu'à 5MB par image
+                                        </p>
+                                    </div>
+                                    <input
+                                        id="images"
+                                        name="images"
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        className="hidden"
+                                        onChange={handleImageChange}
+                                    />
+                                </label>
+                            </div>
+
+                            {/* Image Previews */}
+                            {imagePreviews.length > 0 && (
+                                <div className="mt-4 grid grid-cols-2 gap-4">
+                                    {imagePreviews.map((preview, index) => (
+                                        <div key={index} className="relative group">
+                                            <img
+                                                src={preview}
+                                                alt={`Preview ${index + 1}`}
+                                                className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(index)}
+                                                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                                                {selectedImages[index]?.name}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                     </CardContent>

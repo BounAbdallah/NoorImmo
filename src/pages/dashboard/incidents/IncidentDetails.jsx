@@ -4,8 +4,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { incidentService } from '../../../services/incidentService';
 import { Button } from '../../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
-import { ArrowLeft, CheckCircle, User } from 'lucide-react';
+import { ArrowLeft, CheckCircle, User, X, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import Swal from 'sweetalert2';
+
+// Get backend base URL for images
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+
+// Helper function to get full image URL
+const getImageUrl = (path) => {
+    if (!path) return '';
+    // If path already includes http, return as is
+    if (path.startsWith('http')) return path;
+    // Otherwise, prepend the backend URL
+    return `${API_BASE_URL}${path}`;
+};
 
 export default function IncidentDetails() {
     const { id } = useParams();
@@ -13,6 +25,8 @@ export default function IncidentDetails() {
     const [incident, setIncident] = useState(null);
     const [loading, setLoading] = useState(true);
     const [resolving, setResolving] = useState(false);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
         loadIncident();
@@ -54,8 +68,45 @@ export default function IncidentDetails() {
         }
     };
 
+    const openLightbox = (index) => {
+        setCurrentImageIndex(index);
+        setLightboxOpen(true);
+    };
+
+    const closeLightbox = () => {
+        setLightboxOpen(false);
+    };
+
+    const nextImage = () => {
+        if (incident.images && currentImageIndex < incident.images.length - 1) {
+            setCurrentImageIndex(currentImageIndex + 1);
+        }
+    };
+
+    const previousImage = () => {
+        if (currentImageIndex > 0) {
+            setCurrentImageIndex(currentImageIndex - 1);
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowRight') nextImage();
+        if (e.key === 'ArrowLeft') previousImage();
+    };
+
+    useEffect(() => {
+        if (lightboxOpen) {
+            window.addEventListener('keydown', handleKeyDown);
+            return () => window.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [lightboxOpen, currentImageIndex]);
+
     if (loading) return <div className="p-8 text-center">Chargement...</div>;
     if (!incident) return null;
+
+    const images = incident.images || [];
+    const hasImages = images.length > 0;
 
     return (
         <div className="max-w-3xl mx-auto space-y-6">
@@ -86,6 +137,35 @@ export default function IncidentDetails() {
                             <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{incident.description}</dd>
                         </div>
 
+                        {/* Images Section */}
+                        {hasImages && (
+                            <div className="sm:col-span-2">
+                                <dt className="text-sm font-medium text-gray-500 mb-3">
+                                    Photos de l'incident ({images.length})
+                                </dt>
+                                <dd className="mt-1">
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                        {images.map((imageUrl, index) => (
+                                            <div
+                                                key={index}
+                                                className="relative group cursor-pointer overflow-hidden rounded-lg border-2 border-gray-200 hover:border-primary-500 transition-all"
+                                                onClick={() => openLightbox(index)}
+                                            >
+                                                <img
+                                                    src={getImageUrl(imageUrl)}
+                                                    alt={`Incident photo ${index + 1}`}
+                                                    className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200"
+                                                />
+                                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                                                    <ImageIcon className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </dd>
+                            </div>
+                        )}
+
                         {incident.resolution_notes && (
                             <div className="sm:col-span-2 bg-green-50 p-4 rounded-md">
                                 <dt className="text-sm font-medium text-green-800">Notes de résolution</dt>
@@ -115,6 +195,51 @@ export default function IncidentDetails() {
                     )}
                 </div>
             </div>
+
+            {/* Lightbox Modal */}
+            {lightboxOpen && hasImages && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4">
+                    {/* Close Button */}
+                    <button
+                        onClick={closeLightbox}
+                        className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+                    >
+                        <X className="h-8 w-8" />
+                    </button>
+
+                    {/* Previous Button */}
+                    {currentImageIndex > 0 && (
+                        <button
+                            onClick={previousImage}
+                            className="absolute left-4 text-white hover:text-gray-300 transition-colors"
+                        >
+                            <ChevronLeft className="h-12 w-12" />
+                        </button>
+                    )}
+
+                    {/* Image */}
+                    <div className="max-w-5xl max-h-full flex flex-col items-center">
+                        <img
+                            src={getImageUrl(images[currentImageIndex])}
+                            alt={`Incident photo ${currentImageIndex + 1}`}
+                            className="max-w-full max-h-[80vh] object-contain"
+                        />
+                        <p className="text-white mt-4 text-sm">
+                            Image {currentImageIndex + 1} sur {images.length}
+                        </p>
+                    </div>
+
+                    {/* Next Button */}
+                    {currentImageIndex < images.length - 1 && (
+                        <button
+                            onClick={nextImage}
+                            className="absolute right-4 text-white hover:text-gray-300 transition-colors"
+                        >
+                            <ChevronRight className="h-12 w-12" />
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

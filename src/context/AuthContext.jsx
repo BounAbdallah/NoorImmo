@@ -51,6 +51,8 @@ export const AuthProvider = ({ children }) => {
         } finally {
             localStorage.removeItem('token');
             setUser(null);
+            // Force full page reload to clear all state
+            window.location.href = '/login';
         }
     };
 

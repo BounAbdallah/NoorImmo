@@ -125,7 +125,8 @@ export default function LoginPage() {
             if (rememberMe) {
                 localStorage.setItem('remember_email', email);
             }
-            navigate('/dashboard'); // Redirection après login réussi (Page à créer ou existante)
+            // Force full page reload to ensure all state is fresh
+            window.location.href = '/dashboard';
         } catch (err) {
             setError(err.response?.data?.message || 'Identifiants incorrects');
         } finally {

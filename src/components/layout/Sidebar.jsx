@@ -20,11 +20,12 @@ export function Sidebar({ isOpen, onClose }) {
         { name: 'Baux', href: '/leases', icon: FileText, roles: ['agence', 'bailleur', 'admin'], module: 'baux', feature: 'gestion_baux' },
         { name: 'Paiements', href: '/payments', icon: CreditCard, roles: ['agence', 'bailleur', 'admin'], module: 'paiements', feature: 'paiements_loyers' },
         { name: 'Dettes Locataires', href: '/payments/unpaid', icon: AlertTriangle, roles: ['agence', 'bailleur', 'admin'], module: 'paiements', feature: 'paiements_loyers' },
-        { name: 'Incidents', href: '/incidents', icon: AlertTriangle, roles: ['agence', 'bailleur', 'locataire', 'admin'], module: 'incidents', feature: 'gestion_incidents' },
+        { name: 'Incidents', href: '/incidents', icon: AlertTriangle, roles: ['agence', 'bailleur', 'admin'], module: 'incidents', feature: 'gestion_incidents' },
         { name: 'États des Lieux', href: '/dashboard/inventory', icon: ClipboardCheck, roles: ['agence', 'admin'], module: 'etats_lieux', feature: 'etats_lieux' },
         { name: 'Locataires', href: '/tenants', icon: Users, roles: ['agence', 'bailleur', 'admin'], module: 'locataires', feature: 'gestion_locataires' },
 
         // Tenant specific
+        { name: 'Mes Signalements', href: '/my-incidents', icon: AlertTriangle, roles: ['locataire'] },
         { name: 'Mes Paiements', href: '/my-payments', icon: CreditCard, roles: ['locataire'] },
         { name: 'Mon Bail', href: '/my-lease', icon: FileText, roles: ['locataire'] },
 
@@ -99,6 +100,7 @@ export function Sidebar({ isOpen, onClose }) {
     const getBadgeCount = (itemName) => {
         switch (itemName) {
             case 'Incidents': return counts.incidents;
+            case 'Mes Signalements': return counts.incidents; // Tenant
             case 'Paiements': return counts.payments; // Agency/Landlord
             case 'Mes Paiements': return counts.payments; // Tenant
             case 'Notifications': return counts.notifications;
@@ -154,7 +156,7 @@ export function Sidebar({ isOpen, onClose }) {
                                 {count > 0 && (
                                     <span className={cn(
                                         "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                                        item.name === 'Incidents' ? "bg-red-100 text-red-800" :
+                                        item.name === 'Incidents' || item.name === 'Mes Signalements' ? "bg-red-100 text-red-800" :
                                             item.name === 'Notifications' ? "bg-blue-100 text-blue-800" :
                                                 "bg-yellow-100 text-yellow-800"
                                     )}>
