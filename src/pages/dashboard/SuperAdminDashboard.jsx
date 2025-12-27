@@ -3,17 +3,84 @@ import { adminService } from '../../services/adminService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { Users, Building, DollarSign, Activity, Search, Ban, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Users, Building, DollarSign, Activity, Search, Ban, CheckCircle, AlertTriangle, X } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 import { useNavigate } from 'react-router-dom';
 import { Bar, Doughnut } from 'react-chartjs-2';
+
+// Modal Component for Online Users
+const OnlineUsersModal = ({ isOpen, onClose, users }) => {
+    if (!isOpen) return null;
+
+    // Ensure users is an array
+    const userList = Array.isArray(users) ? users : [];
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">Utilisateurs En Ligne ({userList.length})</h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dernière activité</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {userList.map((user) => (
+                                <tr key={user.id}>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm font-medium text-gray-900">{user.nom} {user.prenom}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            {user.user_type}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {user.email}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {new Date(user.last_seen_at).toLocaleTimeString()}
+                                    </td>
+                                </tr>
+                            ))}
+                            {userList.length === 0 && (
+                                <tr>
+                                    <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">
+                                        Aucun utilisateur en ligne (à part vous peut-être ?)
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="mt-4 flex justify-end">
+                    <Button variant="outline" onClick={onClose}>Fermer</Button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default function SuperAdminDashboard() {
     const navigate = useNavigate();
     const [stats, setStats] = useState(null);
     const [agencies, setAgencies] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isOnlineUsersModalOpen, setIsOnlineUsersModalOpen] = useState(false);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -58,6 +125,7 @@ export default function SuperAdminDashboard() {
             }
         } catch (error) {
             console.error("Error loading admin data", error);
+            setError("Erreur lors du chargement des données.");
         } finally {
             setLoading(false);
         }
@@ -95,6 +163,7 @@ export default function SuperAdminDashboard() {
     };
 
     if (loading && !stats) return <div className="p-12 text-center">Chargement du tableau de bord administrateur...</div>;
+    if (error) return <div className="p-12 text-center text-red-500">{error}</div>; // Display error message
 
     return (
         <div className="space-y-6">
@@ -107,11 +176,25 @@ export default function SuperAdminDashboard() {
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div onClick={() => setIsOnlineUsersModalOpen(true)} className="cursor-pointer transition-transform hover:scale-105">
+                    <StatsCard title="Utilisateurs En Ligne" value={stats?.users?.online || 0} icon={Activity} color="text-green-500" bg="bg-green-50" />
+                </div>
+                <StatsCard title="Visites Plateforme" value={stats?.visits?.platform || 0} icon={Search} color="text-blue-500" bg="bg-blue-50" />
+                <StatsCard title="Visites Landing" value={stats?.visits?.landing || 0} icon={Search} color="text-indigo-500" bg="bg-indigo-50" />
+
                 <StatsCard title="Agences" value={stats?.agencies?.total || 0} icon={Building} color="text-blue-600" bg="bg-blue-100" />
                 <StatsCard title="Abonnements Actifs" value={stats?.agencies?.active_subscriptions || 0} icon={CheckCircle} color="text-green-600" bg="bg-green-100" />
                 <StatsCard title="Utilisateurs Totaux" value={stats?.users?.total || 0} icon={Users} color="text-purple-600" bg="bg-purple-100" />
                 <StatsCard title="Revenus (MRR Est.)" value={`${new Intl.NumberFormat('fr-FR').format(stats?.revenue?.current_mrr || 0)} F`} icon={DollarSign} color="text-emerald-600" bg="bg-emerald-100" />
+                <StatsCard title="Visites Autres" value={stats?.visits?.other || 0} icon={Search} color="text-gray-500" bg="bg-gray-50" />
             </div>
+
+            {/* Modal for online users */}
+            <OnlineUsersModal
+                isOpen={isOnlineUsersModalOpen}
+                onClose={() => setIsOnlineUsersModalOpen(false)}
+                users={stats?.users?.online_list || []}
+            />
 
             {/* Charts Section */}
             {chartData && (

@@ -1,6 +1,8 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { adminService } from './services/adminService';
 import { AuthProvider } from './context/AuthContext';
+
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
@@ -64,9 +66,48 @@ import NotificationDetailsPage from './pages/dashboard/NotificationDetailsPage';
 import FeaturesManagementPage from './pages/admin/FeaturesManagementPage';
 import ChatWidget from './components/ai/ChatWidget';
 
+function RouteTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const logVisit = async () => {
+      let page = 'other';
+      const path = location.pathname;
+
+      // Don't log visits for auth pages
+      if (path === '/login' || path === '/register') return;
+
+      if (path === '/' || path === '/contact' || path === '/pricing') {
+        page = 'landing';
+      } else if (
+        path.startsWith('/dashboard') ||
+        path.startsWith('/projects') ||
+        path.startsWith('/biens') ||
+        path.startsWith('/leases') ||
+        path.startsWith('/tenants') ||
+        path.startsWith('/payments') ||
+        path.startsWith('/incidents')
+      ) {
+        page = 'platform';
+      }
+
+      try {
+        await adminService.logVisit(page);
+      } catch (error) {
+        // Silent fail
+      }
+    };
+
+    logVisit();
+  }, [location]);
+
+  return null;
+}
+
 function App() {
   return (
     <Router>
+      <RouteTracker />
       <AuthProvider>
         <Routes>
           {/* Portal Routes (Public) */}
@@ -120,9 +161,8 @@ function App() {
               <Route path="/dashboard/inventory/new" element={<InventoryForm />} />
 
               {/* Bailleurs */}
-              {/* Bailleurs */}
               <Route path="/bailleurs" element={<LandlordListPage />} />
-              <Route path="/bailleurs/create" element={<BailleurForm />} /> {/* Keep existing form if valid or rename */}
+              <Route path="/bailleurs/create" element={<BailleurForm />} />
               <Route path="/bailleurs/:id" element={<LandlordDetailsPage />} />
               <Route path="/bailleurs/edit/:id" element={<EditLandlord />} />
 

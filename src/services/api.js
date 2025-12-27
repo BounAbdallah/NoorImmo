@@ -26,7 +26,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
+        // Don't redirect for analytics calls or specifically handled errors
+        if (error.response?.status === 401 && !error.config.url.includes('/analytics/visit')) {
             localStorage.removeItem('token');
             window.location.href = '/login';
         }

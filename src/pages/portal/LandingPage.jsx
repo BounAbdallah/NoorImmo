@@ -416,6 +416,32 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            {/* --- VIDEO SECTION --- */}
+            <section className="py-10 px-6 max-w-5xl mx-auto">
+                <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-blue-900/20 group">
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent z-10 pointer-events-none"></div>
+
+                    <video
+                        className="w-full h-auto object-cover transform transition-transform duration-700 hover:scale-[1.01]"
+                        controls
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                    >
+                        <source src="/images/videos/Noorimmo.mp4" type="video/mp4" />
+                        Votre navigateur ne supporte pas la lecture de vidéos.
+                    </video>
+
+                    <div className="absolute bottom-6 left-6 z-20">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white/90 text-xs font-bold uppercase tracking-wider mb-2">
+                            Démo Rapide
+                        </div>
+                        <h3 className="text-xl font-bold text-white">Découvrez Noor Immo en action</h3>
+                    </div>
+                </div>
+            </section>
+
             {/* --- FEATURES GRID --- */}
             <section id="fonctionnalites" ref={revealFeatures.ref} className="py-32 px-6 max-w-7xl mx-auto">
                 <div className={`text-center mb-20 transition-all duration-1000 ease-out-expo ${revealFeatures.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>

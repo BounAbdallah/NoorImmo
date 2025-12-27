@@ -54,5 +54,13 @@ export const adminService = {
     getAllPlans: async () => {
         const response = await api.get('/admin/plans');
         return response.data;
+    },
+
+    logVisit: async (page) => {
+        // This is a public/semi-public route, so if api interceptor adds token it's fine
+        // If no token, it should still work if the route is not protected by auth:sanctum strictly
+        // We put it in 'v1' group but outside 'auth:sanctum' middleware group in api.php
+        const response = await api.post('/analytics/visit', { page });
+        return response.data;
     }
 };
