@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import {
     Building, Menu, X, Shield, BarChart3, Users, Zap,
@@ -194,8 +195,50 @@ export default function LandingPage() {
         { q: "Y a-t-il une période d'engagement ?", a: "Non, toutes nos offres sont sans engagement. Vous pouvez annuler à tout moment." }
     ];
 
+    const structuredData = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Noor Immo",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Le logiciel de gestion immobilière de référence au Sénégal et en Afrique de l'Ouest. Gestion locative, syndic, quittances et contrats.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "XOF"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "120"
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#050505] text-slate-200 selection:bg-blue-500 selection:text-white font-sans overflow-x-hidden" onClick={() => setActiveHotspot(null)}>
+            <Helmet>
+                <title>Noor Immo - La Référence de la Gestion Immobilière au Sénégal & Afrique de l'Ouest</title>
+                <meta name="description" content="La solution complète pour agences immobilières au Sénégal. Gestion locative, syndic, quittances automatiques, et conformité juridique OHADA." />
+                <meta name="keywords" content="gestion immobilière sénégal, logiciel immobilier afrique, syndic copropriété dakar, quittance loyer sénégal, gestion locative afrique de l'ouest, noor immo" />
+
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://noorimmo.com/" />
+                <meta property="og:title" content="Noor Immo - Révolutionnez votre Agence Immobilière au Sénégal" />
+                <meta property="og:description" content="Automatisez vos contrats, quittances et suivis financiers avec la plateforme n°1 en Afrique de l'Ouest." />
+                <meta property="og:image" content="https://noorimmo.com/og-image.jpg" />
+
+                {/* Twitter */}
+                <meta property="twitter:card" content="summary_large_image" />
+                <meta property="twitter:url" content="https://noorimmo.com/" />
+                <meta property="twitter:title" content="Noor Immo - Gestion Immobilière Simplifiée" />
+                <meta property="twitter:description" content="La solution de gestion immobilière conçue pour le Sénégal et l'Afrique de l'Ouest." />
+                <meta property="twitter:image" content="https://noorimmo.com/og-image.jpg" />
+
+                <script type="application/ld+json">
+                    {JSON.stringify(structuredData)}
+                </script>
+            </Helmet>
 
             {/* Background Effects */}
             <div className="fixed inset-0 pointer-events-none z-0">
@@ -229,25 +272,27 @@ export default function LandingPage() {
             </nav>
 
             {/* Mobile Menu */}
-            {mobileMenuOpen && (
-                <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center gap-8 p-6">
-                    <button className="absolute top-6 right-6 text-white" onClick={() => setMobileMenuOpen(false)}>
-                        <X className="w-8 h-8" />
-                    </button>
-                    <a href="#fonctionnalites" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold">Fonctionnalités</a>
-                    <a href="#tarifs" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold">Tarifs</a>
-                    <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold">Contact</Link>
-                    <Link to="/login" className="text-xl text-slate-400">Connexion</Link>
-                    <Link to="/register" className="bg-blue-600 text-white px-8 py-3 rounded-full text-xl font-bold w-full text-center">S'inscrire</Link>
-                </div>
-            )}
+            {
+                mobileMenuOpen && (
+                    <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center gap-8 p-6">
+                        <button className="absolute top-6 right-6 text-white" onClick={() => setMobileMenuOpen(false)}>
+                            <X className="w-8 h-8" />
+                        </button>
+                        <a href="#fonctionnalites" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold">Fonctionnalités</a>
+                        <a href="#tarifs" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold">Tarifs</a>
+                        <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold">Contact</Link>
+                        <Link to="/login" className="text-xl text-slate-400">Connexion</Link>
+                        <Link to="/register" className="bg-blue-600 text-white px-8 py-3 rounded-full text-xl font-bold w-full text-center">S'inscrire</Link>
+                    </div>
+                )
+            }
 
             {/* --- HERO SECTION --- */}
             <section className="relative pt-40 pb-20 px-6 max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center z-10">
                 <div ref={revealHero.ref} className="space-y-8">
                     <div className={`transition-all duration-1000 ease-out-expo delay-0 ${revealHero.isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95'}`}>
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider">
-                            <span className="w-3 h-3" />Produit de Noor Web Services ! <span/>
+                            <span className="w-3 h-3" />Produit de Noor Web Services ! <span />
                         </div>
                     </div>
 
@@ -968,6 +1013,6 @@ export default function LandingPage() {
                     &copy; 2025 Noor Immobilier Technologies Sénégal. Tous droits réservés.
                 </div>
             </footer>
-        </div>
+        </div >
     );
 }
