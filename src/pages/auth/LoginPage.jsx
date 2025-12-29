@@ -72,7 +72,7 @@ const AbstractDashboard = () => (
 );
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
+    const [loginIdentifier, setLoginIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
@@ -121,9 +121,9 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            await login(email, password);
+            await login(loginIdentifier, password);
             if (rememberMe) {
-                localStorage.setItem('remember_email', email);
+                localStorage.setItem('remember_login', loginIdentifier);
             }
             // Force full page reload to ensure all state is fresh
             window.location.href = '/dashboard';
@@ -254,15 +254,15 @@ export default function LoginPage() {
 
                         <div className="space-y-4">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Email Pro</label>
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Email ou Téléphone</label>
                                 <div className="relative group">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
                                     <input
-                                        type="email"
-                                        placeholder="nom@agence.com"
+                                        type="text"
+                                        placeholder="Email ou N° de téléphone"
                                         className="w-full pl-12 pr-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.05] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        value={loginIdentifier}
+                                        onChange={(e) => setLoginIdentifier(e.target.value)}
                                         required
                                     />
                                 </div>

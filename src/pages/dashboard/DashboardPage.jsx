@@ -4,7 +4,6 @@ import { useAuth } from '../../context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Building, Home, FileText, Activity, Users, Wallet, AlertTriangle, TrendingUp, CheckCircle, XCircle, DollarSign, Clock } from 'lucide-react';
 import { dashboardService } from '../../services/dashboardService';
-import { projectService } from '../../services/projectService';
 import { Link } from 'react-router-dom';
 import {
     Chart as ChartJS,
@@ -24,7 +23,7 @@ import AgencyDetailsAdminPage from './admin/AgencyDetailsAdminPage';
 import PlansManagementPage from './admin/PlansManagementPage';
 import PlanDetailsPage from './admin/PlanDetailsPage';
 import CommissionsPage from './admin/CommissionsPage';
-import { useLocation } from 'react-router-dom'; // Import useLocation
+import { useLocation } from 'react-router-dom';
 
 ChartJS.register(
     CategoryScale,
@@ -42,12 +41,9 @@ export default function DashboardPage() {
     const { user } = useAuth();
     const [stats, setStats] = useState(null);
     const [statsLoading, setStatsLoading] = useState(true);
-    const [recentProjects, setRecentProjects] = useState([]);
-    const [projectsLoading, setProjectsLoading] = useState(true);
     const location = useLocation();
 
     // Simple internal routing for Admin features
-    // In a real app setup, these would be defined in App.js routes
     if (user?.user_type === 'admin') {
         if (location.pathname === '/admin/plans') return <PlansManagementPage />;
 
@@ -78,20 +74,6 @@ export default function DashboardPage() {
             console.error("Failed to fetch stats", error);
         } finally {
             setStatsLoading(false);
-        }
-
-        if (['bailleur', 'entrepreneur', 'admin'].includes(user?.user_type)) {
-            try {
-                const projectsRes = await projectService.getAll();
-                const data = projectsRes.data.data?.data || projectsRes.data.data || [];
-                setRecentProjects(data);
-            } catch (error) {
-                console.error("Failed to fetch projects", error);
-            } finally {
-                setProjectsLoading(false);
-            }
-        } else {
-            setProjectsLoading(false);
         }
     };
 
@@ -362,11 +344,11 @@ export default function DashboardPage() {
                                         ) : null}
                                         <div className="relative flex space-x-3">
                                             <div>
-                                                <span className={`h - 8 w - 8 rounded - full flex items - center justify - center ring - 8 ring - white 
+                                                <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white 
                                                     ${activity.type === 'payment' ? 'bg-green-500' :
                                                         activity.type === 'incident' ? 'bg-red-500' :
                                                             'bg-blue-500'
-                                                    } `}>
+                                                    }`}>
                                                     {activity.type === 'payment' && <Wallet className="h-5 w-5 text-white" />}
                                                     {activity.type === 'incident' && <AlertTriangle className="h-5 w-5 text-white" />}
                                                     {activity.type === 'lease' && <FileText className="h-5 w-5 text-white" />}
@@ -496,43 +478,6 @@ export default function DashboardPage() {
                     </Card>
                 </div>
             )}
-
-            {/* Recent Projects Table (Optional) */}
-            {['bailleur', 'entrepreneur'].includes(user?.user_type) && recentProjects.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Projets Récents</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projet</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progression</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {recentProjects.slice(0, 5).map((project) => (
-                                        <tr key={project.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{project.titre}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px - 2 inline - flex text - xs leading - 5 font - semibold rounded - full ${project.statut === 'termine' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} `}>
-                                                    {project.statut}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {project.pourcentage_avancement}%
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
         </div>
     );
 }
@@ -545,8 +490,8 @@ function StatsCard({ title, value, icon: Icon, color }) {
                     <p className="text-sm font-medium text-gray-500">{title}</p>
                     <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
                 </div>
-                <div className={`p - 3 rounded - full bg - opacity - 10 ${color.replace('text-', 'bg-')} `}>
-                    <Icon className={`h - 6 w - 6 ${color} `} />
+                <div className={`p-3 rounded-full bg-opacity-10 ${color.replace('text-', 'bg-')} `}>
+                    <Icon className={`h-6 w-6 ${color} `} />
                 </div>
             </CardContent>
         </Card>

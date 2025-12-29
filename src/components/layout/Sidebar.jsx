@@ -13,7 +13,7 @@ export function Sidebar({ isOpen, onClose }) {
 
     const allNavigation = [
         { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-        { name: 'Mes Projets', href: '/projects', icon: Building, roles: ['bailleur', 'entrepreneur', 'admin'] },
+        { name: 'Mes Projets', href: '/projects', icon: Building, roles: ['admin'] },
         { name: 'Mes Bailleurs', href: '/bailleurs', icon: Users, roles: ['agence', 'admin'], module: 'bailleurs', feature: 'gestion_bailleurs' },
         { name: 'Mes Immeubles', href: '/immeubles', icon: Building, roles: ['agence', 'bailleur', 'admin'], module: 'immeubles', feature: 'gestion_immeubles' },
         { name: 'Mes Biens', href: '/biens', icon: Home, roles: ['agence', 'bailleur', 'admin'], module: 'biens', feature: 'gestion_biens' },

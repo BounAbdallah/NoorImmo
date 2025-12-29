@@ -170,25 +170,26 @@ export default function EditTenant() {
                         </div>
 
                         <div>
-                            <Label htmlFor="email">Email</Label>
+                            <Label htmlFor="email">Email (Optionnel si téléphone renseigné)</Label>
                             <Input
                                 type="email"
                                 id="email"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                required
                             />
                         </div>
 
                         <div>
-                            <Label htmlFor="telephone">Téléphone</Label>
+                            <Label htmlFor="telephone">Téléphone {!formData.email && <span className="text-red-500">*</span>}</Label>
                             <Input
                                 type="tel"
                                 id="telephone"
                                 name="telephone"
                                 value={formData.telephone}
                                 onChange={handleChange}
+                                required={!formData.email}
+                                placeholder={!formData.email ? "Requis car pas d'email" : "Numéro de téléphone"}
                             />
                         </div>
 

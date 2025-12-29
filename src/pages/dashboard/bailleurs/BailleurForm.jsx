@@ -92,7 +92,9 @@ export default function BailleurForm() {
                     title: 'Bailleur créé !',
                     html: response.email_sent
                         ? `Le compte a été créé avec succès.<br/>Un email avec les identifiants de connexion a été envoyé à <strong>${formData.email}</strong>`
-                        : `Le compte a été créé avec succès.<br/><span style="color: #f59e0b;">⚠️ L'email n'a pas pu être envoyé. Veuillez contacter le bailleur manuellement.</span>`,
+                        : formData.email
+                            ? `Le compte a été créé avec succès.<br/><span style="color: #f59e0b;">⚠️ L'email n'a pas pu être envoyé. Veuillez contacter le bailleur manuellement.</span>`
+                            : `Le compte a été créé avec succès.<br/>Notez que sans email, le bailleur devra utiliser son <strong>numéro de téléphone</strong> pour se connecter.`,
                     confirmButtonText: 'OK'
                 });
                 navigate('/bailleurs');
@@ -152,25 +154,26 @@ export default function BailleurForm() {
                         </div>
 
                         <div>
-                            <Label htmlFor="email">Email (Sera utilisé pour la connexion)</Label>
+                            <Label htmlFor="email">Email (Optionnel - utilisé pour la connexion)</Label>
                             <Input
                                 type="email"
                                 id="email"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                required
                             />
                         </div>
 
                         <div>
-                            <Label htmlFor="telephone">Téléphone</Label>
+                            <Label htmlFor="telephone">Téléphone {!formData.email && <span className="text-red-500 font-bold">*</span>}</Label>
                             <Input
                                 type="tel"
                                 id="telephone"
                                 name="telephone"
                                 value={formData.telephone}
                                 onChange={handleChange}
+                                required={!formData.email}
+                                placeholder="Requis si pas d'email"
                             />
                         </div>
 
