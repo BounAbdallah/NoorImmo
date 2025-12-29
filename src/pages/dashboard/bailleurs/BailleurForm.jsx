@@ -76,8 +76,12 @@ export default function BailleurForm() {
             });
 
             // Append files if they exist
-            if (cniRecto) data.append('cni_recto', cniRecto);
             if (cniVerso) data.append('cni_verso', cniVerso);
+
+            console.log('Sending FormData contents:');
+            for (let [key, value] of data.entries()) {
+                console.log(key, value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value);
+            }
 
             const response = await bailleurService.create(data);
             if (response.success) {
