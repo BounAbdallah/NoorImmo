@@ -222,20 +222,20 @@ export default function BailleurList() {
             {totalPages > 1 && (
                 <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4 rounded-lg shadow">
                     <div className="flex flex-1 justify-between sm:hidden">
-                        <Button
-                            variant="outline"
+                        <button
                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                             disabled={currentPage === 1}
+                            className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                         >
                             Précédent
-                        </Button>
-                        <Button
-                            variant="outline"
+                        </button>
+                        <button
                             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                             disabled={currentPage === totalPages}
+                            className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                         >
                             Suivant
-                        </Button>
+                        </button>
                     </div>
                     <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                         <div>
