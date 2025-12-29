@@ -60,5 +60,10 @@ export const paymentService = {
         const file = new Blob([response.data], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(file);
         window.open(fileURL, '_blank');
+    },
+
+    getLeaseTimeline: async (leaseId) => {
+        const response = await api.get(`/baux/${leaseId}/timeline`);
+        return response.data;
     }
 };

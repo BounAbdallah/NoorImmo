@@ -391,28 +391,110 @@ export default function DashboardPage() {
                 </div>
             )}
 
-            {/* Tenant Payment History */}
-            {user?.user_type === 'locataire' && stats?.payments_history && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Historique Récent</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ul className="divide-y divide-gray-200">
-                            {stats.payments_history.map((payment, idx) => (
-                                <li key={idx} className="py-4 flex justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-900">Loyer {new Date(payment.date).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</p>
-                                        <p className="text-sm text-gray-500">{new Intl.NumberFormat('fr-FR').format(payment.amount)} FCFA</p>
-                                    </div>
-                                    <span className={`inline - flex items - center px - 2.5 py - 0.5 rounded - full text - xs font - medium ${payment.status === 'paye' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} `}>
-                                        {payment.status}
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
-                    </CardContent>
-                </Card>
+            {/* Tenant Charts & History */}
+            {user?.user_type === 'locataire' && !statsLoading && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Payment History Chart */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Historique des Paiements (12 mois)</CardTitle>
+                        </CardHeader>
+                        <CardContent className="h-[300px]">
+                            {stats?.payment_history ? (
+                                <Bar
+                                    data={{
+                                        labels: stats.payment_history.map(d => d.month),
+                                        datasets: [{
+                                            label: 'Montant Payé (F)',
+                                            data: stats.payment_history.map(d => d.amount),
+                                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                            borderColor: 'rgb(59, 130, 246)',
+                                            borderWidth: 1,
+                                        }]
+                                    }}
+                                    options={{
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        scales: { y: { beginAtZero: true } }
+                                    }}
+                                />
+                            ) : (
+                                <div className="h-full flex items-center justify-center text-gray-500">
+                                    Aucune donnée disponible
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Incident Status Chart */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Statut des Signalements</CardTitle>
+                        </CardHeader>
+                        <CardContent className="h-[300px]">
+                            {stats?.incident_stats ? (
+                                <Pie
+                                    data={{
+                                        labels: ['Ouverts', 'En cours', 'Résolus'],
+                                        datasets: [{
+                                            data: [
+                                                stats.incident_stats.ouvert || 0,
+                                                stats.incident_stats.en_cours || 0,
+                                                stats.incident_stats.resolu || 0
+                                            ],
+                                            backgroundColor: [
+                                                'rgba(239, 68, 68, 0.8)', // Red
+                                                'rgba(234, 179, 8, 0.8)', // Yellow
+                                                'rgba(34, 197, 94, 0.8)', // Green
+                                            ],
+                                            borderWidth: 1,
+                                        }]
+                                    }}
+                                    options={{
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: { legend: { position: 'bottom' } }
+                                    }}
+                                />
+                            ) : (
+                                <div className="h-full flex items-center justify-center text-gray-500">
+                                    Aucune donnée disponible
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Tenant Recent Payments List */}
+                    <Card className="lg:col-span-2">
+                        <CardHeader>
+                            <CardTitle>Derniers Paiements</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="divide-y divide-gray-200">
+                                {stats?.payments_history_list?.length > 0 ? (
+                                    stats.payments_history_list.map((payment, idx) => (
+                                        <li key={idx} className="py-4 flex justify-between items-center">
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    Paiement du {new Date(payment.date).toLocaleDateString()}
+                                                </p>
+                                                <p className="text-sm text-gray-500">
+                                                    {new Intl.NumberFormat('fr-FR').format(payment.amount)} FCFA
+                                                </p>
+                                            </div>
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                ${payment.status === 'paye' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                {payment.status === 'paye' ? 'Payé' : payment.status}
+                                            </span>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <li className="py-4 text-center text-gray-500">Aucun historique récent.</li>
+                                )}
+                            </ul>
+                        </CardContent>
+                    </Card>
+                </div>
             )}
 
             {/* Recent Projects Table (Optional) */}
