@@ -22,6 +22,7 @@ export function Sidebar({ isOpen, onClose }) {
         { name: 'Dettes Locataires', href: '/payments/unpaid', icon: AlertTriangle, roles: ['agence', 'bailleur', 'admin'], module: 'paiements', feature: 'paiements_loyers' },
         { name: 'Incidents', href: '/incidents', icon: AlertTriangle, roles: ['agence', 'bailleur', 'admin'], module: 'incidents', feature: 'gestion_incidents' },
         { name: 'États des Lieux', href: '/dashboard/inventory', icon: ClipboardCheck, roles: ['agence', 'admin'], module: 'etats_lieux', feature: 'etats_lieux' },
+        { name: 'Dépenses', href: '/expenses', icon: DollarSign, roles: ['agence', 'bailleur', 'admin'], module: 'depenses', feature: 'gestion_depenses' },
         { name: 'Locataires', href: '/tenants', icon: Users, roles: ['agence', 'bailleur', 'admin'], module: 'locataires', feature: 'gestion_locataires' },
 
         // Tenant specific

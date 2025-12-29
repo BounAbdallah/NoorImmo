@@ -58,6 +58,7 @@ import DashboardLayout from './components/layout/DashboardLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import PortalLayout from './components/portal/PortalLayout';
 import LandingPage from './pages/portal/LandingPage';
+import ExpensesPage from './pages/dashboard/expenses/ExpensesPage';
 import PricingPage from './pages/portal/PricingPage';
 import CustomPlanRequestPage from './pages/portal/CustomPlanRequestPage';
 import ContactPage from './pages/portal/ContactPage';
@@ -86,7 +87,9 @@ function RouteTracker() {
         path.startsWith('/leases') ||
         path.startsWith('/tenants') ||
         path.startsWith('/payments') ||
-        path.startsWith('/incidents')
+        path.startsWith('/incidents') ||
+        path.startsWith('/expenses') ||
+        path.startsWith('/immeubles')
       ) {
         page = 'platform';
       }
@@ -170,6 +173,8 @@ function App() {
               <Route path="/immeubles" element={<BuildingList />} />
               <Route path="/immeubles/new" element={<BuildingForm />} />
               <Route path="/immeubles/:id" element={<BuildingDetails />} />
+
+              <Route path="/expenses" element={<ExpensesPage />} />
 
               {/* Admin Routes */}
               <Route path="/admin/test" element={<TestAdminPage />} />
