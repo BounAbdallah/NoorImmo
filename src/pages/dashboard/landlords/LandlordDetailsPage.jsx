@@ -12,6 +12,12 @@ import LandlordMonthlyReportModal from './LandlordMonthlyReportModal';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
+const getStorageUrl = (path) => {
+    if (!path) return null;
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+    return `${baseUrl}/storage/${path}`;
+};
+
 export default function LandlordDetailsPage() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -152,7 +158,7 @@ export default function LandlordDetailsPage() {
                     <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-3">
                         <div className="sm:col-span-1">
                             <dt className="text-sm font-medium text-gray-500 flex items-center"><Mail className="h-4 w-4 mr-2" /> Email</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{landlord.user?.email}</dd>
+                            <dd className="mt-1 text-sm text-gray-900">{landlord.user?.email || 'Pas d\'email'}</dd>
                         </div>
                         <div className="sm:col-span-1">
                             <dt className="text-sm font-medium text-gray-500 flex items-center"><Phone className="h-4 w-4 mr-2" /> Téléphone</dt>
@@ -164,6 +170,57 @@ export default function LandlordDetailsPage() {
                         </div>
                     </dl>
                 </div>
+
+                {/* Documents d'identité */}
+                {(landlord.cni_recto || landlord.cni_verso || landlord.numero_cni) && (
+                    <div className="border-t border-gray-200 px-4 py-5 sm:px-6 bg-gray-50">
+                        <h3 className="text-sm font-medium text-gray-500 mb-4 flex items-center">
+                            <FileText className="h-4 w-4 mr-2" /> Documents d'Identité
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {landlord.numero_cni && (
+                                <div>
+                                    <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider">Numéro CNI</dt>
+                                    <dd className="mt-1 text-sm font-bold text-gray-900">{landlord.numero_cni}</dd>
+                                </div>
+                            )}
+                            {landlord.cni_recto && (
+                                <div className="space-y-2">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">CNI Recto</p>
+                                    <a
+                                        href={getStorageUrl(landlord.cni_recto)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <img
+                                            src={getStorageUrl(landlord.cni_recto)}
+                                            alt="CNI Recto"
+                                            className="h-32 w-auto rounded-lg shadow-sm border border-gray-200 hover:opacity-90 transition-opacity cursor-zoom-in"
+                                        />
+                                    </a>
+                                </div>
+                            )}
+                            {landlord.cni_verso && (
+                                <div className="space-y-2">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">CNI Verso</p>
+                                    <a
+                                        href={getStorageUrl(landlord.cni_verso)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <img
+                                            src={getStorageUrl(landlord.cni_verso)}
+                                            alt="CNI Verso"
+                                            className="h-32 w-auto rounded-lg shadow-sm border border-gray-200 hover:opacity-90 transition-opacity cursor-zoom-in"
+                                        />
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Statistics KPIs */}

@@ -26,6 +26,12 @@ import PermissionGuard from '../../../components/auth/PermissionGuard';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
+const getStorageUrl = (path) => {
+    if (!path) return null;
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+    return `${baseUrl}/storage/${path}`;
+};
+
 export default function TenantDetailsPage() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -215,6 +221,57 @@ export default function TenantDetailsPage() {
                             </PermissionGuard>
                         </div>
                     </div>
+
+                    {/* Documents d'identité */}
+                    {(tenant.cni_recto || tenant.cni_verso || tenant.numero_cni) && (
+                        <div className="mt-8 pt-6 border-t border-gray-100">
+                            <h3 className="text-sm font-medium text-gray-500 mb-4 flex items-center">
+                                <FileText className="h-4 w-4 mr-2 text-primary-500" /> Documents d'Identité
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {tenant.numero_cni && (
+                                    <div>
+                                        <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider">Numéro CNI</dt>
+                                        <dd className="mt-1 text-sm font-bold text-gray-900">{tenant.numero_cni}</dd>
+                                    </div>
+                                )}
+                                {tenant.cni_recto && (
+                                    <div className="space-y-2">
+                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">CNI Recto</p>
+                                        <a
+                                            href={getStorageUrl(tenant.cni_recto)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <img
+                                                src={getStorageUrl(tenant.cni_recto)}
+                                                alt="CNI Recto"
+                                                className="h-32 w-auto rounded-lg shadow-sm border border-gray-200 hover:opacity-90 transition-opacity cursor-zoom-in"
+                                            />
+                                        </a>
+                                    </div>
+                                )}
+                                {tenant.cni_verso && (
+                                    <div className="space-y-2">
+                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">CNI Verso</p>
+                                        <a
+                                            href={getStorageUrl(tenant.cni_verso)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <img
+                                                src={getStorageUrl(tenant.cni_verso)}
+                                                alt="CNI Verso"
+                                                className="h-32 w-auto rounded-lg shadow-sm border border-gray-200 hover:opacity-90 transition-opacity cursor-zoom-in"
+                                            />
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
