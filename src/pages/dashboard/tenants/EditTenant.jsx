@@ -9,6 +9,14 @@ import { Info, Loader } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useAuth } from '../../../context/AuthContext';
 
+const getStorageUrl = (path) => {
+    if (!path) return null;
+    let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    baseUrl = baseUrl.replace(/\/api\/v1\/?$/, '');
+    baseUrl = baseUrl.replace(/\/+$/, '');
+    return `${baseUrl}/storage/${path.replace(/^\/+/, '')}`;
+};
+
 export default function EditTenant() {
     const navigate = useNavigate();
     const { id } = useParams();
@@ -250,7 +258,7 @@ export default function EditTenant() {
                                             </div>
                                         ) : existingCniRecto && (
                                             <div className="mt-2">
-                                                <img src={`${import.meta.env.VITE_API_URL?.replace('/api/v1', '')}/storage/${existingCniRecto}`} alt="CNI Recto actuel" className="h-32 w-auto rounded border" />
+                                                <img src={getStorageUrl(existingCniRecto)} alt="CNI Recto actuel" className="h-32 w-auto rounded border" />
                                                 <p className="text-xs text-gray-500 mt-1">Photo actuelle</p>
                                             </div>
                                         )}
@@ -271,7 +279,7 @@ export default function EditTenant() {
                                             </div>
                                         ) : existingCniVerso && (
                                             <div className="mt-2">
-                                                <img src={`${import.meta.env.VITE_API_URL?.replace('/api/v1', '')}/storage/${existingCniVerso}`} alt="CNI Verso actuel" className="h-32 w-auto rounded border" />
+                                                <img src={getStorageUrl(existingCniVerso)} alt="CNI Verso actuel" className="h-32 w-auto rounded border" />
                                                 <p className="text-xs text-gray-500 mt-1">Photo actuelle</p>
                                             </div>
                                         )}

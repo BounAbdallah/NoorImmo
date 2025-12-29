@@ -9,6 +9,14 @@ import { Info, Loader } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useAuth } from '../../../context/AuthContext';
 
+const getStorageUrl = (path) => {
+    if (!path) return null;
+    let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    baseUrl = baseUrl.replace(/\/api\/v1\/?$/, '');
+    baseUrl = baseUrl.replace(/\/+$/, '');
+    return `${baseUrl}/storage/${path.replace(/^\/+/, '')}`;
+};
+
 export default function EditLandlord() {
     const navigate = useNavigate();
     const { id } = useParams();
@@ -175,13 +183,21 @@ export default function EditLandlord() {
                         </div>
 
                         <div>
-                            <Label htmlFor="email">Email</Label>
-                            <Input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+                            <Label htmlFor="email">Email (Optionnel si téléphone renseigné)</Label>
+                            <Input type="email" id="email" name="email" value={formData.email} onChange={handleChange} />
                         </div>
 
                         <div>
-                            <Label htmlFor="telephone">Téléphone</Label>
-                            <Input type="tel" id="telephone" name="telephone" value={formData.telephone} onChange={handleChange} />
+                            <Label htmlFor="telephone">Téléphone {!formData.email && <span className="text-red-500">*</span>}</Label>
+                            <Input
+                                type="tel"
+                                id="telephone"
+                                name="telephone"
+                                value={formData.telephone}
+                                onChange={handleChange}
+                                required={!formData.email}
+                                placeholder={!formData.email ? "Requis car pas d'email" : "Numéro de téléphone"}
+                            />
                         </div>
 
                         <div>
@@ -227,7 +243,7 @@ export default function EditLandlord() {
                                             </div>
                                         ) : existingCniRecto && (
                                             <div className="mt-2">
-                                                <img src={`${import.meta.env.VITE_API_URL?.replace('/api/v1', '')}/storage/${existingCniRecto}`} alt="CNI Recto actuel" className="h-32 w-auto rounded border" />
+                                                <img src={getStorageUrl(existingCniRecto)} alt="CNI Recto actuel" className="h-32 w-auto rounded border" />
                                                 <p className="text-xs text-gray-500 mt-1">Photo actuelle</p>
                                             </div>
                                         )}
@@ -242,7 +258,7 @@ export default function EditLandlord() {
                                             </div>
                                         ) : existingCniVerso && (
                                             <div className="mt-2">
-                                                <img src={`${import.meta.env.VITE_API_URL?.replace('/api/v1', '')}/storage/${existingCniVerso}`} alt="CNI Verso actuel" className="h-32 w-auto rounded border" />
+                                                <img src={getStorageUrl(existingCniVerso)} alt="CNI Verso actuel" className="h-32 w-auto rounded border" />
                                                 <p className="text-xs text-gray-500 mt-1">Photo actuelle</p>
                                             </div>
                                         )}

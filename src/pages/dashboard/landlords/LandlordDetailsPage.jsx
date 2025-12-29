@@ -14,8 +14,13 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tool
 
 const getStorageUrl = (path) => {
     if (!path) return null;
-    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
-    return `${baseUrl}/storage/${path}`;
+    let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    // Remove the /api/v1 (or /api/v1/) suffix to get the root URL
+    baseUrl = baseUrl.replace(/\/api\/v1\/?$/, '');
+    // Ensure no trailing slash
+    baseUrl = baseUrl.replace(/\/+$/, '');
+
+    return `${baseUrl}/storage/${path.replace(/^\/+/, '')}`;
 };
 
 export default function LandlordDetailsPage() {
