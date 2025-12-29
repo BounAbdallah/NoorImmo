@@ -102,14 +102,17 @@ export default function EditLandlord() {
 
         try {
             const data = new FormData();
+
+            // Append all common fields
             Object.keys(formData).forEach(key => {
-                if (formData[key]) {
-                    data.append(key, formData[key]);
-                }
+                data.append(key, formData[key] || '');
             });
 
             if (cniRecto) data.append('cni_recto', cniRecto);
             if (cniVerso) data.append('cni_verso', cniVerso);
+
+            // Laravel workaround for PUT requests with FormData
+            data.append('_method', 'PUT');
 
             const response = await landlordService.update(id, data);
             if (response.success) {
@@ -124,7 +127,19 @@ export default function EditLandlord() {
             }
         } catch (error) {
             console.error(error);
-            Swal.fire('Erreur', error.response?.data?.message || 'Erreur lors de la modification.', 'error');
+            const message = error.response?.data?.message || 'Erreur lors de la modification.';
+            const errors = error.response?.data?.errors;
+
+            if (errors) {
+                const errorMessages = Object.values(errors).flat().join('<br/>');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur de validation',
+                    html: `<div class="text-left">${errorMessages}</div>`,
+                });
+            } else {
+                Swal.fire('Erreur', message, 'error');
+            }
         } finally {
             setLoading(false);
         }

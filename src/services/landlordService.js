@@ -21,7 +21,8 @@ export const landlordService = {
 
     // Update landlord
     update: async (id, data) => {
-        const response = await api.put(`/bailleurs/${id}`, data);
+        // Use POST with _method: 'PUT' override for FormData (files)
+        const response = await api.post(`/bailleurs/${id}`, data);
         return response.data;
     },
 

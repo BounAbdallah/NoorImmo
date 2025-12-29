@@ -69,12 +69,13 @@ export default function BailleurForm() {
         try {
             // Create FormData for file upload
             const data = new FormData();
+
+            // Append all common fields
             Object.keys(formData).forEach(key => {
-                if (formData[key]) {
-                    data.append(key, formData[key]);
-                }
+                data.append(key, formData[key] || '');
             });
 
+            // Append files if they exist
             if (cniRecto) data.append('cni_recto', cniRecto);
             if (cniVerso) data.append('cni_verso', cniVerso);
 
@@ -93,7 +94,19 @@ export default function BailleurForm() {
             }
         } catch (error) {
             console.error(error);
-            Swal.fire('Erreur', error.response?.data?.message || 'Erreur lors de la création.', 'error');
+            const message = error.response?.data?.message || 'Erreur lors de la création.';
+            const errors = error.response?.data?.errors;
+
+            if (errors) {
+                const errorMessages = Object.values(errors).flat().join('<br/>');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur de validation',
+                    html: `<div class="text-left">${errorMessages}</div>`,
+                });
+            } else {
+                Swal.fire('Erreur', message, 'error');
+            }
         } finally {
             setLoading(false);
         }
