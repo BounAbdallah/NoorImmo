@@ -98,6 +98,7 @@ export default function BailleurForm() {
             const errors = error.response?.data?.errors;
 
             if (errors) {
+                console.log('Validation errors:', errors);
                 const errorMessages = Object.values(errors).flat().join('<br/>');
                 Swal.fire({
                     icon: 'error',
