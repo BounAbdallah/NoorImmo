@@ -226,10 +226,6 @@ export default function AgencyDetailsAdminPage({ agencyId }) {
                                 <p className="text-xl font-bold text-blue-600">{agency.taux_commission_agence}%</p>
                             </div>
                             <div>
-                                <label className="text-sm font-medium text-gray-500">Commission Plateforme</label>
-                                <p className="text-xl font-bold text-purple-600">{agency.taux_commission_plateforme}%</p>
-                            </div>
-                            <div>
                                 <label className="text-sm font-medium text-gray-500">Date d'inscription</label>
                                 <p className="text-gray-900">{new Date(agency.created_at).toLocaleDateString()}</p>
                             </div>

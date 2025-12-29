@@ -101,8 +101,8 @@ export default function CommissionsPage() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             Loyer #{item.paiement_loyer_id}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-emerald-600">
-                                            +{new Intl.NumberFormat('fr-FR').format(item.montant_plateforme)} F
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-400">
+                                            -
                                         </td>
                                     </tr>
                                 ))}

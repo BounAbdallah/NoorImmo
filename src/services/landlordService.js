@@ -29,5 +29,25 @@ export const landlordService = {
     delete: async (id) => {
         const response = await api.delete(`/bailleurs/${id}`);
         return response.data;
+    },
+
+    // Reports
+    downloadMonthlyReport: async (params) => {
+        const response = await api.get('/reports/landlord-monthly', {
+            params,
+            responseType: 'blob'
+        });
+
+        // Create download link
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = `rapport-mensuel-${params.bailleur_id}-${params.month}-${params.year}.pdf`;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        return response.data;
     }
 };

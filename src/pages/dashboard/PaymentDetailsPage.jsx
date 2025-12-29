@@ -162,21 +162,15 @@ export default function PaymentDetailsPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-3">
+                        <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Part Agence (10%)</dt>
+                                <dt className="text-sm font-medium text-gray-500">Commission Agence</dt>
                                 <dd className="mt-1 text-lg font-semibold text-indigo-600">
                                     {Number(payment.ventilation.montant_agence).toLocaleString()} F
                                 </dd>
                             </div>
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Part Plateforme (5%)</dt>
-                                <dd className="mt-1 text-lg font-semibold text-purple-600">
-                                    {Number(payment.ventilation.montant_plateforme).toLocaleString()} F
-                                </dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Part Bailleur (85%)</dt>
+                                <dt className="text-sm font-medium text-gray-500">Part Bailleur</dt>
                                 <dd className="mt-1 text-lg font-semibold text-green-600">
                                     {Number(payment.ventilation.montant_bailleur).toLocaleString()} F
                                 </dd>

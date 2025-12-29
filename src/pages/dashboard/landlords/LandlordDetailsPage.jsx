@@ -8,6 +8,7 @@ import { Bar, Doughnut } from 'react-chartjs-2';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import PermissionGuard from '../../../components/auth/PermissionGuard';
+import LandlordMonthlyReportModal from './LandlordMonthlyReportModal';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -17,6 +18,7 @@ export default function LandlordDetailsPage() {
     const [landlord, setLandlord] = useState(null);
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
     const handleDelete = async () => {
         const result = await Swal.fire({
@@ -117,6 +119,15 @@ export default function LandlordDetailsPage() {
                     </div>
                     {/* Action Buttons */}
                     <div className="flex gap-2">
+                        <PermissionGuard module="bailleurs" action="view">
+                            <button
+                                onClick={() => setIsReportModalOpen(true)}
+                                className="inline-flex items-center px-4 py-2 border border-blue-300 shadow-sm text-sm font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none"
+                            >
+                                <FileText className="h-4 w-4 mr-2" />
+                                Rapport Mensuel
+                            </button>
+                        </PermissionGuard>
                         <PermissionGuard module="bailleurs" action="edit">
                             <button
                                 onClick={() => navigate(`/bailleurs/edit/${id}`)}
@@ -308,6 +319,13 @@ export default function LandlordDetailsPage() {
                     )}
                 </ul>
             </div>
-        </div>
+
+            <LandlordMonthlyReportModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                landlordId={id}
+                landlordName={`${landlord.user?.prenom} ${landlord.user?.nom}`}
+            />
+        </div >
     );
 }
