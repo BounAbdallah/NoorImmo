@@ -76,6 +76,7 @@ export default function BailleurForm() {
             });
 
             // Append files if they exist
+            if (cniRecto) data.append('cni_recto', cniRecto);
             if (cniVerso) data.append('cni_verso', cniVerso);
 
             console.log('Sending FormData contents:');
