@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { landlordService } from '../../../services/landlordService';
 import { propertyService } from '../../../services/propertyService';
+import { structureService } from '../../../services/structureService';
 import { User, Phone, Mail, MapPin, Building, ArrowLeft, Loader, TrendingUp, Home, DollarSign, FileText, Download, Edit, Trash2 } from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
@@ -28,6 +29,7 @@ export default function LandlordDetailsPage() {
     const navigate = useNavigate();
     const [landlord, setLandlord] = useState(null);
     const [stats, setStats] = useState(null);
+    const [immeubles, setImmeubles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
@@ -73,6 +75,10 @@ export default function LandlordDetailsPage() {
             const response = await landlordService.getById(id);
             setLandlord(response.data);
             setStats(response.stats);
+
+            // Fetch Buildings
+            const buildingsRes = await structureService.getAllBuildings({ bailleur_id: id });
+            setImmeubles(buildingsRes.data.data || []);
         } catch (error) {
             console.error('Error fetching details:', error);
         } finally {
@@ -318,6 +324,55 @@ export default function LandlordDetailsPage() {
                 </div>
             )}
 
+            {/* Immeubles List (Buildings) */}
+            <div className="bg-white shadow rounded-lg overflow-hidden">
+                <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
+                        <Building className="h-5 w-5 mr-2 text-indigo-500" />
+                        Immeubles ({immeubles.length})
+                    </h3>
+                </div>
+                <ul className="divide-y divide-gray-200">
+                    {immeubles.length > 0 ? (
+                        immeubles.map((immeuble) => (
+                            <li key={immeuble.id}>
+                                <div className="px-4 py-4 sm:px-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium text-indigo-600 truncate">{immeuble.nom}</p>
+                                            <p className="text-sm text-gray-500">{immeuble.adresse}</p>
+                                        </div>
+                                        <div className="flex space-x-2">
+                                            <button
+                                                onClick={() => structureService.viewMandat(immeuble.id)}
+                                                className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                                            >
+                                                <FileText className="h-3 w-3 mr-1 text-gray-500" />
+                                                Voir Mandat
+                                            </button>
+                                            <button
+                                                onClick={() => structureService.downloadMandat(immeuble.id)}
+                                                className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                                            >
+                                                <Download className="h-3 w-3 mr-1 text-gray-500" />
+                                                Télécharger
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="mt-2 text-sm text-gray-500">
+                                        {immeuble.etages?.length || 0} étages • {immeuble.nombre_biens || 0} biens
+                                    </div>
+                                </div>
+                            </li>
+                        ))
+                    ) : (
+                        <li className="px-4 py-4 sm:px-6 text-center text-gray-500 text-sm">
+                            Aucun immeuble associé à ce bailleur.
+                        </li>
+                    )}
+                </ul>
+            </div>
+
             {/* Properties List */}
             <div className="bg-white shadow rounded-lg overflow-hidden">
                 <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
@@ -347,27 +402,6 @@ export default function LandlordDetailsPage() {
                                                 <p className="flex items-center text-sm text-gray-500">
                                                     {bien.type} - {bien.surface} m² - {bien.nombre_pieces} pièces
                                                 </p>
-                                                <div className="flex space-x-2 mt-2">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            propertyService.viewMandat(bien.id);
-                                                        }}
-                                                        className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
-                                                    >
-                                                        <FileText className="h-3 w-3 mr-1 text-gray-500" />
-                                                        Mandat
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            propertyService.downloadMandat(bien.id);
-                                                        }}
-                                                        className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
-                                                    >
-                                                        <Download className="h-3 w-3 mr-1 text-gray-500" />
-                                                    </button>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>

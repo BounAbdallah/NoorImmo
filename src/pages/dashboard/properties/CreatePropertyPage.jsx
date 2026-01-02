@@ -272,6 +272,7 @@ export default function CreatePropertyPage() {
                                     onChange={handleChange}
                                     className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 >
+                                    <option value="chambre">Chambre</option>
                                     <option value="appartement">Appartement</option>
                                     <option value="maison">Maison</option>
                                     <option value="studio">Studio</option>
@@ -289,7 +290,7 @@ export default function CreatePropertyPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Surface (m²)</Label>
-                                <Input name="surface" type="number" value={formData.surface} onChange={handleChange} required />
+                                <Input name="surface" type="number" value={formData.surface} onChange={handleChange} />
                             </div>
                             <div className="space-y-2">
                                 <Label>Nombre de pièces (Total)</Label>
@@ -395,11 +396,7 @@ export default function CreatePropertyPage() {
                             </div>
                         )}
 
-                        <div className="space-y-2">
-                            <Label>Taux Commission Agence (%) (Défaut Mandat)</Label>
-                            <Input name="taux_commission" type="number" step="0.01" value={formData.taux_commission} onChange={handleChange} placeholder="Ex: 10" />
-                            <p className="text-xs text-gray-500">Si vide, le taux par défaut de l'agence sera utilisé.</p>
-                        </div>
+
 
                         <div className="space-y-2">
                             <Label>Description</Label>

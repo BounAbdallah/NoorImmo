@@ -45,6 +45,22 @@ export default function BuildingDetails() {
         }));
     };
 
+    const handleDownloadMandat = async () => {
+        try {
+            const blob = await structureService.downloadMandat(building.id);
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Mandat_Gerance_${building.nom}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+        } catch (error) {
+            console.error('Erreur lors du téléchargement du mandat:', error);
+            alert('Impossible de télécharger le mandat.');
+        }
+    };
+
     if (loading) return <div className="p-8 text-center">Chargement...</div>;
     if (!building) return <div className="p-8 text-center">Immeuble non trouvé.</div>;
 
@@ -60,6 +76,14 @@ export default function BuildingDetails() {
                         <MapPin className="mr-1.5 h-4 w-4 text-gray-400" />
                         {building.adresse}
                     </p>
+                </div>
+                <div className="flex space-x-3">
+                    <Button
+                        onClick={handleDownloadMandat}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        Créer Mandat (PDF)
+                    </Button>
                 </div>
             </div>
 

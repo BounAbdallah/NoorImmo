@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui
 import { ArrowLeft, MapPin, Tag, Home, Maximize, Calendar, User, Edit, Trash2, Building, FileText, Bed, Sofa, UtensilsCrossed, Bath, Toilet, Wind, Trees, Waves, Car, Package } from 'lucide-react';
 import Swal from 'sweetalert2';
 import PermissionGuard from '../../../components/auth/PermissionGuard';
+import { structureService } from '../../../services/structureService';
 
 export default function PropertyDetailsPage() {
     const { id } = useParams();
@@ -305,6 +306,9 @@ export default function PropertyDetailsPage() {
                 </div>
 
                 {/* Actions & Stats */}
+
+
+                {/* Gestionnaire / Mandat */}
                 <div className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -356,7 +360,6 @@ export default function PropertyDetailsPage() {
                         </CardContent>
                     </Card>
 
-                    {/* Propriétaire / Bailleur info if needed */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Gestionnaire</CardTitle>
@@ -367,28 +370,67 @@ export default function PropertyDetailsPage() {
                                     <User className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-900">{property.bailleur?.user?.nom_complet || 'Moi'}</p>
-                                    <p className="text-xs text-gray-500">Propriétaire</p>
+                                    <p className="text-sm font-medium text-gray-900">
+                                        {property.bailleur?.user?.prenom} {property.bailleur?.user?.nom}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        {property.bailleur ? (
+                                            <>Bailleur {property.immeuble ? `(Immeuble: ${property.immeuble.nom})` : ''}</>
+                                        ) : 'Propriétaire'}
+                                    </p>
                                 </div>
                             </div>
-                            <div className="border-t pt-4 grid grid-cols-2 gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => propertyService.viewMandat(property.id)}
-                                    className="w-full text-xs"
-                                >
-                                    Voir Mandat
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => propertyService.downloadMandat(property.id)}
-                                    className="w-full text-xs"
-                                >
-                                    Télécharger
-                                </Button>
-                            </div>
+
+                            {/* Mandat Actions - Link to Building Mandate if available */}
+                            {property.immeuble_id ? (
+                                <div className="border-t pt-4 grid grid-cols-2 gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={async () => {
+                                            try {
+                                                const blob = await structureService.viewMandat(property.immeuble_id);
+                                                const url = window.URL.createObjectURL(blob);
+                                                window.open(url, '_blank');
+                                            } catch (e) {
+                                                console.error(e);
+                                                alert("Erreur lors de l'ouverture du mandat");
+                                            }
+                                        }}
+                                        className="w-full text-xs"
+                                    >
+                                        Voir Mandat (Immeuble)
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={async () => {
+                                            try {
+                                                const blob = await structureService.downloadMandat(property.immeuble_id);
+                                                const url = window.URL.createObjectURL(blob);
+                                                const link = document.createElement('a');
+                                                link.href = url;
+                                                link.setAttribute('download', `Mandat_Immeuble_${property.immeuble.nom}.pdf`);
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                link.remove();
+                                            } catch (e) {
+                                                console.error(e);
+                                                alert("Erreur lors du téléchargement");
+                                            }
+                                        }}
+                                        className="w-full text-xs"
+                                    >
+                                        Télécharger
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="border-t pt-4 text-center">
+                                    <p className="text-xs text-gray-500 italic">
+                                        Ce bien n'est pas lié à un immeuble. <br /> Pas de mandat de gérance disponible.
+                                    </p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>

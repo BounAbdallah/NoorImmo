@@ -27,6 +27,20 @@ export const structureService = {
         return response.data;
     },
 
+    downloadMandat: async (id) => {
+        const response = await api.get(`/immeubles/${id}/mandat/download`, {
+            responseType: 'blob'
+        });
+        return response.data;
+    },
+
+    viewMandat: async (id) => {
+        const response = await api.get(`/immeubles/${id}/mandat/view`, {
+            responseType: 'blob'
+        });
+        return response.data;
+    },
+
     // Floors (usually accessed via Building, but maybe standalone if we add endpoint?)
     // For now, floors are listed in building details.
 };

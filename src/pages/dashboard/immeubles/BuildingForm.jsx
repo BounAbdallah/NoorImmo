@@ -18,8 +18,14 @@ export default function BuildingForm() {
         nom: '',
         adresse: '',
         nombre_etages: '', // Backend will auto-create floors
+        nombre_biens: '',
         description: '',
-        bailleur_id: ''
+        bailleur_id: '',
+        taux_commission: '',
+        type_mandat: '',
+        duree_mandat: '',
+        date_debut_mandat: '',
+        date_fin_mandat: ''
     });
 
     useEffect(() => {
@@ -112,6 +118,81 @@ export default function BuildingForm() {
                                 required
                             />
                             <p className="text-xs text-gray-500">Le système générera automatiquement les étages.</p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Nombre d'appartements (Total)</Label>
+                            <Input
+                                name="nombre_biens"
+                                type="number"
+                                min="0"
+                                value={formData.nombre_biens}
+                                onChange={handleChange}
+                                placeholder="Total de lots/appartements"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Taux de Commission (en %)</Label>
+                            <Input
+                                name="taux_commission"
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                value={formData.taux_commission}
+                                onChange={handleChange}
+                                placeholder="Ex: 10.00"
+                            />
+                            <p className="text-xs text-gray-500">Laissez vide pour utiliser le taux par défaut de l'agence.</p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Type de Gestion / Mandat</Label>
+                            <select
+                                name="type_mandat"
+                                value={formData.type_mandat}
+                                onChange={handleChange}
+                                className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            >
+                                <option value="">Choisir le type de gestion...</option>
+                                <option value="gerance_totale">GÉRANCE TOTALE (Recouvrement, réparation et rénovation)</option>
+                                <option value="declaration_impots">DÉCLARATION DES IMPÔTS</option>
+                                <option value="recouvrement_seulement">RECOUVREMENT SEULEMENT</option>
+                            </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Durée du contrat (en mois)</Label>
+                            <Input
+                                name="duree_mandat"
+                                type="number"
+                                min="1"
+                                value={formData.duree_mandat}
+                                onChange={handleChange}
+                                placeholder="Ex: 12"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Date de début</Label>
+                                <Input
+                                    name="date_debut_mandat"
+                                    type="date"
+                                    value={formData.date_debut_mandat}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Date de fin</Label>
+                                <Input
+                                    name="date_fin_mandat"
+                                    type="date"
+                                    value={formData.date_fin_mandat}
+                                    onChange={handleChange}
+                                />
+                            </div>
                         </div>
 
                         <div className="space-y-2">

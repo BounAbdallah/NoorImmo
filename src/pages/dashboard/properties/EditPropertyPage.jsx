@@ -399,11 +399,7 @@ export default function EditPropertyPage() {
                             </select>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label>Taux Commission Agence (%) (Défaut Mandat)</Label>
-                            <Input name="taux_commission" type="number" step="0.01" value={formData.taux_commission} onChange={handleChange} placeholder="Ex: 10" />
-                            <p className="text-xs text-gray-500">Si vide, le taux par défaut de l'agence sera utilisé.</p>
-                        </div>
+
 
                         <div className="space-y-2">
                             <Label>Description</Label>
