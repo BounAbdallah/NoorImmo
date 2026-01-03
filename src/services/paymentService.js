@@ -67,10 +67,12 @@ export const paymentService = {
         return response.data;
     },
 
-    initiateWavePayment: async (bailId, montant) => {
+    initiateWavePayment: async (bailId, montant, month, year) => {
         const response = await api.post('/paiements-loyer/wave/initiate', {
             bail_id: bailId,
-            montant: montant
+            montant: montant,
+            month: month,
+            year: year
         });
         return response.data;
     },

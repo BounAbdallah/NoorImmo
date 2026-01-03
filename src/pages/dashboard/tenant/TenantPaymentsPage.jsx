@@ -104,7 +104,7 @@ export default function TenantPaymentsPage() {
         }
     };
 
-    const handleWavePayment = async (bailId, montant) => {
+    const handleWavePayment = async (bailId, montant, month, year) => {
         if (!bailId || !montant) return;
 
         const fees = Math.ceil(montant * 0.015);
@@ -115,6 +115,7 @@ export default function TenantPaymentsPage() {
             html: `
                 <div class="text-left">
                     <p>Montant Loyer: <b>${montant.toLocaleString()} FCFA</b></p>
+                    <p>Mois concerné: <b>${month}/${year}</b></p>
                     <p>Frais (1.5%): <b>${fees.toLocaleString()} FCFA</b></p>
                     <hr class="my-2"/>
                     <p class="text-lg">Total à payer: <b class="text-blue-600">${total.toLocaleString()} FCFA</b></p>
@@ -130,7 +131,7 @@ export default function TenantPaymentsPage() {
         if (!result.isConfirmed) return;
 
         try {
-            const response = await paymentService.initiateWavePayment(bailId, montant);
+            const response = await paymentService.initiateWavePayment(bailId, montant, month, year);
             if (response.success && response.checkout_url) {
                 window.location.href = response.checkout_url;
             } else {
@@ -205,7 +206,15 @@ export default function TenantPaymentsPage() {
                                                             <Button
                                                                 size="sm"
                                                                 className="bg-blue-500 hover:bg-blue-600 text-white"
-                                                                onClick={() => handleWavePayment(item.lease_id || payments[0]?.bail_id, item.amount || item.reste || (stats.dette > 0 ? stats.dette : 0))}
+                                                                onClick={() => {
+                                                                    const [year, month] = (item.date || '').split('-');
+                                                                    handleWavePayment(
+                                                                        item.lease_id || payments[0]?.bail_id,
+                                                                        item.amount || item.reste || (stats.dette > 0 ? stats.dette : 0),
+                                                                        month, // Pass month
+                                                                        year   // Pass year
+                                                                    );
+                                                                }}
                                                                 title="Payer avec Wave"
                                                             >
                                                                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Wave_logo_Logotype_Emblem.png/600px-Wave_logo_Logotype_Emblem.png" alt="Wave" className="h-4 w-4 mr-1 brightness-0 invert" />
