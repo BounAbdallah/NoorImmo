@@ -26,7 +26,7 @@ const PaymentSuccessPage = () => {
 
             try {
                 // Call backend to confirm payment
-                await paymentService.confirmWavePayment({
+                const response = await paymentService.confirmWavePayment({
                     bail_id: bailId,
                     montant: amount,
                     reference_transaction: waveId || ref // Use Wave ID if available, else client ref
