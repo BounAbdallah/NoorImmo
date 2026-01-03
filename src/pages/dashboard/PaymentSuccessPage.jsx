@@ -10,13 +10,18 @@ const PaymentSuccessPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
+    const processedRef = React.useRef(false);
+
     useEffect(() => {
+        if (processedRef.current) return;
+        processedRef.current = true;
+
         const confirmPayment = async () => {
-            const params = new URLSearchParams(location.search);
+            const params = new URLSearchParams(window.location.search); // Use window for stability
             const ref = params.get('ref');
             const bailId = params.get('bail_id');
             const amount = params.get('amount');
-            const waveId = params.get('id'); // Wave sometimes sends 'id'
+            const waveId = params.get('id');
 
             if (!bailId || !amount) {
                 setStatus('error');
@@ -36,28 +41,42 @@ const PaymentSuccessPage = () => {
                 setMessage('Paiement confirmé avec succès !');
 
                 // Redirect to payment details page
-                const paymentId = response.data?.id; // Standard create response
-                const fallbackId = response.data?.data?.id; // If wrapped in resource or existing check
-
-                const targetId = paymentId || fallbackId;
+                // Response structure: { success: true, data: { id: ... } }
+                const paymentId = response.id || response.data?.id;
 
                 setTimeout(() => {
-                    if (targetId) {
-                        navigate(`/payments/${targetId}`);
+                    if (paymentId) {
+                        navigate(`/payments/${paymentId}`, { replace: true });
                     } else {
-                        navigate('/my-payments');
+                        navigate('/my-payments', { replace: true });
                     }
                 }, 2000);
 
             } catch (error) {
                 console.error('Payment confirmation error:', error);
+
+                // If error is "Payment already processed", consider it a success
+                if (error.response?.data?.message === 'Paiement déjà enregistré.' || error.response?.data?.status === 'already_processed') {
+                    setStatus('success');
+                    setMessage('Paiement déjà validé.');
+                    const existingId = error.response?.data?.data?.id;
+                    setTimeout(() => {
+                        if (existingId) {
+                            navigate(`/payments/${existingId}`, { replace: true });
+                        } else {
+                            navigate('/my-payments', { replace: true });
+                        }
+                    }, 2000);
+                    return;
+                }
+
                 setStatus('error');
-                setMessage('Erreur lors de la confirmation du paiement. Veuillez contacter le support si vous avez été débité.');
+                setMessage('Erreur lors de la confirmation.');
             }
         };
 
         confirmPayment();
-    }, [location, navigate]);
+    }, []); // Empty dependency array
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
