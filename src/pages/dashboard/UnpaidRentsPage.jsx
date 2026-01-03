@@ -41,8 +41,19 @@ export default function UnpaidRentsPage() {
 
     const handleWavePayment = async (rent) => {
         try {
+            // Extract month/year from rent.periode_debut if available, otherwise current
+            const date = rent.periode_debut ? new Date(rent.periode_debut) : new Date();
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+
             // Show loading or disable button
-            const response = await paymentService.initiateWavePayment(rent.bail_id, rent.dette); // Paying full debt
+            const response = await paymentService.initiateWavePayment(
+                rent.bail_id,
+                rent.dette,
+                month,
+                year
+            ); // Paying full debt
+
             if (response.success && response.checkout_url) {
                 window.location.href = response.checkout_url;
             } else {

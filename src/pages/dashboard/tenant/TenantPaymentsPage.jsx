@@ -211,8 +211,8 @@ export default function TenantPaymentsPage() {
                                                                     handleWavePayment(
                                                                         item.lease_id || payments[0]?.bail_id,
                                                                         item.amount || item.reste || (stats.dette > 0 ? stats.dette : 0),
-                                                                        month, // Pass month
-                                                                        year   // Pass year
+                                                                        parseInt(month, 10), // Ensure integer
+                                                                        parseInt(year, 10)   // Ensure integer
                                                                     );
                                                                 }}
                                                                 title="Payer avec Wave"
