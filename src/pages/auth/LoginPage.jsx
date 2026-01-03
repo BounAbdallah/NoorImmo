@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Lock, Mail, Eye, EyeOff, Check, ArrowRight, User, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -82,6 +82,7 @@ export default function LoginPage() {
 
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Carousel auto-rotate
     useEffect(() => {
@@ -125,8 +126,17 @@ export default function LoginPage() {
             if (rememberMe) {
                 localStorage.setItem('remember_login', loginIdentifier);
             }
-            // Force full page reload to ensure all state is fresh
-            window.location.href = '/dashboard';
+            // navigate(from, { replace: true });
+            // Using window.location to ensure fresh state, but we need to respect 'from'
+            const from = location.state?.from?.pathname || '/dashboard';
+
+            if (from === '/dashboard') {
+                window.location.href = '/dashboard';
+            } else {
+                navigate(from, { replace: true });
+                // If we need a refresh, we might need a workaround, but usually navigate is enough
+                // window.location.reload(); // only if strictly needed
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'Identifiants incorrects');
         } finally {
