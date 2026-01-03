@@ -35,10 +35,19 @@ const PaymentSuccessPage = () => {
                 setStatus('success');
                 setMessage('Paiement confirmé avec succès !');
 
-                // Redirect after a short delay
+                // Redirect to payment details page
+                const paymentId = response.data?.id; // Standard create response
+                const fallbackId = response.data?.data?.id; // If wrapped in resource or existing check
+
+                const targetId = paymentId || fallbackId;
+
                 setTimeout(() => {
-                    navigate('/my-payments');
-                }, 3000);
+                    if (targetId) {
+                        navigate(`/payments/${targetId}`);
+                    } else {
+                        navigate('/my-payments');
+                    }
+                }, 2000);
 
             } catch (error) {
                 console.error('Payment confirmation error:', error);
