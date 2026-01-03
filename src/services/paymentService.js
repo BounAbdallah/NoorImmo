@@ -65,5 +65,18 @@ export const paymentService = {
     getLeaseTimeline: async (leaseId) => {
         const response = await api.get(`/baux/${leaseId}/timeline`);
         return response.data;
+    },
+
+    initiateWavePayment: async (bailId, montant) => {
+        const response = await api.post('/paiements-loyer/wave/initiate', {
+            bail_id: bailId,
+            montant: montant
+        });
+        return response.data;
+    },
+
+    confirmWavePayment: async (paymentData) => {
+        const response = await api.post('/paiements-loyer/wave/confirm', paymentData);
+        return response.data;
     }
 };

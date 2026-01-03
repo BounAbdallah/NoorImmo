@@ -39,6 +39,21 @@ export default function UnpaidRentsPage() {
         }
     };
 
+    const handleWavePayment = async (rent) => {
+        try {
+            // Show loading or disable button
+            const response = await paymentService.initiateWavePayment(rent.bail_id, rent.dette); // Paying full debt
+            if (response.success && response.checkout_url) {
+                window.location.href = response.checkout_url;
+            } else {
+                alert('Erreur: Impossible d\'initier le paiement Wave.');
+            }
+        } catch (error) {
+            console.error('Wave Payment Error:', error);
+            alert('Une erreur est survenue lors du paiement Wave.');
+        }
+    };
+
     if (loading) {
         return <div className="p-12 text-center">Chargement...</div>;
     }
@@ -147,6 +162,23 @@ export default function UnpaidRentsPage() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex justify-end space-x-2">
+                                            {/* Wave Payment Button - Only for tenants or showing to admin? Usually tenants pay. 
+                                                If implemented for admin, they might be generating a link? 
+                                                For now assuming this page viewable by Admin/Manager, but button useful if they want to pay on behalf? 
+                                                Actually, requirements imply "Integrer le moyen de paiement", usually for the payer. 
+                                                If this page is "Unpaid Rents" seen by LANDLORD, he doesn't pay. 
+                                                If seen by TENANT, he pays.
+                                                Let's add it, but maybe verify user role? For MVP, adding it.
+                                            */}
+                                            <button
+                                                onClick={() => handleWavePayment(rent)}
+                                                className="inline-flex items-center px-3 py-1 border border-transparent shadow-sm text-xs font-medium rounded text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                title="Payer avec Wave"
+                                            >
+                                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Wave_logo_Logotype_Emblem.png/600px-Wave_logo_Logotype_Emblem.png" alt="Wave" className="h-4 w-4 mr-1 brightness-0 invert" />
+                                                Payer
+                                            </button>
+
                                             <button
                                                 onClick={() => paymentService.viewDebtDocument(rent.paiements[0]?.id)}
                                                 className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"

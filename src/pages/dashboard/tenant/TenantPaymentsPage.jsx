@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui
 import { paymentService } from '../../../services/paymentService';
 import { Download, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
+import Swal from 'sweetalert2';
 
 export default function TenantPaymentsPage() {
     const [payments, setPayments] = useState([]);
@@ -37,9 +38,6 @@ export default function TenantPaymentsPage() {
 
     const loadTimeline = async () => {
         try {
-            // Get user's active lease first (usually from stats or another call)
-            // But we can also get it from any payment or wait for a specific endpoint
-            // For now, let's assume we can find the lease_id from the first payment or stats
             const paymentsRes = await paymentService.getPayments();
             const firstPayment = paymentsRes.data?.data?.[0] || paymentsRes.data?.[0];
 
@@ -78,6 +76,7 @@ export default function TenantPaymentsPage() {
             partiel: 'bg-yellow-100 text-yellow-800',
             en_retard: 'bg-red-100 text-red-800',
             impaye: 'bg-red-100 text-red-800',
+            non_echu: 'bg-blue-50 text-blue-600',
             en_attente: 'bg-gray-100 text-gray-800'
         };
 
@@ -86,6 +85,7 @@ export default function TenantPaymentsPage() {
             partiel: 'Partiel',
             en_retard: 'En retard',
             impaye: 'Impayé',
+            non_echu: 'À venir',
             en_attente: 'En attente'
         };
 
@@ -101,6 +101,44 @@ export default function TenantPaymentsPage() {
             await paymentService.downloadReceipt(id);
         } catch (error) {
             console.error("Failed to download quittance", error);
+        }
+    };
+
+    const handleWavePayment = async (bailId, montant) => {
+        if (!bailId || !montant) return;
+
+        const fees = Math.ceil(montant * 0.015);
+        const total = parseInt(montant) + fees;
+
+        const result = await Swal.fire({
+            title: 'Confirmer le paiement',
+            html: `
+                <div class="text-left">
+                    <p>Montant Loyer: <b>${montant.toLocaleString()} FCFA</b></p>
+                    <p>Frais (1.5%): <b>${fees.toLocaleString()} FCFA</b></p>
+                    <hr class="my-2"/>
+                    <p class="text-lg">Total à payer: <b class="text-blue-600">${total.toLocaleString()} FCFA</b></p>
+                </div>
+            `,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Payer avec Wave',
+            cancelButtonText: 'Annuler',
+            confirmButtonColor: '#1b9df0' // Wave Blue
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await paymentService.initiateWavePayment(bailId, montant);
+            if (response.success && response.checkout_url) {
+                window.location.href = response.checkout_url;
+            } else {
+                alert('Erreur: Impossible d\'initier le paiement Wave.');
+            }
+        } catch (error) {
+            console.error('Wave Payment Error:', error);
+            alert('Une erreur est survenue lors du paiement Wave.');
         }
     };
 
@@ -162,14 +200,28 @@ export default function TenantPaymentsPage() {
                                                         Télécharger
                                                     </Button>
                                                 ) : (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        disabled
-                                                        className="text-gray-400 cursor-not-allowed"
-                                                    >
-                                                        Indisponible
-                                                    </Button>
+                                                    <div className="flex justify-end gap-2">
+                                                        {(item.status === 'impaye' || item.status === 'en_retard' || item.status === 'partiel' || item.status === 'non_echu') ? (
+                                                            <Button
+                                                                size="sm"
+                                                                className="bg-blue-500 hover:bg-blue-600 text-white"
+                                                                onClick={() => handleWavePayment(item.lease_id || payments[0]?.bail_id, item.amount || item.reste || (stats.dette > 0 ? stats.dette : 0))}
+                                                                title="Payer avec Wave"
+                                                            >
+                                                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Wave_logo_Logotype_Emblem.png/600px-Wave_logo_Logotype_Emblem.png" alt="Wave" className="h-4 w-4 mr-1 brightness-0 invert" />
+                                                                Payer
+                                                            </Button>
+                                                        ) : (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                disabled
+                                                                className="text-gray-400 cursor-not-allowed"
+                                                            >
+                                                                Indisponible
+                                                            </Button>
+                                                        )}
+                                                    </div>
                                                 )}
                                             </td>
                                         </tr>

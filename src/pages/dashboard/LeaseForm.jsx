@@ -50,7 +50,7 @@ export default function LeaseForm() {
         try {
             // Fetch available properties and tenants
             const [propsRes, tenantsRes] = await Promise.all([
-                propertyService.getAllProperties(), // Assuming this exists or I need to create it/check it
+                propertyService.getAllProperties({ statut: 'disponible' }), // Only fetch available properties
                 tenantService.getAllTenants()
             ]);
 
