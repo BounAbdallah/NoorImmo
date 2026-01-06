@@ -101,6 +101,8 @@ export function NotificationBell() {
                 return <CreditCard className="h-5 w-5 text-green-500" />;
             case 'incident':
                 return <AlertTriangle className="h-5 w-5 text-red-500" />;
+            case 'commission_earned':
+                return <DollarSign className="h-5 w-5 text-amber-500" />;
             default:
                 return <Info className="h-5 w-5 text-blue-500" />;
         }
@@ -117,6 +119,8 @@ export function NotificationBell() {
                 return metadata.paiement_id ? `/payments/${metadata.paiement_id}` : '/payments';
             case 'incident':
                 return metadata.incident_id ? `/incidents/${metadata.incident_id}` : '/incidents';
+            case 'commission_earned':
+                return '/admin/dashboard';
             default:
                 return null;
         }
