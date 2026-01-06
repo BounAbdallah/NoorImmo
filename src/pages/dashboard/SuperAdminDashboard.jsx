@@ -186,8 +186,62 @@ export default function SuperAdminDashboard() {
                 <StatsCard title="Abonnements Actifs" value={stats?.agencies?.active_subscriptions || 0} icon={CheckCircle} color="text-green-600" bg="bg-green-100" />
                 <StatsCard title="Utilisateurs Totaux" value={stats?.users?.total || 0} icon={Users} color="text-purple-600" bg="bg-purple-100" />
                 <StatsCard title="Revenus (MRR Est.)" value={`${new Intl.NumberFormat('fr-FR').format(stats?.revenue?.current_mrr || 0)} F`} icon={DollarSign} color="text-emerald-600" bg="bg-emerald-100" />
-                <StatsCard title="Visites Autres" value={stats?.visits?.other || 0} icon={Search} color="text-gray-500" bg="bg-gray-50" />
+
+                {/* Platform Commission Wallet */}
+                <StatsCard
+                    title="Portefeuille Commissions"
+                    value={`${new Intl.NumberFormat('fr-FR').format(stats?.platform_wallet_balance || 0)} F`}
+                    icon={DollarSign}
+                    color="text-amber-600"
+                    bg="bg-amber-100"
+                />
+                <StatsCard
+                    title="Commissions (Mois)"
+                    value={`${new Intl.NumberFormat('fr-FR').format(stats?.platform_revenue_month || 0)} F`}
+                    icon={Activity}
+                    color="text-amber-600"
+                    bg="bg-amber-50"
+                />
             </div>
+
+            {/* Recent Earnings Table */}
+            {stats?.recent_earnings?.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Derniers Gains (Commissions)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Détails</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agence</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {stats.recent_earnings.map((earning, index) => (
+                                        <tr key={index}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {new Date(earning.date).toLocaleDateString()} {new Date(earning.date).toLocaleTimeString()}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{earning.source}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{earning.details}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{earning.agence}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600 text-right">
+                                                +{new Intl.NumberFormat('fr-FR').format(earning.amount)} F
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* Modal for online users */}
             <OnlineUsersModal
