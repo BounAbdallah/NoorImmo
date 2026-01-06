@@ -214,15 +214,16 @@ export default function CreatePropertyPage() {
                         {/* Immeuble / Etage Selection */}
                         <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-md">
                             <div className="space-y-2">
-                                <Label>Immeuble (Optionnel)</Label>
+                                <Label>Immeuble (Obligatoire)</Label>
                                 <select
                                     name="immeuble_id"
                                     value={formData.immeuble_id}
                                     onChange={handleImmeubleChange}
                                     className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:text-gray-500"
                                     disabled={!!searchParams.get('immeuble_id')}
+                                    required
                                 >
-                                    <option value="">Aucun (Maison/Autre)</option>
+                                    <option value="">Sélectionner un immeuble...</option>
                                     {immeubles.map(im => (
                                         <option key={im.id} value={im.id}>{im.nom}</option>
                                     ))}
