@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Check, CheckCheck, Trash2, X, AlertTriangle, FileText, CreditCard, Info } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, X, AlertTriangle, FileText, CreditCard, Info, DollarSign } from 'lucide-react';
 import { notificationService } from '../../services/notificationService';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';

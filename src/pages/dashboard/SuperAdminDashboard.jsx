@@ -216,20 +216,25 @@ export default function SuperAdminDashboard() {
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Détails</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bien</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agence</th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Commission</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {stats.recent_earnings.map((earning, index) => (
                                         <tr key={index}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {new Date(earning.date).toLocaleDateString()} {new Date(earning.date).toLocaleTimeString()}
+                                                {new Date(earning.date).toLocaleDateString()} <span className="text-xs">{new Date(earning.date).toLocaleTimeString()}</span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{earning.source}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{earning.details}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
+                                                {earning.transaction_ref}
+                                                <div className="text-xs text-gray-500">{earning.mode}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{earning.client}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{earning.property}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{earning.agence}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600 text-right">
                                                 +{new Intl.NumberFormat('fr-FR').format(earning.amount)} F
