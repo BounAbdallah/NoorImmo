@@ -76,17 +76,6 @@ export default function BuildingList() {
             } else {
                 setTotalItems(data.length);
             }
-
-            // Use stats from API response
-            if (response.stats) {
-                setStats({
-                    totalImmeubles: response.data?.total || data.length,
-                    totalEtages: response.stats.total_etages || 0,
-                    totalBiens: response.stats.total_biens || 0,
-                    totalLocataires: response.stats.total_locataires || 0,
-                    totalChiffreAffaires: response.stats.total_chiffre_affaires || 0,
-                });
-            }
         } catch (error) {
             console.error(error);
         } finally {
@@ -94,40 +83,34 @@ export default function BuildingList() {
         }
     }, [currentPage, searchTerm, filterBailleurId]);
 
-    const calculateStats = (data) => {
-        let totalEtages = 0;
-        let totalBiens = 0;
-        let totalLocataires = 0;
+    // Load stats separately to get accurate totals from ALL buildings
+    const loadStats = useCallback(async () => {
+        try {
+            // Fetch ALL buildings for accurate statistics
+            const response = await structureService.getAllBuildings({ all: 'true' });
+            const allBuildings = response.data || [];
+            const statsData = response.stats || {};
 
-        data.forEach(building => {
-            totalEtages += building.etages?.length || building.nombre_etages || 0;
+            setStats({
+                totalImmeubles: allBuildings.length,
+                totalEtages: statsData.total_etages || 0,
+                totalBiens: statsData.total_biens || 0,
+                totalLocataires: statsData.total_locataires || 0,
+                totalChiffreAffaires: statsData.total_chiffre_affaires || 0,
+            });
+        } catch (error) {
+            console.error('Failed to load stats:', error);
+        }
+    }, []);
 
-            // Count biens and locataires from etages if available
-            if (building.etages) {
-                building.etages.forEach(etage => {
-                    if (etage.biens) {
-                        totalBiens += etage.biens.length;
-                        etage.biens.forEach(bien => {
-                            if (bien.baux) {
-                                totalLocataires += bien.baux.filter(b => b.statut === 'actif').length;
-                            }
-                        });
-                    }
-                });
-            }
-        });
-
-        setStats({
-            totalImmeubles: data.length,
-            totalEtages,
-            totalBiens,
-            totalLocataires,
-        });
-    };
+    useEffect(() => {
+        loadStats();
+    }, [loadStats]);
 
     useEffect(() => {
         loadBuildings();
     }, [loadBuildings]);
+
 
     // Chart data - buildings by number of floors
     const chartData = {

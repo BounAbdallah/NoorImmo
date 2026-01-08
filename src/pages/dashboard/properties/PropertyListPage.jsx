@@ -48,10 +48,7 @@ export default function PropertyListPage() {
             setTotalPages(data.last_page);
             setTotalItems(data.total);
 
-            // Calculate stats from all properties (first load or when filters change)
-            if (currentPage === 1 && !searchQuery && !selectedStatus && !selectedType) {
-                calculateStats(data.data, data.total);
-            }
+
         } catch (error) {
             console.error("Failed to load properties", error);
         } finally {
@@ -62,22 +59,21 @@ export default function PropertyListPage() {
     // Load stats separately to get accurate totals
     const loadStats = useCallback(async () => {
         try {
-            // Load all properties for stats (without pagination)
-            const [disponibleRes, loueRes, maintenanceRes, allRes] = await Promise.all([
-                propertyService.getAll({ statut: 'disponible', per_page: 1 }),
-                propertyService.getAll({ statut: 'loue', per_page: 1 }),
-                propertyService.getAll({ statut: 'maintenance', per_page: 1 }),
-                propertyService.getAll({ per_page: 100 }) // Get more for revenue calculation
-            ]);
+            // Load ALL properties for accurate stats (using the new 'all' parameter)
+            const response = await propertyService.getAll({ all: 'true' });
+            const allProperties = response.data.data || [];
 
-            const allProperties = allRes.data.data.data || [];
+            // Calculate statistics from all properties
+            const disponible = allProperties.filter(p => p.statut === 'disponible').length;
+            const loue = allProperties.filter(p => p.statut === 'loue').length;
+            const maintenance = allProperties.filter(p => p.statut === 'maintenance').length;
             const totalRevenue = allProperties.reduce((sum, p) => sum + (parseFloat(p.loyer_mensuel) || 0), 0);
 
             setStats({
-                total: allRes.data.data.total || 0,
-                disponible: disponibleRes.data.data.total || 0,
-                loue: loueRes.data.data.total || 0,
-                maintenance: maintenanceRes.data.data.total || 0,
+                total: allProperties.length,
+                disponible,
+                loue,
+                maintenance,
                 totalRevenue
             });
         } catch (error) {
@@ -93,14 +89,7 @@ export default function PropertyListPage() {
         loadProperties();
     }, [loadProperties]);
 
-    const calculateStats = (props, total) => {
-        const disponible = props.filter(p => p.statut === 'disponible').length;
-        const loue = props.filter(p => p.statut === 'loue').length;
-        const maintenance = props.filter(p => p.statut === 'maintenance').length;
-        const totalRevenue = props.reduce((sum, p) => sum + (parseFloat(p.loyer_mensuel) || 0), 0);
 
-        setStats({ total, disponible, loue, maintenance, totalRevenue });
-    };
 
     const handleSearch = (e) => {
         e.preventDefault();
