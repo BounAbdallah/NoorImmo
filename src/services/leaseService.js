@@ -27,7 +27,7 @@ export const leaseService = {
     terminateLease: async (id) => {
         // Assuming termination might be an update to status or a specific endpoint
         // For now, let's assume it's an update to set status to 'termine'
-        const response = await api.put(`/baux/${id}`, { statut: 'termine' });
+        const response = await api.put(`/baux/${id}`, { statut: 'resilie' });
         return response.data;
     },
 

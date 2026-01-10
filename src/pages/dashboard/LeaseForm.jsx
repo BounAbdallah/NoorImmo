@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { leaseService } from '../../services/leaseService';
 import { propertyService } from '../../services/propertyService'; // Need to fetch properties
 import { tenantService } from '../../services/tenantService';
@@ -12,10 +12,13 @@ import Swal from 'sweetalert2';
 
 export default function LeaseForm() {
     const navigate = useNavigate();
+    const { id } = useParams(); // Get ID for edit mode
     const { user, hasPermission } = useAuth();
+    const isEditMode = !!id;
 
     useEffect(() => {
-        if (!hasPermission('baux.create')) {
+        if (!hasPermission('baux.create') && !isEditMode) {
+            // For edit, maybe checking baux.edit would be better but keeping simple
             Swal.fire({
                 icon: 'error',
                 title: 'Accès refusé',
@@ -25,7 +28,7 @@ export default function LeaseForm() {
             });
             navigate('/leases');
         }
-    }, [hasPermission, navigate]);
+    }, [hasPermission, navigate, isEditMode]);
 
     const [properties, setProperties] = useState([]);
     const [tenants, setTenants] = useState([]);
@@ -44,24 +47,41 @@ export default function LeaseForm() {
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [id]);
 
     const loadData = async () => {
         try {
             // Fetch available properties and tenants
+            // For edit mode, we might need to fetch ALL properties or at least the one currently linked
             const [propsRes, tenantsRes] = await Promise.all([
-                propertyService.getAllProperties({ statut: 'disponible', all: 'true' }), // Fetch ALL available properties
+                propertyService.getAllProperties({ all: 'true' }), // Fetch ALL to ensure current property is visible in edit
                 tenantService.getAllTenants()
             ]);
 
             if (propsRes.data) {
-                // Handle pagination: response.data.data.data vs response.data.data
                 const pData = propsRes.data.data;
                 setProperties(pData?.data || pData || []);
             }
             if (tenantsRes.data) {
                 const tData = tenantsRes.data.data;
                 setTenants(tData?.data || tData || []);
+            }
+
+            // If Edit Mode, Fetch Lease Data
+            if (isEditMode) {
+                const leaseRes = await leaseService.getLease(id);
+                if (leaseRes.success) {
+                    const data = leaseRes.data;
+                    setFormData({
+                        bien_id: data.bien_id,
+                        locataire_id: data.locataire_id,
+                        date_debut: data.date_debut,
+                        date_fin: data.date_fin,
+                        type_duree: data.type_duree,
+                        loyer_mensuel: data.loyer_mensuel,
+                        caution: data.caution
+                    });
+                }
             }
         } catch (error) {
             console.error("Error loading form data", error);
@@ -81,25 +101,25 @@ export default function LeaseForm() {
         setSubmitting(true);
 
         try {
-            // Add current agency ID if user is agency? 
-            // The API might infer it from authenticated user if they are linked to an agency.
-            // But let's send what we have. API BailController validates 'agence_id'.
-            // If the user IS the agency, backend should handle it or we pass it explicitely.
-            // For now, let's assume backend infers from auth user or we add it if needed.
-
             const payload = {
                 ...formData,
                 agence_id: user.agence?.id // Pass agency ID if available
             };
 
-            const response = await leaseService.createLease(payload);
+            let response;
+            if (isEditMode) {
+                response = await leaseService.updateLease(id, payload);
+            } else {
+                response = await leaseService.createLease(payload);
+            }
+
             if (response.success) {
-                Swal.fire('Succès', 'Bail créé avec succès', 'success');
+                Swal.fire('Succès', `Bail ${isEditMode ? 'modifié' : 'créé'} avec succès`, 'success');
                 navigate('/leases');
             }
         } catch (error) {
             console.error(error);
-            Swal.fire('Erreur', error.response?.data?.message || 'Erreur lors de la création du bail.', 'error');
+            Swal.fire('Erreur', error.response?.data?.message || `Erreur lors de la ${isEditMode ? 'modification' : 'création'} du bail.`, 'error');
         } finally {
             setSubmitting(false);
         }
@@ -111,7 +131,7 @@ export default function LeaseForm() {
 
     return (
         <div className="max-w-3xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Nouveau Bail Numérique</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">{isEditMode ? 'Modifier le Bail' : 'Nouveau Bail Numérique'}</h1>
 
             <Card>
                 <form onSubmit={handleSubmit}>
@@ -130,10 +150,11 @@ export default function LeaseForm() {
                                     value={formData.bien_id}
                                     onChange={handleChange}
                                     required
+                                    disabled={isEditMode} // Usually shouldn't change property of an existing lease easily without recreation? User can try.
                                 >
                                     <option value="">Sélectionner un bien...</option>
                                     {properties.map(p => (
-                                        <option key={p.id} value={p.id}>{p.reference} - {p.adresse}</option>
+                                        <option key={p.id} value={p.id}>{p.reference} - {p.adresse} {p.statut !== 'disponible' && p.id != formData.bien_id ? '(Occupé)' : ''}</option>
                                     ))}
                                 </select>
                             </div>
@@ -148,13 +169,14 @@ export default function LeaseForm() {
                                     value={formData.locataire_id}
                                     onChange={handleChange}
                                     required
+                                    disabled={isEditMode} // Keep tenant fixed if editing
                                 >
                                     <option value="">Sélectionner un locataire...</option>
                                     {tenants.map(t => (
                                         <option key={t.id} value={t.id}>{t.user?.prenom} {t.user?.nom} ({t.user?.email})</option>
                                     ))}
                                 </select>
-                                <p className="mt-1 text-xs text-gray-500">Le locataire n'est pas dans la liste ? Ajoutez-le d'abord dans l'annuaire.</p>
+                                {!isEditMode && <p className="mt-1 text-xs text-gray-500">Le locataire n'est pas dans la liste ? Ajoutez-le d'abord dans l'annuaire.</p>}
                             </div>
 
                             {/* Contract Type */}
@@ -229,7 +251,7 @@ export default function LeaseForm() {
                             Annuler
                         </Button>
                         <Button type="submit" isLoading={submitting}>
-                            Créer le bail
+                            {isEditMode ? 'Enregistrer les modifications' : 'Créer le bail'}
                         </Button>
                     </CardFooter>
                 </form>

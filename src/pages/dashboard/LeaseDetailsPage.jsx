@@ -5,13 +5,16 @@ import { leaseService } from '../../services/leaseService';
 import { paymentService } from '../../services/paymentService'; // Ensure this is imported
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { ArrowLeft, User, Home, Calendar, FileText, Download, CheckCircle, AlertTriangle, Clock, CreditCard } from 'lucide-react';
+import { ArrowLeft, User, Home, Calendar, FileText, Download, CheckCircle, AlertTriangle, Clock, CreditCard, Edit, Trash2 } from 'lucide-react';
 import { format, differenceInMonths, addMonths, isBefore, isAfter, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import PaymentModal from '../../components/dashboard/PaymentModal';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom'; // Add useNavigate
 
 export default function LeaseDetailsPage() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [lease, setLease] = useState(null);
     const [loading, setLoading] = useState(true);
     const [schedule, setSchedule] = useState([]);
@@ -36,6 +39,32 @@ export default function LeaseDetailsPage() {
             console.error("Error loading lease", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleTerminate = async () => {
+        const result = await Swal.fire({
+            title: 'Êtes-vous sûr ?',
+            text: "La résiliation de ce bail est irréversible. Le statut passera à 'Résilié' et le bien sera libéré.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Oui, résilier !',
+            cancelButtonText: 'Annuler'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await leaseService.terminateLease(id);
+                if (response.success) {
+                    Swal.fire('Résilié !', 'Le bail a été résilié avec succès.', 'success');
+                    loadLease(); // Reload to show new status
+                }
+            } catch (error) {
+                console.error("Error terminating lease", error);
+                Swal.fire('Erreur', 'Impossible de résilier le bail.', 'error');
+            }
         }
     };
 
@@ -173,18 +202,60 @@ export default function LeaseDetailsPage() {
         }
     };
 
+    const getLeaseStatusBadge = (status) => {
+        switch (status) {
+            case 'actif':
+                return <span className="px-3 py-1 inline-flex text-sm font-semibold rounded-full bg-green-100 text-green-800 border border-green-200">Actif</span>;
+            case 'expire':
+                return <span className="px-3 py-1 inline-flex text-sm font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">Expiré</span>;
+            case 'resilie':
+                return <span className="px-3 py-1 inline-flex text-sm font-semibold rounded-full bg-gray-100 text-gray-800 border border-gray-200">Résilié</span>;
+            default:
+                return <span className="px-3 py-1 inline-flex text-sm font-semibold rounded-full bg-blue-100 text-blue-800">{status}</span>;
+        }
+    };
+
     if (loading) return <div className="p-8 text-center">Chargement...</div>;
     if (!lease) return <div className="p-8 text-center">Bail introuvable.</div>;
 
     return (
         <div className="space-y-6 pb-12">
-            <div className="flex items-center space-x-4">
-                <Link to="/leases" className="p-2 rounded-full hover:bg-gray-100">
-                    <ArrowLeft className="h-6 w-6 text-gray-500" />
-                </Link>
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Détails du Bail</h1>
-                    <p className="text-sm text-gray-500">Référence: {lease.id}</p>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                    <Link to="/leases" className="p-2 rounded-full hover:bg-gray-100">
+                        <ArrowLeft className="h-6 w-6 text-gray-500" />
+                    </Link>
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-2xl font-bold text-gray-900">Détails du Bail</h1>
+                            {getLeaseStatusBadge(lease.statut)}
+                        </div>
+                        <p className="text-sm text-gray-500">Référence: {lease.id}</p>
+                    </div>
+                </div>
+                <div className="flex space-x-3">
+                    {lease.statut === 'actif' && (
+                        <>
+                            <PermissionGuard permission="baux.edit">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => navigate(`/leases/${id}/edit`)}
+                                    className="flex items-center"
+                                >
+                                    <Edit className="h-4 w-4 mr-2" /> Modifier
+                                </Button>
+                            </PermissionGuard>
+                            <PermissionGuard permission="baux.delete"> {/* Or dedicated permission */}
+                                <Button
+                                    variant="destructive"
+                                    onClick={handleTerminate}
+                                    className="flex items-center"
+                                >
+                                    <Trash2 className="h-4 w-4 mr-2" /> Résilier
+                                </Button>
+                            </PermissionGuard>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -436,7 +507,7 @@ export default function LeaseDetailsPage() {
                                                 </Button>
                                             )}
 
-                                            {item.status !== 'paye' && (
+                                            {item.status !== 'paye' && (lease.statut === 'actif' || ['retard', 'impaye', 'partiel'].includes(item.status)) && (
                                                 <PermissionGuard permission="paiements.create">
                                                     <Button
                                                         size="sm"

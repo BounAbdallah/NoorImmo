@@ -31,14 +31,23 @@ export const structureService = {
         const response = await api.get(`/immeubles/${id}/mandat/download`, {
             responseType: 'blob'
         });
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `mandat_gerance_${id}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
         return response.data;
     },
 
-    viewMandat: async (id) => {
-        const response = await api.get(`/immeubles/${id}/mandat/view`, {
-            responseType: 'blob'
-        });
-        return response.data;
+    viewMandat: (id) => {
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+        const token = localStorage.getItem('token');
+        const queryParams = new URLSearchParams({ token });
+        const url = `${baseUrl}/immeubles/${id}/mandat/view?${queryParams}`;
+        window.open(url, '_blank');
     },
 
     // Floors (usually accessed via Building, but maybe standalone if we add endpoint?)

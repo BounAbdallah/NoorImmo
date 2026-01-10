@@ -147,6 +147,7 @@ function App() {
               {/* Gestion Locative Routes */}
               <Route path="/leases" element={<LeaseList />} />
               <Route path="/leases/new" element={<LeaseForm />} />
+              <Route path="/leases/:id/edit" element={<LeaseForm />} />
               <Route path="/leases/:id" element={<LeaseDetailsPage />} />
               <Route path="/tenants" element={<TenantsList />} />
               <Route path="/tenants/:id" element={<TenantDetailsPage />} />
