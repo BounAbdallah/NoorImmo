@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -79,11 +79,11 @@ export default function LoginPage() {
                     </form>
                 </CardContent>
                 <CardFooter className="flex justify-center flex-col space-y-2">
-                    <a href="#" className="text-sm text-primary-600 hover:underline">
+                    <Link to="/forgot-password" className="text-sm text-primary-600 hover:underline">
                         Mot de passe oublié ?
-                    </a>
+                    </Link>
                     <div className="text-sm text-gray-500">
-                        Pas encore de compte ? <a href="#" className="text-primary-600 hover:underline">S'inscrire</a>
+                        Pas encore de compte ? <Link to="/register" className="text-primary-600 hover:underline">S'inscrire</Link>
                     </div>
                 </CardFooter>
             </Card>
