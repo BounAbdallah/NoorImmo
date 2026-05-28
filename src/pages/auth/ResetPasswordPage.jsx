@@ -52,7 +52,9 @@ export default function ResetPasswordPage() {
                 password_confirmation: passwordConfirmation,
             });
             setSuccess(true);
-            setTimeout(() => navigate('/login'), 3000);
+            setTimeout(() => {
+                navigate('/login');
+            }, 2500);
         } catch (err) {
             setError(err.response?.data?.message || 'Une erreur est survenue. Veuillez réessayer.');
         } finally {

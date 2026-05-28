@@ -5,6 +5,8 @@ import { AuthProvider } from './context/AuthContext';
 
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ProjectListPage from './pages/dashboard/projects/ProjectListPage';
 import CreateProjectPage from './pages/dashboard/projects/CreateProjectPage';
@@ -77,7 +79,7 @@ function RouteTracker() {
       const path = location.pathname;
 
       // Don't log visits for auth pages
-      if (path === '/login' || path === '/register') return;
+      if (path === '/login' || path === '/register' || path === '/forgot-password' || path === '/reset-password') return;
 
       if (path === '/' || path === '/contact' || path === '/pricing') {
         page = 'landing';
@@ -127,6 +129,8 @@ function App() {
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Routes Protégées */}
           <Route element={<ProtectedRoute />}>

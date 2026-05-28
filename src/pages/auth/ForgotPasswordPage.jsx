@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../comp
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -21,6 +22,9 @@ export default function ForgotPasswordPage() {
         try {
             await api.post('/auth/forgot-password', { email });
             setSent(true);
+            setTimeout(() => {
+                navigate('/login');
+            }, 3000);
         } catch (err) {
             setError(err.response?.data?.message || 'Une erreur est survenue. Veuillez réessayer.');
         } finally {
