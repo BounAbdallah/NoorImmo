@@ -126,18 +126,11 @@ export default function LoginPage() {
             if (rememberMe) {
                 localStorage.setItem('remember_login', loginIdentifier);
             }
-            // navigate(from, { replace: true });
-            // Using window.location to ensure fresh state, but we need to respect 'from'
             const fromState = location.state?.from;
             const fromPath = fromState?.pathname || '/dashboard';
             const fromSearch = fromState?.search || '';
             const fullPath = fromPath + fromSearch;
-
-            if (fromPath === '/dashboard') {
-                window.location.href = '/dashboard';
-            } else {
-                navigate(fullPath, { replace: true });
-            }
+            navigate(fullPath, { replace: true });
         } catch (err) {
             setError(err.response?.data?.message || 'Identifiants incorrects');
         } finally {

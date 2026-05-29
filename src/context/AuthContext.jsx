@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+    const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -51,8 +53,7 @@ export const AuthProvider = ({ children }) => {
         } finally {
             localStorage.removeItem('token');
             setUser(null);
-            // Force full page reload to clear all state
-            window.location.href = '/login';
+            navigate('/login', { replace: true });
         }
     };
 
