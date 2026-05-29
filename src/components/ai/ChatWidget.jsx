@@ -14,22 +14,7 @@ export default function ChatWidget() {
     const [conversationId, setConversationId] = useState(null);
     const messagesEndRef = useRef(null);
 
-    // Hide widget on public pages
-    const publicPages = ['/', '/pricing', '/contact', '/login', '/register', '/custom-plan-request'];
-    if (publicPages.includes(location.pathname)) {
-        return null;
-    }
-
-    useEffect(() => {
-        if (isOpen && suggestions.length === 0) {
-            loadSuggestions();
-        }
-    }, [isOpen]);
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
+    // Fonctions définies avant les hooks qui les référencent
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
@@ -44,6 +29,23 @@ export default function ChatWidget() {
             console.error('Error loading suggestions:', error);
         }
     };
+
+    // Tous les useEffect AVANT tout return conditionnel (règle des hooks)
+    useEffect(() => {
+        if (isOpen && suggestions.length === 0) {
+            loadSuggestions();
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    // Masquer sur les pages publiques — APRÈS tous les hooks
+    const publicPages = ['/', '/pricing', '/contact', '/login', '/register', '/custom-plan-request', '/forgot-password', '/reset-password'];
+    if (publicPages.includes(location.pathname)) {
+        return null;
+    }
 
     const handleSendMessage = async (message = null) => {
         const messageToSend = message || inputMessage.trim();
