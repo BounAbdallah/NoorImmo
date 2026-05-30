@@ -14,6 +14,10 @@ export default defineConfig({
         short_name: 'Noor Immo',
         description: 'Gestion immobilière simplifiée',
         theme_color: '#0284c7',
+        background_color: '#050505',
+        display: 'standalone',
+        start_url: '/login',
+        scope: '/',
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -28,7 +32,19 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        // Force le service worker à s'activer immédiatement sans attendre
+        // que tous les onglets soient fermés → les utilisateurs PWA reçoivent
+        // les corrections de bugs au prochain chargement de page
+        skipWaiting: true,
+        clientsClaim: true,
+        // Ne pas mettre en cache les appels API
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/immo-back\.noorwebservices\.com\/api\//,
+            handler: 'NetworkOnly',
+          },
+        ],
       }
     })
   ],
