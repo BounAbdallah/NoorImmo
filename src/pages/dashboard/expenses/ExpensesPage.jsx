@@ -29,6 +29,7 @@ export default function ExpensesPage() {
 
     const [bailleurs, setBailleurs] = useState([]);
     const [immeubles, setImmeubles] = useState([]);
+    const [biens, setBiens] = useState([]);
 
     const months = [
         { id: 1, name: 'Janvier' }, { id: 2, name: 'Février' }, { id: 3, name: 'Mars' },
@@ -45,12 +46,14 @@ export default function ExpensesPage() {
     const loadInitialData = async () => {
         try {
             const params = user?.agence_id ? { agence_id: user.agence_id } : {};
-            const [bRes, iRes] = await Promise.all([
+            const [bRes, iRes, propRes] = await Promise.all([
                 bailleurService.getAll(params),
-                structureService.getAllBuildings()
+                structureService.getAllBuildings(),
+                propertyService.getAll({ all: 'true' })
             ]);
             setBailleurs(bRes.data?.data || bRes.data || []);
             setImmeubles(iRes.data?.data || iRes.data || []);
+            setBiens(propRes.data?.data || propRes.data || []);
         } catch (error) {
             console.error("Error loading selection data", error);
         }
@@ -326,6 +329,7 @@ export default function ExpensesPage() {
                     onSuccess={() => { setIsModalOpen(false); setSelectedNote(null); loadData(); }}
                     bailleurs={bailleurs}
                     immeubles={immeubles}
+                    biens={biens}
                 />
             )}
             {isReportModalOpen && (
