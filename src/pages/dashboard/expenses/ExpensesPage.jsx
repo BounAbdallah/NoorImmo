@@ -259,7 +259,9 @@ export default function ExpensesPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col text-sm">
-                                                <span className="font-medium text-gray-900">{note.immeuble?.nom || 'Global'}</span>
+                                                <span className="font-medium text-gray-900">
+                                                    {note.immeuble ? note.immeuble.nom : (note.bien ? note.bien.reference : 'Global')}
+                                                </span>
                                                 <span className="text-xs text-gray-500">{note.bailleur?.user?.nom} {note.bailleur?.user?.prenom}</span>
                                             </div>
                                         </td>

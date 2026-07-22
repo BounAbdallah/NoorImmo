@@ -3,13 +3,17 @@ import { X, Plus, Trash2, Loader2, Calendar, FileText } from 'lucide-react';
 import { depenseService } from '../../../services/depenseService';
 import Swal from 'sweetalert2';
 
-export default function ExpenseModal({ isOpen, onClose, expense, onSuccess, bailleurs, immeubles }) {
+export default function ExpenseModal({ isOpen, onClose, expense, onSuccess, bailleurs, immeubles, biens = [] }) {
     const [loading, setLoading] = useState(false);
+    const [typeLiaison, setTypeLiaison] = useState('immeuble'); // 'immeuble' | 'bien'
     const [formData, setFormData] = useState({
         mois: new Date().getMonth() + 1,
         annee: new Date().getFullYear(),
         bailleur_id: '',
         immeuble_id: '',
+        bien_id: '',
+        search_immeuble: '',
+        search_bien: '',
         statut: 'paye',
         description: '',
         depenses: [
@@ -19,11 +23,16 @@ export default function ExpenseModal({ isOpen, onClose, expense, onSuccess, bail
 
     useEffect(() => {
         if (expense) {
+            const isBien = !!expense.bien_id;
+            setTypeLiaison(isBien ? 'bien' : 'immeuble');
             setFormData({
                 mois: expense.mois,
                 annee: expense.annee,
                 bailleur_id: expense.bailleur_id,
-                immeuble_id: expense.immeuble_id,
+                immeuble_id: expense.immeuble_id || '',
+                bien_id: expense.bien_id || '',
+                search_immeuble: expense.immeuble ? `${expense.immeuble.nom} (${expense.immeuble.bailleur?.user?.nom})` : '',
+                search_bien: expense.bien ? `${expense.bien.reference} - ${expense.bien.adresse}` : '',
                 statut: expense.statut || 'paye',
                 description: expense.description || '',
                 depenses: expense.depenses.map(d => ({
@@ -35,11 +44,15 @@ export default function ExpenseModal({ isOpen, onClose, expense, onSuccess, bail
                 }))
             });
         } else {
+            setTypeLiaison('immeuble');
             setFormData({
                 mois: new Date().getMonth() + 1,
                 annee: new Date().getFullYear(),
                 bailleur_id: '',
                 immeuble_id: '',
+                bien_id: '',
+                search_immeuble: '',
+                search_bien: '',
                 statut: 'paye',
                 description: '',
                 depenses: [
@@ -88,14 +101,29 @@ export default function ExpenseModal({ isOpen, onClose, expense, onSuccess, bail
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Prepare submit data, cleaning up search fields
+        const submitData = { ...formData };
+        if (typeLiaison === 'immeuble') {
+            submitData.bien_id = null;
+        } else {
+            submitData.immeuble_id = null;
+        }
+        delete submitData.search_immeuble;
+        delete submitData.search_bien;
+
+        if (!submitData.immeuble_id && !submitData.bien_id) {
+            return Swal.fire('Erreur', 'Veuillez sélectionner un immeuble ou un bien valide.', 'error');
+        }
+
         setLoading(true);
 
         try {
             if (expense?.id) {
-                await depenseService.updateExpense(expense.id, formData);
+                await depenseService.updateExpense(expense.id, submitData);
                 Swal.fire('Succès', 'Note de dépense mise à jour avec succès.', 'success');
             } else {
-                await depenseService.createExpense(formData);
+                await depenseService.createExpense(submitData);
                 Swal.fire('Succès', 'Note de dépense enregistrée avec succès.', 'success');
             }
             onSuccess();
@@ -126,35 +154,98 @@ export default function ExpenseModal({ isOpen, onClose, expense, onSuccess, bail
                             <p className="text-sm text-gray-500">{expense ? 'Modifiez les détails de cette note.' : 'Regroupez plusieurs dépenses pour une période donnée.'}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white rounded-full transition border border-transparent hover:border-gray-200">
+                    <button type="button" onClick={onClose} className="p-2 hover:bg-white rounded-full transition border border-transparent hover:border-gray-200">
                         <X className="w-6 h-6 text-gray-400" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-8">
                     {/* Header Info */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-blue-50/30 p-6 rounded-2xl border border-blue-100/50">
-                        <div className="md:col-span-2">
-                            <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Immeuble Concerné</label>
-                            <select
-                                required
-                                className="w-full rounded-xl border-gray-200 py-3 focus:ring-primary-500 focus:border-primary-500"
-                                value={formData.immeuble_id}
-                                onChange={(e) => {
-                                    const imm = immeubles.find(i => i.id == e.target.value);
-                                    setFormData({ ...formData, immeuble_id: e.target.value, bailleur_id: imm?.bailleur_id || '' });
-                                }}
-                            >
-                                <option value="">Sélectionner un immeuble</option>
-                                {immeubles.map(i => (
-                                    <option key={i.id} value={i.id}>{i.nom} ({i.bailleur?.user?.nom})</option>
-                                ))}
-                            </select>
+                    <div className="bg-blue-50/30 p-6 rounded-2xl border border-blue-100/50 mb-6 space-y-6">
+                        
+                        <div className="flex gap-4 border-b border-blue-100 pb-4">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input 
+                                    type="radio" 
+                                    name="typeLiaison" 
+                                    value="immeuble" 
+                                    checked={typeLiaison === 'immeuble'} 
+                                    onChange={() => setTypeLiaison('immeuble')}
+                                    className="text-primary-600"
+                                />
+                                <span className="font-bold text-sm">Par Immeuble</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input 
+                                    type="radio" 
+                                    name="typeLiaison" 
+                                    value="bien" 
+                                    checked={typeLiaison === 'bien'} 
+                                    onChange={() => setTypeLiaison('bien')}
+                                    className="text-primary-600"
+                                />
+                                <span className="font-bold text-sm">Par Bien (Indépendant)</span>
+                            </label>
                         </div>
-                        <div>
-                            <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Mois</label>
-                            <select
-                                required
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div className="md:col-span-2">
+                                {typeLiaison === 'immeuble' ? (
+                                    <>
+                                        <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Immeuble Concerné (Recherche)</label>
+                                        <input
+                                            list="immeubles-list"
+                                            required={typeLiaison === 'immeuble'}
+                                            placeholder="Rechercher un immeuble..."
+                                            className="w-full rounded-xl border-gray-200 py-3 focus:ring-primary-500 focus:border-primary-500"
+                                            value={formData.search_immeuble}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const selected = immeubles.find(i => val.includes(i.nom));
+                                                if (selected) {
+                                                    setFormData({ ...formData, search_immeuble: val, immeuble_id: selected.id, bailleur_id: selected.bailleur_id });
+                                                } else {
+                                                    setFormData({ ...formData, search_immeuble: val, immeuble_id: '' });
+                                                }
+                                            }}
+                                        />
+                                        <datalist id="immeubles-list">
+                                            {immeubles.map(i => (
+                                                <option key={i.id} value={`${i.nom} - ${i.bailleur?.user?.nom || 'Sans bailleur'}`} />
+                                            ))}
+                                        </datalist>
+                                    </>
+                                ) : (
+                                    <>
+                                        <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Bien Concerné (Recherche)</label>
+                                        <input
+                                            list="biens-list"
+                                            required={typeLiaison === 'bien'}
+                                            placeholder="Rechercher un bien..."
+                                            className="w-full rounded-xl border-gray-200 py-3 focus:ring-primary-500 focus:border-primary-500"
+                                            value={formData.search_bien}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const selected = biens.find(b => val.includes(b.reference));
+                                                if (selected) {
+                                                    setFormData({ ...formData, search_bien: val, bien_id: selected.id, bailleur_id: selected.bailleur_id });
+                                                } else {
+                                                    setFormData({ ...formData, search_bien: val, bien_id: '' });
+                                                }
+                                            }}
+                                        />
+                                        <datalist id="biens-list">
+                                            {biens.map(b => (
+                                                <option key={b.id} value={`${b.reference} - ${b.adresse || 'Sans adresse'}`} />
+                                            ))}
+                                        </datalist>
+                                    </>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Mois</label>
+                                <select
+                                    required
                                 className="w-full rounded-xl border-gray-200 py-3"
                                 value={formData.mois}
                                 onChange={(e) => setFormData({ ...formData, mois: e.target.value })}
@@ -187,6 +278,7 @@ export default function ExpenseModal({ isOpen, onClose, expense, onSuccess, bail
                                 <option value="annule">Annulée</option>
                             </select>
                         </div>
+                    </div>
                     </div>
 
                     {/* Items Section */}
@@ -283,7 +375,7 @@ export default function ExpenseModal({ isOpen, onClose, expense, onSuccess, bail
                         </button>
                         <button
                             onClick={handleSubmit}
-                            disabled={loading || !formData.immeuble_id}
+                            disabled={loading || (typeLiaison === 'immeuble' ? !formData.immeuble_id : !formData.bien_id)}
                             className="flex-1 md:flex-none px-12 py-3 bg-primary-600 text-white rounded-2xl hover:bg-primary-700 transition font-bold shadow-lg shadow-primary-200 disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Enregistrement...</> : (expense ? 'Mettre à jour' : 'Valider la Note')}
