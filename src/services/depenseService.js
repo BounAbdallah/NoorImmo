@@ -54,4 +54,10 @@ export const depenseService = {
         });
         return response.data;
     },
+
+    // Bailleurs who have at least one note de dépense (includes soft-deleted users)
+    async getBailleursWithExpenses() {
+        const response = await api.get('/reports/bailleurs-with-expenses');
+        return response.data;
+    },
 };

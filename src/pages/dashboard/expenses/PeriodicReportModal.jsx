@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, Download, Loader2, FileText } from 'lucide-react';
 import { depenseService } from '../../../services/depenseService';
 import Swal from 'sweetalert2';
 
-export default function PeriodicReportModal({ isOpen, onClose, bailleurs }) {
+export default function PeriodicReportModal({ isOpen, onClose }) {
     const [loading, setLoading] = useState(false);
+    const [bailleurs, setBailleurs] = useState([]);
     const [formData, setFormData] = useState({
         bailleur_id: '',
         start_month: new Date().getMonth() + 1,
@@ -12,6 +13,14 @@ export default function PeriodicReportModal({ isOpen, onClose, bailleurs }) {
         end_month: new Date().getMonth() + 1,
         end_year: new Date().getFullYear(),
     });
+
+    useEffect(() => {
+        if (isOpen) {
+            depenseService.getBailleursWithExpenses()
+                .then(res => setBailleurs(res.data || []))
+                .catch(() => {});
+        }
+    }, [isOpen]);
 
     const months = [
         { id: 1, name: 'Janvier' }, { id: 2, name: 'Février' }, { id: 3, name: 'Mars' },
