@@ -78,8 +78,8 @@ export default function PeriodicReportModal({ isOpen, onClose, bailleurs }) {
                             onChange={(e) => setFormData({ ...formData, bailleur_id: e.target.value })}
                         >
                             <option value="">Sélectionner un bailleur</option>
-                            {bailleurs.map(b => (
-                                <option key={b.id} value={b.id}>{b.user.nom}</option>
+                            {bailleurs.filter(b => b.user).map(b => (
+                                <option key={b.id} value={b.id}>{b.user.prenom} {b.user.nom}</option>
                             ))}
                         </select>
                     </div>
